@@ -1,5 +1,5 @@
 """
-Django admin configuration for Patient model.
+Admin configuration for Patients app.
 """
 
 from django.contrib import admin
@@ -8,27 +8,40 @@ from .models import Patient
 
 @admin.register(Patient)
 class PatientAdmin(admin.ModelAdmin):
-    """
-    Patient admin with search and filtering.
-    """
-    
-    list_display = ['mrn', 'name', 'age', 'gender', 'location', 'primary_department', 'consults_count']
-    list_filter = ['gender', 'primary_department']
-    search_fields = ['mrn', 'name']
-    ordering = ['-created_at']
+    list_display = [
+        'mrn',
+        'name',
+        'age',
+        'gender',
+        'ward',
+        'bed_number',
+        'primary_department',
+        'created_at'
+    ]
+    list_filter = [
+        'gender',
+        'primary_department',
+        'ward',
+        'created_at'
+    ]
+    search_fields = [
+        'mrn',
+        'name',
+        'primary_diagnosis'
+    ]
+    readonly_fields = ['created_at', 'updated_at']
     
     fieldsets = (
-        ('Patient Information', {
+        ('Basic Information', {
             'fields': ('mrn', 'name', 'age', 'gender')
         }),
         ('Location', {
             'fields': ('ward', 'bed_number', 'primary_department')
         }),
-        ('Medical Information', {
+        ('Clinical', {
             'fields': ('primary_diagnosis',)
         }),
+        ('Metadata', {
+            'fields': ('created_at', 'updated_at')
+        }),
     )
-    
-    def consults_count(self, obj):
-        return obj.consults_count
-    consults_count.short_description = 'Consults'

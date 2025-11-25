@@ -1,5 +1,5 @@
 """
-Django admin configuration for Department model.
+Admin configuration for Departments app.
 """
 
 from django.contrib import admin
@@ -8,14 +8,23 @@ from .models import Department
 
 @admin.register(Department)
 class DepartmentAdmin(admin.ModelAdmin):
-    """
-    Department admin with user count display.
-    """
-    
-    list_display = ['name', 'code', 'head', 'user_count', 'active_consults_count', 'is_active']
-    list_filter = ['is_active']
-    search_fields = ['name', 'code']
-    ordering = ['name']
+    list_display = [
+        'code',
+        'name',
+        'head',
+        'contact_number',
+        'is_active',
+        'created_at'
+    ]
+    list_filter = [
+        'is_active',
+        'created_at'
+    ]
+    search_fields = [
+        'name',
+        'code'
+    ]
+    readonly_fields = ['created_at', 'updated_at']
     
     fieldsets = (
         ('Basic Information', {
@@ -23,14 +32,9 @@ class DepartmentAdmin(admin.ModelAdmin):
         }),
         ('SLA Configuration', {
             'fields': ('emergency_sla', 'urgent_sla', 'routine_sla'),
-            'description': 'Service Level Agreements in minutes'
+            'description': 'Service Level Agreement times in minutes'
+        }),
+        ('Metadata', {
+            'fields': ('created_at', 'updated_at')
         }),
     )
-    
-    def user_count(self, obj):
-        return obj.user_count
-    user_count.short_description = 'Users'
-    
-    def active_consults_count(self, obj):
-        return obj.active_consults_count
-    active_consults_count.short_description = 'Active Consults'
