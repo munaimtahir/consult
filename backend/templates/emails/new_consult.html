@@ -1,0 +1,15 @@
+{% extends "emails/base.html" %}
+
+{% block title %}New Consult Request{% endblock %}
+
+{% block content %}
+    <h3>New Consult Request</h3>
+    
+    <p><strong>Urgency:</strong> <span class="urgency-{{ consult.urgency|lower }}">{{ consult.urgency }}</span></p>
+    <p><strong>Patient:</strong> {{ patient.name }} (MRN: {{ patient.mrn }})</p>
+    <p><strong>Location:</strong> {{ patient.location }}</p>
+    <p><strong>Requested by:</strong> {{ requester.get_full_name }} ({{ requester.department.name }})</p>
+    <p><strong>Reason:</strong> {{ consult.reason_for_consult }}</p>
+    
+    <a href="{{ url }}" class="button">View Consult</a>
+{% endblock %}

@@ -1,0 +1,15 @@
+{% extends "emails/base.html" %}
+
+{% block title %}Consult Assigned{% endblock %}
+
+{% block content %}
+<h3>Consult Assigned</h3>
+
+<p>You have been assigned a new consult.</p>
+
+<p><strong>Patient:</strong> {{ patient.name }} (MRN: {{ patient.mrn }})</p>
+<p><strong>Urgency:</strong> <span class="urgency-{{ consult.urgency|lower }}">{{ consult.urgency }}</span></p>
+<p><strong>Reason:</strong> {{ consult.reason_for_consult }}</p>
+
+<a href="{{ url }}" class="button">View Consult</a>
+{% endblock %}

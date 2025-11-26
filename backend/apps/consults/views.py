@@ -88,9 +88,28 @@ class ConsultRequestViewSet(viewsets.ModelViewSet):
     
     def perform_create(self, serializer):
         """
-        Set requester to current user on creation.
+        Use service to create consult.
         """
-        serializer.save(requester=self.request.user)
+        from .services import ConsultService
+        
+        # We need to extract data from serializer to pass to service
+        # But serializer.save() does a lot of work. 
+        # For now, let's let serializer save, but we might want to move creation logic to service fully later.
+        # Actually, to strictly follow service pattern:
+        # serializer.save(requester=self.request.user)
+        # ConsultService.notify_new_consult(serializer.instance)
+        
+        # Better approach:
+        # 1. Validate data
+        # 2. Call service
+        
+        # However, since we are using ModelViewSet, perform_create is called after validation.
+        # Let's override create instead? Or just hook into perform_create.
+        
+        # Let's stick to the current pattern but use service for notifications/side effects
+        instance = serializer.save(requester=self.request.user)
+        from apps.notifications.services import NotificationService
+        NotificationService.notify_new_consult(instance)
     
     @action(detail=True, methods=['post'])
     def acknowledge(self, request, pk=None):
@@ -98,6 +117,7 @@ class ConsultRequestViewSet(viewsets.ModelViewSet):
         Acknowledge a consult request.
         """
         consult = self.get_object()
+        from .services import ConsultService
         
         # Check permissions
         if request.user.department != consult.target_department:
@@ -112,9 +132,7 @@ class ConsultRequestViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        consult.status = 'ACKNOWLEDGED'
-        consult.acknowledged_at = timezone.now()
-        consult.save()
+        ConsultService.acknowledge_consult(consult, request.user)
         
         serializer = self.get_serializer(consult)
         return Response(serializer.data)
@@ -125,6 +143,7 @@ class ConsultRequestViewSet(viewsets.ModelViewSet):
         Assign a consult to a specific user.
         """
         consult = self.get_object()
+        from .services import ConsultService
         
         # Check permissions - only HOD or admins can assign
         if not request.user.can_assign_consults:
@@ -163,13 +182,7 @@ class ConsultRequestViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        consult.assigned_to = assigned_user
-        if consult.status == 'PENDING':
-            consult.status = 'ACKNOWLEDGED'
-            consult.acknowledged_at = timezone.now()
-        elif consult.status == 'ACKNOWLEDGED':
-            consult.status = 'IN_PROGRESS'
-        consult.save()
+        ConsultService.assign_consult(consult, assigned_user)
         
         serializer = self.get_serializer(consult)
         return Response(serializer.data)
@@ -180,6 +193,7 @@ class ConsultRequestViewSet(viewsets.ModelViewSet):
         Add a note to the consult.
         """
         consult = self.get_object()
+        from .services import ConsultService
         
         # Check permissions - must be assigned or in target department
         if (request.user != consult.assigned_to and 
@@ -192,14 +206,19 @@ class ConsultRequestViewSet(viewsets.ModelViewSet):
         
         serializer = ConsultNoteSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save(consult=consult, author=request.user)
+            # Use service to add note
+            note = ConsultService.add_note(
+                consult=consult,
+                author=request.user,
+                content=serializer.validated_data['content'],
+                note_type=serializer.validated_data.get('note_type', 'PROGRESS'),
+                recommendations=serializer.validated_data.get('recommendations', ''),
+                follow_up_required=serializer.validated_data.get('follow_up_required', False),
+                follow_up_instructions=serializer.validated_data.get('follow_up_instructions', ''),
+                is_final=serializer.validated_data.get('is_final', False)
+            )
             
-            # Update consult status
-            if consult.status == 'ACKNOWLEDGED':
-                consult.status = 'IN_PROGRESS'
-                consult.save()
-            
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(ConsultNoteSerializer(note).data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     @action(detail=True, methods=['post'])
@@ -208,6 +227,7 @@ class ConsultRequestViewSet(viewsets.ModelViewSet):
         Mark consult as completed.
         """
         consult = self.get_object()
+        from .services import ConsultService
         
         # Check permissions
         if (request.user != consult.assigned_to and 
@@ -217,9 +237,7 @@ class ConsultRequestViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_403_FORBIDDEN
             )
         
-        consult.status = 'COMPLETED'
-        consult.completed_at = timezone.now()
-        consult.save()
+        ConsultService.complete_consult(consult)
         
         serializer = self.get_serializer(consult)
         return Response(serializer.data)
@@ -230,6 +248,7 @@ class ConsultRequestViewSet(viewsets.ModelViewSet):
         Cancel a consult request.
         """
         consult = self.get_object()
+        from .services import ConsultService
         
         # Check permissions - only requester or admins can cancel
         if request.user != consult.requester and not request.user.is_admin_user:
@@ -244,8 +263,7 @@ class ConsultRequestViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        consult.status = 'CANCELLED'
-        consult.save()
+        ConsultService.cancel_consult(consult)
         
         serializer = self.get_serializer(consult)
         return Response(serializer.data)

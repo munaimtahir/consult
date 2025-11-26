@@ -164,6 +164,7 @@ class ConsultRequestCreateSerializer(serializers.ModelSerializer):
             'vital_signs',
             'lab_results'
         ]
+        read_only_fields = ['requester']
     
     def validate(self, data):
         """Validate that requesting and target departments are different."""

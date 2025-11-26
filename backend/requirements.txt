@@ -8,6 +8,6 @@ django-allauth>=0.57.0
 dj-rest-auth>=5.0.0
 celery>=5.3.4
 redis>=5.0.1
-django-channels>=4.0.0
+channels>=4.0.0
 channels-redis>=4.1.0
 Pillow>=10.1.0

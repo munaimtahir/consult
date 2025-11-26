@@ -1,0 +1,14 @@
+{% extends "emails/base.html" %}
+
+{% block title %}Consult Completed{% endblock %}
+
+{% block content %}
+<h3>Consult Completed</h3>
+
+<p>The consult request for <strong>{{ patient.name }}</strong> has been completed.</p>
+
+<p><strong>Completed by:</strong> {{ completed_by.get_full_name }}</p>
+<p><strong>Date:</strong> {{ consult.completed_at|date:"M d, Y H:i" }}</p>
+
+<a href="{{ url }}" class="button">View Results</a>
+{% endblock %}
