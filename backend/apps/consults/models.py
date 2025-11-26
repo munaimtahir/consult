@@ -8,9 +8,27 @@ from datetime import timedelta
 
 
 class ConsultRequest(models.Model):
-    """
-    Main consult request model.
-    Tracks the lifecycle of a consultation request from creation to completion.
+    """Represents a request for a medical consultation.
+
+    This model is the central object in the consult workflow, tracking all
+    information related to a single consultation request, from its initiation
+    to its completion. It includes details about the patient, the requesting
+    and target departments, clinical information, and SLA tracking.
+
+    Attributes:
+        patient: A foreign key to the `Patient` model.
+        requester: The `User` who initiated the consult request.
+        requesting_department: The department initiating the consult.
+        target_department: The department to which the consult is directed.
+        assigned_to: The `User` currently assigned to handle the consult.
+        status: The current status of the consult (e.g., 'PENDING',
+                'COMPLETED').
+        urgency: The clinical urgency of the consult (e.g., 'EMERGENCY',
+                 'ROUTINE').
+        reason_for_consult: The primary clinical reason for the request.
+        is_overdue: A boolean indicating if the consult has exceeded its SLA.
+        escalation_level: An integer tracking the number of times the
+                          consult has been escalated.
     """
     
     STATUS_CHOICES = [
@@ -132,8 +150,15 @@ class ConsultRequest(models.Model):
         return f"Consult #{self.id} - {self.patient.name} ({self.urgency})"
     
     def save(self, *args, **kwargs):
-        """
-        Override save to calculate expected response time based on urgency and department SLA.
+        """Overrides the default save method to add custom logic.
+
+        This method calculates the `expected_response_time` based on the
+        target department's SLA for the given urgency level. It also updates
+        the `is_overdue` status before saving.
+
+        Args:
+            *args: Variable length argument list.
+            **kwargs: Arbitrary keyword arguments.
         """
         if not self.expected_response_time:
             # Get SLA from target department based on urgency
@@ -154,42 +179,74 @@ class ConsultRequest(models.Model):
     
     @property
     def time_elapsed(self):
-        """Get time elapsed since creation"""
+        """Calculates the time elapsed since the consult was created.
+
+        Returns:
+            A `timedelta` object representing the duration.
+        """
         if self.completed_at:
             return self.completed_at - self.created_at
         return timezone.now() - self.created_at
     
     @property
     def time_to_acknowledgement(self):
-        """Get time taken to acknowledge"""
+        """Calculates the time it took to acknowledge the consult.
+
+        Returns:
+            A `timedelta` object, or `None` if not yet acknowledged.
+        """
         if self.acknowledged_at:
             return self.acknowledged_at - self.created_at
         return None
     
     @property
     def time_to_completion(self):
-        """Get time taken to complete"""
+        """Calculates the total time taken to complete the consult.
+
+        Returns:
+            A `timedelta` object, or `None` if not yet completed.
+        """
         if self.completed_at:
             return self.completed_at - self.created_at
         return None
     
     @property
     def is_pending_assignment(self):
-        """Check if consult is pending assignment"""
+        """Checks if the consult is awaiting assignment to a user.
+
+        Returns:
+            True if the consult is pending or acknowledged but not yet
+            assigned, False otherwise.
+        """
         return self.status in ['PENDING', 'ACKNOWLEDGED'] and not self.assigned_to
     
     @property
     def sla_compliance(self):
-        """Check if consult was completed within SLA"""
+        """Determines if the consult met its SLA.
+
+        Returns:
+            True if the consult was completed within the expected response
+            time, False otherwise.
+        """
         if self.completed_at:
             return self.completed_at <= self.expected_response_time
         return not self.is_overdue
 
 
 class ConsultNote(models.Model):
-    """
-    Notes added to a consult request.
-    Can be progress notes, recommendations, or final assessments.
+    """Represents a note associated with a `ConsultRequest`.
+
+    These notes are used to document the progress, findings, and
+    recommendations related to a consult. A special 'final' note can be
+    used to mark the completion of the consult.
+
+    Attributes:
+        consult: A foreign key to the `ConsultRequest` this note belongs to.
+        author: The `User` who wrote the note.
+        note_type: The type of the note (e.g., 'PROGRESS', 'FINAL').
+        content: The main text content of the note.
+        is_final: A boolean indicating if this is the final note that
+                  completes the consult.
     """
     
     NOTE_TYPE_CHOICES = [
@@ -251,8 +308,15 @@ class ConsultNote(models.Model):
         return f"Note by {self.author.get_full_name()} on Consult #{self.consult.id}"
     
     def save(self, *args, **kwargs):
-        """
-        Override save to update consult status when final note is added.
+        """Overrides the default save method to add custom logic.
+
+        If the note is marked as final (`is_final` is True), this method
+        will update the associated `ConsultRequest` to 'COMPLETED' and set
+        its completion timestamp.
+
+        Args:
+            *args: Variable length argument list.
+            **kwargs: Arbitrary keyword arguments.
         """
         super().save(*args, **kwargs)
         

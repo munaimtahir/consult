@@ -17,6 +17,14 @@ const queryClient = new QueryClient({
   },
 });
 
+/**
+ * The main application component.
+ *
+ * This component sets up the application's routing, providers (QueryClient
+ * and Auth), and defines the overall page structure.
+ *
+ * @returns {React.ReactElement} The rendered application component.
+ */
 function App() {
   return (
     <QueryClientProvider client={queryClient}>

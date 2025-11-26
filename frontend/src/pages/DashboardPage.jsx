@@ -2,6 +2,16 @@ import { useAuth } from '../context/AuthContext';
 import { useDashboardStats } from '../hooks/useConsults';
 import { Link } from 'react-router-dom';
 
+/**
+ * Renders the main dashboard page.
+ *
+ * This component displays a welcome message and a summary of consult
+ * statistics for the current user, categorized by department, assigned to
+ * the user, and requested by the user. It also provides quick links to
+ * filtered views of the consults list.
+ *
+ * @returns {React.ReactElement} The rendered dashboard page component.
+ */
 export default function DashboardPage() {
     const { user } = useAuth();
     const { data: stats, isLoading } = useDashboardStats();

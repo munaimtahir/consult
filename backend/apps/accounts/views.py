@@ -15,17 +15,28 @@ User = get_user_model()
 
 
 class UserViewSet(viewsets.ModelViewSet):
-    """
-    ViewSet for User model.
-    Provides user management operations.
+    """Provides API endpoints for managing users.
+
+    This ViewSet allows for listing, retrieving, creating, updating, and
+    deleting users. It also includes custom actions for managing the
+    currently authenticated user's profile.
+
+    Filtering is available for 'department', 'role', and 'on_call' status.
     """
     
     permission_classes = [IsAuthenticated]
     queryset = User.objects.select_related('department')
     
     def get_serializer_class(self):
-        """
-        Return appropriate serializer based on action.
+        """Selects the appropriate serializer for the current action.
+
+        Uses `UserListSerializer` for the 'list' action to provide a more
+        concise user representation. For profile updates, it uses
+        `UserProfileSerializer`. For all other actions, it defaults to the
+        full `UserSerializer`.
+
+        Returns:
+            The serializer class to be used for the request.
         """
         if self.action == 'list':
             return UserListSerializer
@@ -34,8 +45,13 @@ class UserViewSet(viewsets.ModelViewSet):
         return UserSerializer
     
     def get_queryset(self):
-        """
-        Filter users based on parameters.
+        """Constructs the queryset for the view, with optional filtering.
+
+        This method retrieves all active users and allows filtering by
+        department, role, and on-call status via query parameters in the URL.
+
+        Returns:
+            A Django QuerySet of User objects.
         """
         queryset = User.objects.filter(is_active=True).select_related('department')
         
@@ -58,16 +74,28 @@ class UserViewSet(viewsets.ModelViewSet):
     
     @action(detail=False, methods=['get'])
     def me(self, request):
-        """
-        Get current user profile.
+        """Retrieves the profile of the currently authenticated user.
+
+        Args:
+            request: The Django HttpRequest object.
+
+        Returns:
+            A DRF Response object containing the serialized user data.
         """
         serializer = UserSerializer(request.user)
         return Response(serializer.data)
     
     @action(detail=False, methods=['patch'])
     def update_profile(self, request):
-        """
-        Update current user profile.
+        """Updates the profile of the currently authenticated user.
+
+        Args:
+            request: The Django HttpRequest object, containing the update
+                     data.
+
+        Returns:
+            A DRF Response object with the updated user data, or an error
+            response if the data is invalid.
         """
         serializer = UserProfileSerializer(request.user, data=request.data, partial=True)
         if serializer.is_valid():

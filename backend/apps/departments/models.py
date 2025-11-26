@@ -6,8 +6,20 @@ from django.db import models
 
 
 class Department(models.Model):
-    """
-    Medical department/specialty (e.g., Cardiology, Neurology).
+    """Represents a medical department or specialty.
+
+    This model stores information about each department, including its name,
+    code, head, and service level agreement (SLA) times for consults of
+    varying urgency.
+
+    Attributes:
+        name: The full name of the department.
+        code: A short, unique code for the department.
+        head: A foreign key to the `User` who is the head of this
+              department.
+        emergency_sla: The SLA for emergency consults, in minutes.
+        urgent_sla: The SLA for urgent consults, in minutes.
+        routine_sla: The SLA for routine consults, in minutes.
     """
     
     name = models.CharField(max_length=100, unique=True)
@@ -49,10 +61,18 @@ class Department(models.Model):
     
     @property
     def user_count(self):
-        """Get number of users in this department"""
+        """Returns the number of users in this department.
+
+        Returns:
+            An integer representing the total number of users.
+        """
         return self.users.count()
     
     @property
     def active_consults_count(self):
-        """Get number of active consults for this department"""
+        """Returns the number of active consults for this department.
+
+        Returns:
+            An integer representing the number of non-completed consults.
+        """
         return self.incoming_consults.exclude(status='COMPLETED').count()
