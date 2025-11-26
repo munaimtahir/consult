@@ -8,6 +8,8 @@ from .base import *
 # Debug mode
 DEBUG = True
 
+ALLOWED_HOSTS = ['testserver', 'localhost', '127.0.0.1']
+
 # Database - SQLite for development
 DATABASES = {
     'default': {
@@ -29,3 +31,10 @@ CORS_ALLOW_ALL_ORIGINS = True
 # Logging - More verbose in development
 LOGGING['root']['level'] = 'DEBUG'
 LOGGING['loggers']['apps']['level'] = 'DEBUG'
+
+# Django Channels - In-memory for development
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer"
+    }
+}

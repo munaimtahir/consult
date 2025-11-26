@@ -143,7 +143,8 @@ class ConsultRequest(models.Model):
                 'ROUTINE': self.target_department.routine_sla,
             }.get(self.urgency, self.target_department.routine_sla)
             
-            self.expected_response_time = self.created_at + timedelta(minutes=sla_minutes)
+            base_time = self.created_at or timezone.now()
+            self.expected_response_time = base_time + timedelta(minutes=sla_minutes)
         
         # Check if overdue
         if self.status not in ['COMPLETED', 'CANCELLED']:

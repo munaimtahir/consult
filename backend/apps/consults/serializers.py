@@ -152,6 +152,7 @@ class ConsultRequestCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = ConsultRequest
         fields = [
+            'id',
             'patient',
             'requester',
             'requesting_department',
