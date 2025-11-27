@@ -8,6 +8,12 @@ from .models import ConsultRequest, ConsultNote
 
 @admin.register(ConsultRequest)
 class ConsultRequestAdmin(admin.ModelAdmin):
+    """Customizes the Django admin interface for the `ConsultRequest` model.
+
+    Provides a more organized and user-friendly interface for managing
+    consult requests in the admin panel, including detailed list displays,
+    filters, and search capabilities.
+    """
     list_display = [
         'id',
         'patient',
@@ -81,6 +87,14 @@ class ConsultRequestAdmin(admin.ModelAdmin):
     )
     
     def get_queryset(self, request):
+        """Optimizes the queryset by pre-fetching related objects.
+
+        Args:
+            request: The Django HttpRequest object.
+
+        Returns:
+            The optimized queryset.
+        """
         return super().get_queryset(request).select_related(
             'patient',
             'requester',
@@ -92,6 +106,11 @@ class ConsultRequestAdmin(admin.ModelAdmin):
 
 @admin.register(ConsultNote)
 class ConsultNoteAdmin(admin.ModelAdmin):
+    """Customizes the Django admin interface for the `ConsultNote` model.
+
+    Provides a clear and manageable interface for consult notes in the
+    admin panel.
+    """
     list_display = [
         'id',
         'consult',
@@ -142,6 +161,14 @@ class ConsultNoteAdmin(admin.ModelAdmin):
     )
     
     def get_queryset(self, request):
+        """Optimizes the queryset by pre-fetching related objects.
+
+        Args:
+            request: The Django HttpRequest object.
+
+        Returns:
+            The optimized queryset.
+        """
         return super().get_queryset(request).select_related(
             'consult__patient',
             'author'

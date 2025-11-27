@@ -8,14 +8,20 @@ from asgiref.sync import async_to_sync
 from apps.core.services.email_service import EmailService
 
 class NotificationService:
-    """
-    Service for handling notifications.
+    """Provides a centralized service for handling notifications.
+
+    This class is responsible for sending both real-time WebSocket
+    notifications and emails for various events in the consult workflow.
     """
     
     @staticmethod
     def _send_ws_message(group_name, message_type, data):
-        """
-        Helper to send WebSocket message to a group.
+        """A helper method to send a WebSocket message to a group.
+
+        Args:
+            group_name: The name of the channel group to send the message to.
+            message_type: The type of the notification message.
+            data: A dictionary of data to be sent with the message.
         """
         channel_layer = get_channel_layer()
         async_to_sync(channel_layer.group_send)(
@@ -31,8 +37,13 @@ class NotificationService:
     
     @staticmethod
     def notify_new_consult(consult):
-        """
-        Notify target department about new consult.
+        """Sends notifications for a newly created consult.
+
+        This method sends both an email and a real-time WebSocket
+        notification to the target department.
+
+        Args:
+            consult: The `ConsultRequest` instance that was just created.
         """
         # Send email
         EmailService.send_new_consult_notification(consult)
@@ -51,8 +62,11 @@ class NotificationService:
     
     @staticmethod
     def notify_consult_assigned(consult, doctor):
-        """
-        Notify doctor about assignment.
+        """Sends notifications when a consult is assigned to a doctor.
+
+        Args:
+            consult: The `ConsultRequest` instance that was assigned.
+            doctor: The `User` who was assigned the consult.
         """
         # Send email
         EmailService.send_consult_assigned_notification(consult)
@@ -71,8 +85,14 @@ class NotificationService:
     
     @staticmethod
     def notify_note_added(consult, note):
-        """
-        Notify relevant parties about new note.
+        """Sends notifications when a new note is added to a consult.
+
+        Notifies the assigned doctor and the original requester, unless
+        they are the author of the note.
+
+        Args:
+            consult: The `ConsultRequest` the note was added to.
+            note: The `ConsultNote` instance that was just created.
         """
         # Notify assigned doctor if note is not by them
         if consult.assigned_to and consult.assigned_to != note.author:
@@ -102,8 +122,10 @@ class NotificationService:
     
     @staticmethod
     def notify_consult_completed(consult):
-        """
-        Notify requester about completion.
+        """Sends notifications when a consult is completed.
+
+        Args:
+            consult: The `ConsultRequest` instance that was completed.
         """
         # Send email
         EmailService.send_consult_completed_notification(consult)
@@ -121,8 +143,10 @@ class NotificationService:
     
     @staticmethod
     def escalate_to_hod(consult):
-        """
-        Notify HOD about escalation.
+        """Sends an escalation notification to the Head of Department.
+
+        Args:
+            consult: The `ConsultRequest` instance that is being escalated.
         """
         if consult.target_department.head:
             # Real-time notification to HOD

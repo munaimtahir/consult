@@ -4,7 +4,7 @@ A comprehensive digital system for managing inter-departmental patient consultat
 
 ## 🏥 Overview
 
-The Hospital Consult System is a paperless, digital application that streamlines communication between primary treating teams and specialty departments, ensuring timely patient reviews and reducing medical errors.
+The Hospital Consult System is a paperless, digital application that streamlines communication between primary treating teams and specialty departments, ensuring timely patient reviews and reducing medical errors. This repository contains the complete codebase for the project, with a Django backend and a React frontend.
 
 ## 🎯 Key Features
 
@@ -28,9 +28,9 @@ The Hospital Consult System is a paperless, digital application that streamlines
 - **Email**: Google Workspace SMTP
 
 ### Frontend
-- **Framework**: Next.js 14+ (App Router)
+- **Framework**: React (Vite)
 - **State Management**: React Query (TanStack Query)
-- **Authentication**: NextAuth.js with Google Provider
+- **Authentication**: Context API
 - **HTTP Client**: Axios
 - **Real-time**: WebSocket client
 
@@ -39,8 +39,7 @@ The Hospital Consult System is a paperless, digital application that streamlines
 ```
 consult/
 ├── backend/          # Django project
-├── frontend/         # Next.js project
-├── docs/             # Documentation
+├── frontend/         # React project
 └── README.md         # This file
 ```
 
@@ -89,8 +88,8 @@ cd frontend
 npm install
 
 # Copy environment variables
-cp .env.local.example .env.local
-# Edit .env.local with your configuration
+cp .env.example .env
+# Edit .env with your configuration
 
 # Run development server
 npm run dev
@@ -98,7 +97,7 @@ npm run dev
 
 ### Access the Application
 
-- **Frontend**: http://localhost:3000
+- **Frontend**: http://localhost:5173
 - **Backend API**: http://localhost:8000/api/v1
 - **Django Admin**: http://localhost:8000/admin
 
@@ -131,6 +130,13 @@ See [CSV_USER_IMPORT_SPEC.md](./CSV_USER_IMPORT_SPEC.md) for detailed specificat
 
 ## 📖 Documentation
 
+The codebase is thoroughly documented with docstrings (Python) and JSDoc comments (JavaScript). You can generate a full documentation set using the following tools:
+
+- **Backend (Python)**: [Sphinx](https://www.sphinx-doc.org/en/master/) or [pdoc](https://pdoc.dev/)
+- **Frontend (JavaScript)**: [JSDoc](https://jsdoc.app/)
+
+In addition to the in-code documentation, the following documents provide further details on the project:
+
 - [Technical Plan](./TECHNICAL_PLAN.md) - Complete technical architecture
 - [Implementation Plan](./IMPLEMENTATION_PLAN.md) - Detailed implementation guide
 - [Google Workspace Setup](./GOOGLE_WORKSPACE_SETUP.md) - OAuth and SMTP configuration
@@ -159,7 +165,9 @@ See [IMPLEMENTATION_PLAN.md](./IMPLEMENTATION_PLAN.md) for VPS deployment instru
 
 ## 📝 Development Phases
 
-- ✅ **Phase 1**: Foundation & Authentication (Current)
+The project is currently in the initial development phase. The core models and APIs have been implemented, and the frontend has been set up with basic functionality.
+
+- ✅ **Phase 1**: Foundation & Authentication
 - ⏳ **Phase 2**: Core Models & API
 - ⏳ **Phase 3**: Consult Workflow
 - ⏳ **Phase 4**: Real-time Features
@@ -179,7 +187,7 @@ Proprietary - Pakistan Medical Commission
 
 For technical support or questions:
 - Email: consult@pmc.edu.pk
-- Internal Documentation: See `/docs` folder
+- Internal Documentation: See the other documents in the root directory.
 
 ---
 

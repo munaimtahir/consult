@@ -13,16 +13,23 @@ from .serializers import PatientSerializer, PatientListSerializer
 
 
 class PatientViewSet(viewsets.ModelViewSet):
-    """
-    ViewSet for Patient model.
-    Provides CRUD operations for patient records.
+    """Provides API endpoints for managing patients.
+
+    This ViewSet allows for the listing, retrieving, creating, updating, and
+    deleting of patient records. It also includes a custom action for
+    retrieving all consults associated with a specific patient.
     """
     
     permission_classes = [IsAuthenticated]
     
     def get_queryset(self):
-        """
-        Filter queryset based on search parameters.
+        """Constructs the queryset for the view, with optional filtering.
+
+        This method allows for searching by MRN or name, and filtering by
+        the patient's primary department.
+
+        Returns:
+            A Django QuerySet of `Patient` objects.
         """
         queryset = Patient.objects.select_related('primary_department')
         
@@ -41,8 +48,14 @@ class PatientViewSet(viewsets.ModelViewSet):
         return queryset.order_by('-created_at')
     
     def get_serializer_class(self):
-        """
-        Return appropriate serializer based on action.
+        """Selects the appropriate serializer for the current action.
+
+        Uses `PatientListSerializer` for the 'list' action to provide a
+        more concise representation. For all other actions, it defaults to
+        the full `PatientSerializer`.
+
+        Returns:
+            The serializer class to be used for the request.
         """
         if self.action == 'list':
             return PatientListSerializer
@@ -50,8 +63,14 @@ class PatientViewSet(viewsets.ModelViewSet):
     
     @action(detail=True, methods=['get'])
     def consults(self, request, pk=None):
-        """
-        Get all consults for a specific patient.
+        """Retrieves all consults associated with a specific patient.
+
+        Args:
+            request: The Django HttpRequest object.
+            pk: The primary key of the `Patient`.
+
+        Returns:
+            A DRF Response object containing the serialized consult data.
         """
         patient = self.get_object()
         from apps.consults.serializers import ConsultRequestListSerializer

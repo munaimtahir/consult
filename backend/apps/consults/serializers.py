@@ -10,7 +10,11 @@ from apps.departments.serializers import DepartmentSerializer
 
 
 class ConsultNoteSerializer(serializers.ModelSerializer):
-    """Serializer for ConsultNote model."""
+    """Serializes `ConsultNote` model instances.
+
+    Includes the author's full name and designation for easy display in
+    the frontend.
+    """
     
     author_name = serializers.CharField(source='author.get_full_name', read_only=True)
     author_designation = serializers.CharField(source='author.designation_display', read_only=True)
@@ -36,7 +40,12 @@ class ConsultNoteSerializer(serializers.ModelSerializer):
 
 
 class ConsultRequestListSerializer(serializers.ModelSerializer):
-    """Lightweight serializer for list views."""
+    """A lightweight serializer for listing consult requests.
+
+    This serializer provides a condensed view of a consult request,
+    suitable for list displays. It includes key denormalized fields like
+    patient and department names to reduce the number of database queries.
+    """
     
     patient_name = serializers.CharField(source='patient.name', read_only=True)
     patient_mrn = serializers.CharField(source='patient.mrn', read_only=True)
@@ -76,7 +85,13 @@ class ConsultRequestListSerializer(serializers.ModelSerializer):
 
 
 class ConsultRequestDetailSerializer(serializers.ModelSerializer):
-    """Detailed serializer with nested relationships."""
+    """A detailed serializer for a single consult request.
+
+    This serializer provides a comprehensive view of a consult request,
+    including nested representations of related objects like the patient,
+    requester, and notes. It also includes calculated fields for time
+    tracking and SLA compliance.
+    """
     
     patient = PatientSerializer(read_only=True)
     requester = UserSerializer(read_only=True)
@@ -131,23 +146,51 @@ class ConsultRequestDetailSerializer(serializers.ModelSerializer):
         ]
     
     def get_time_elapsed(self, obj):
-        """Get time elapsed in seconds."""
+        """Returns the total time elapsed in seconds.
+
+        Args:
+            obj: The `ConsultRequest` instance.
+
+        Returns:
+            An integer representing the time elapsed in seconds, or `None`.
+        """
         delta = obj.time_elapsed
         return int(delta.total_seconds()) if delta else None
     
     def get_time_to_acknowledgement(self, obj):
-        """Get time to acknowledgement in seconds."""
+        """Returns the time to acknowledgement in seconds.
+
+        Args:
+            obj: The `ConsultRequest` instance.
+
+        Returns:
+            An integer representing the time to acknowledgement in seconds,
+            or `None`.
+        """
         delta = obj.time_to_acknowledgement
         return int(delta.total_seconds()) if delta else None
     
     def get_time_to_completion(self, obj):
-        """Get time to completion in seconds."""
+        """Returns the time to completion in seconds.
+
+        Args:
+            obj: The `ConsultRequest` instance.
+
+        Returns:
+            An integer representing the time to completion in seconds, or
+            `None`.
+        """
         delta = obj.time_to_completion
         return int(delta.total_seconds()) if delta else None
 
 
 class ConsultRequestCreateSerializer(serializers.ModelSerializer):
-    """Serializer for creating new consult requests."""
+    """A serializer for creating new consult requests.
+
+    This serializer is used specifically for the 'create' action. It
+    includes validation to ensure that the requesting and target
+    departments are not the same.
+    """
     
     class Meta:
         model = ConsultRequest
@@ -168,7 +211,17 @@ class ConsultRequestCreateSerializer(serializers.ModelSerializer):
         read_only_fields = ['requester']
     
     def validate(self, data):
-        """Validate that requesting and target departments are different."""
+        """Ensures the requesting and target departments are different.
+
+        Args:
+            data: The data to be validated.
+
+        Returns:
+            The validated data.
+
+        Raises:
+            serializers.ValidationError: If the departments are the same.
+        """
         if data['requesting_department'] == data['target_department']:
             raise serializers.ValidationError(
                 "Requesting and target departments must be different."

@@ -8,6 +8,15 @@ const urgencyColors = {
     ROUTINE: 'bg-blue-100 text-blue-800 border-blue-300',
 };
 
+/**
+ * Renders the detailed view of a single consult.
+ *
+ * This component displays all the information for a specific consult,
+ * including patient details, clinical information, and a list of notes.
+ * It also provides a form for adding new notes to the consult.
+ *
+ * @returns {React.ReactElement} The rendered consult detail page component.
+ */
 export default function ConsultDetailPage() {
     const { id } = useParams();
     const { data: consult, isLoading } = useConsult(id);

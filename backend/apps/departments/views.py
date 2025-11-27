@@ -13,25 +13,38 @@ from .serializers import DepartmentSerializer, DepartmentListSerializer
 
 
 class DepartmentViewSet(viewsets.ModelViewSet):
-    """
-    ViewSet for Department model.
-    Provides CRUD operations for departments.
+    """Provides API endpoints for managing departments.
+
+    This ViewSet allows for the listing, retrieving, creating, updating, and
+    deleting of departments. It also includes custom actions for retrieving
+    the users and active consults within a department.
     """
     
     permission_classes = [IsAuthenticated]
     queryset = Department.objects.select_related('head')
     
     def get_serializer_class(self):
-        """
-        Return appropriate serializer based on action.
+        """Selects the appropriate serializer for the current action.
+
+        Uses `DepartmentListSerializer` for the 'list' action to provide a
+        more concise representation. For all other actions, it defaults to
+        the full `DepartmentSerializer`.
+
+        Returns:
+            The serializer class to be used for the request.
         """
         if self.action == 'list':
             return DepartmentListSerializer
         return DepartmentSerializer
     
     def get_queryset(self):
-        """
-        Filter to active departments unless user is admin.
+        """Constructs the queryset for the view.
+
+        Admins can see all departments, while other users can only see
+        active departments.
+
+        Returns:
+            A Django QuerySet of `Department` objects.
         """
         if self.request.user.is_admin_user:
             return Department.objects.all()
@@ -39,8 +52,14 @@ class DepartmentViewSet(viewsets.ModelViewSet):
     
     @action(detail=True, methods=['get'])
     def users(self, request, pk=None):
-        """
-        Get all users in a department.
+        """Retrieves all active users in a specific department.
+
+        Args:
+            request: The Django HttpRequest object.
+            pk: The primary key of the `Department`.
+
+        Returns:
+            A DRF Response object containing the serialized user data.
         """
         department = self.get_object()
         from apps.accounts.serializers import UserListSerializer
@@ -50,8 +69,14 @@ class DepartmentViewSet(viewsets.ModelViewSet):
     
     @action(detail=True, methods=['get'])
     def active_consults(self, request, pk=None):
-        """
-        Get active consults for a department.
+        """Retrieves all active consults for a specific department.
+
+        Args:
+            request: The Django HttpRequest object.
+            pk: The primary key of the `Department`.
+
+        Returns:
+            A DRF Response object containing the serialized consult data.
         """
         department = self.get_object()
         from apps.consults.serializers import ConsultRequestListSerializer

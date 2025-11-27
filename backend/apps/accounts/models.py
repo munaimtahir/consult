@@ -9,9 +9,23 @@ from django.core.exceptions import ValidationError
 
 
 class User(AbstractUser):
-    """
-    Custom user model with hospital-specific fields.
-    Uses email as the primary identifier instead of username.
+    """Represents a user in the Hospital Consult System.
+
+    This model extends Django's built-in `AbstractUser` to include fields
+    and logic specific to the hospital's operational hierarchy, such as roles,
+    designations, and departments. It uses the email address as the primary
+    means of identification.
+
+    Attributes:
+        role: The user's primary role (e.g., 'DOCTOR', 'HOD').
+        designation: The user's medical or administrative title.
+        department: A foreign key to the user's assigned department.
+        seniority_level: An integer calculated from designation, used for
+                         escalation.
+        phone_number: The user's contact phone number.
+        profile_photo: A URL to the user's profile photo, typically from
+                       Google.
+        is_on_call: A boolean indicating if the user is currently on call.
     """
     
     ROLE_CHOICES = [
@@ -71,8 +85,22 @@ class User(AbstractUser):
         return f"{self.get_full_name()} ({self.email})"
     
     def save(self, *args, **kwargs):
-        """
-        Override save to auto-calculate seniority level and role from designation.
+        """Overrides the default save method to add custom logic.
+
+        This method performs several actions before saving the user:
+        1. Calculates and sets the `seniority_level` based on the `designation`.
+        2. Automatically sets the user's `role` based on their `designation`.
+        3. Validates that the user's email address ends with '@pmc.edu.pk'.
+        4. Sets the `username` to the part of the email before the '@' if it's not
+           already set.
+
+        Args:
+            *args: Variable length argument list.
+            **kwargs: Arbitrary keyword arguments.
+
+        Raises:
+            ValidationError: If the email address does not have the
+                             '@pmc.edu.pk' domain.
         """
         # Map designation to seniority level
         designation_seniority_map = {
@@ -110,20 +138,39 @@ class User(AbstractUser):
     
     @property
     def designation_display(self):
-        """Get human-readable designation"""
+        """Returns the human-readable version of the designation.
+
+        Returns:
+            A string representing the full designation name (e.g.,
+            'Senior Registrar').
+        """
         return dict(self.DESIGNATION_CHOICES).get(self.designation, '')
     
     @property
     def is_hod(self):
-        """Check if user is Head of Department"""
+        """Checks if the user is a Head of Department.
+
+        Returns:
+            True if the user's role is 'HOD', False otherwise.
+        """
         return self.role == 'HOD'
     
     @property
     def is_admin_user(self):
-        """Check if user is an administrator"""
+        """Checks if the user has administrative privileges.
+
+        Returns:
+            True if the user's role is 'ADMIN' or if they are a superuser,
+            False otherwise.
+        """
         return self.role == 'ADMIN' or self.is_superuser
     
     @property
     def can_assign_consults(self):
-        """Check if user can assign consults to others"""
+        """Checks if the user has permission to assign consults.
+
+        Returns:
+            True if the user's role is 'HOD', 'DEPARTMENT_USER', or 'ADMIN',
+            False otherwise.
+        """
         return self.role in ['HOD', 'DEPARTMENT_USER', 'ADMIN']

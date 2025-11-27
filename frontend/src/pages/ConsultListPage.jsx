@@ -16,6 +16,15 @@ const statusColors = {
     CANCELLED: 'bg-gray-100 text-gray-800',
 };
 
+/**
+ * Renders a list of consults with filtering options.
+ *
+ * This component displays a list of consults and allows the user to filter
+ * them by view (e.g., 'my_department', 'assigned_to_me'), status, and
+ * urgency. The filters are managed via URL search parameters.
+ *
+ * @returns {React.ReactElement} The rendered consult list page component.
+ */
 export default function ConsultListPage() {
     const [searchParams, setSearchParams] = useSearchParams();
     const view = searchParams.get('view') || 'all';

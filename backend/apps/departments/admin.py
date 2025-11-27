@@ -8,6 +8,11 @@ from .models import Department
 
 @admin.register(Department)
 class DepartmentAdmin(admin.ModelAdmin):
+    """Customizes the Django admin interface for the `Department` model.
+
+    Provides a more organized and user-friendly interface for managing
+    departments in the admin panel.
+    """
     list_display = [
         'code',
         'name',

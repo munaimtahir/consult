@@ -7,7 +7,20 @@ from .models import User
 
 
 class UserSerializer(serializers.ModelSerializer):
-    """Serializer for User model."""
+    """Serializes the `User` model for detailed views.
+
+    This serializer includes comprehensive information about a user,
+    including their role, department, and calculated properties like
+    `is_hod` and `can_assign_consults`. It's used for retrieving, creating,
+    and updating user instances.
+
+    Attributes:
+        department_name: The name of the user's department.
+        designation_display: The human-readable designation of the user.
+        is_hod: A boolean indicating if the user is a Head of Department.
+        can_assign_consults: A boolean indicating if the user can assign
+                             consults.
+    """
     
     department_name = serializers.CharField(source='department.name', read_only=True)
     designation_display = serializers.CharField(read_only=True)
@@ -40,7 +53,14 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class UserListSerializer(serializers.ModelSerializer):
-    """Lightweight serializer for list views."""
+    """A lightweight serializer for listing users.
+
+    This serializer provides a minimal set of user fields, optimized for
+    use in list views where a full user representation is not required.
+
+    Attributes:
+        department_name: The name of the user's department.
+    """
     
     department_name = serializers.CharField(source='department.name', read_only=True)
     
@@ -59,7 +79,12 @@ class UserListSerializer(serializers.ModelSerializer):
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
-    """Serializer for user profile updates."""
+    """Serializes a user's profile for updates.
+
+    This serializer is specifically for updating a user's own profile, and
+    only exposes a limited set of fields that are safe for a user to
+    modify.
+    """
     
     class Meta:
         model = User
