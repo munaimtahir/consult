@@ -7,6 +7,7 @@ import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
 import ConsultListPage from './pages/ConsultListPage';
 import ConsultDetailPage from './pages/ConsultDetailPage';
+import NewConsultPage from './pages/NewConsultPage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -42,6 +43,17 @@ function App() {
                 <ProtectedRoute>
                   <Layout>
                     <ConsultListPage />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/consults/new"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <NewConsultPage />
                   </Layout>
                 </ProtectedRoute>
               }

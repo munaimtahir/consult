@@ -18,6 +18,8 @@ from .serializers import (
 )
 
 
+from .permissions import IsConsultParticipant, CanAssignConsult
+
 class ConsultRequestViewSet(viewsets.ModelViewSet):
     """
     ViewSet for ConsultRequest model.
@@ -25,6 +27,14 @@ class ConsultRequestViewSet(viewsets.ModelViewSet):
     """
     
     permission_classes = [IsAuthenticated]
+
+    def get_permissions(self):
+        """
+        Instantiate and return the list of permissions that this view requires.
+        """
+        if self.action in ['retrieve', 'update', 'partial_update', 'destroy']:
+            return [IsAuthenticated(), IsConsultParticipant()]
+        return [IsAuthenticated()]
     
     def get_queryset(self):
         """

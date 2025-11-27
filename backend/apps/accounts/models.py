@@ -61,16 +61,11 @@ class User(AbstractUser):
     
     # Use email as the username field
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['username', 'first_name', 'last_name']
+    REQUIRED_FIELDS = ['first_name', 'last_name']
     
     class Meta:
         db_table = 'users'
-        ordering = ['department', '-seniority_level']
-        indexes = [
-            models.Index(fields=['email']),
-            models.Index(fields=['department', 'role']),
-            models.Index(fields=['designation', 'seniority_level']),
-        ]
+        ordering = ['-date_joined']
     
     def __str__(self):
         return f"{self.get_full_name()} ({self.email})"

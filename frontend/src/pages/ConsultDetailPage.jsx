@@ -27,6 +27,7 @@ export default function ConsultDetailPage() {
                     content: noteContent,
                     note_type: noteType,
                     recommendations,
+                    is_final: noteType === 'FINAL',
                 },
             });
 
