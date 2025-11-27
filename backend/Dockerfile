@@ -17,13 +17,13 @@ RUN apt-get update && apt-get install -y \
 # Install python dependencies
 COPY requirements.txt /app/
 RUN pip install --upgrade pip && pip install -r requirements.txt
-RUN pip install uvicorn gunicorn psycopg2-binary
+RUN pip install "uvicorn[standard]" gunicorn psycopg2-binary
 
 # Copy project
 COPY . /app/
 
-# Create static and media directories
-RUN mkdir -p /app/staticfiles /app/media
+# Create static, media, and log directories
+RUN mkdir -p /app/staticfiles /app/media /var/log/consult
 
 # Entrypoint script
 COPY ./entrypoint.sh /app/entrypoint.sh

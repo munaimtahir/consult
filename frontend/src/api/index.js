@@ -2,7 +2,7 @@ import apiClient from './client';
 
 export const authAPI = {
     login: async (email, password) => {
-        const response = await apiClient.post('/accounts/token/', {
+        const response = await apiClient.post('/auth/token/', {
             email,
             password,
         });
@@ -10,12 +10,12 @@ export const authAPI = {
     },
 
     getCurrentUser: async () => {
-        const response = await apiClient.get('/accounts/users/me/');
+        const response = await apiClient.get('/auth/users/me/');
         return response.data;
     },
 
     refreshToken: async (refreshToken) => {
-        const response = await apiClient.post('/accounts/token/refresh/', {
+        const response = await apiClient.post('/auth/token/refresh/', {
             refresh: refreshToken,
         });
         return response.data;

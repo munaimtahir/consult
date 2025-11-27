@@ -20,6 +20,8 @@ services:
   backend:
     build: ./backend
     command: uvicorn config.asgi:application --host 0.0.0.0 --port 8000
+    ports:
+      - "8000:8000"
     volumes:
       - ./backend:/app
       - static_volume:/app/staticfiles
