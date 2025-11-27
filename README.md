@@ -98,7 +98,7 @@ npm run dev
 ### Access the Application
 
 - **Frontend**: http://localhost:5173
-- **Backend API**: http://localhost:8000/api/v1/
+- **Backend API**: http://localhost:8000/api/v1
 - **Django Admin**: http://localhost:8000/admin
 
 ## 🔐 Google Workspace Configuration
