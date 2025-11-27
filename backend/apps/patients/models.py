@@ -6,8 +6,22 @@ from django.db import models
 
 
 class Patient(models.Model):
-    """
-    Patient information (manually entered).
+    """Represents a patient in the hospital.
+
+    This model stores essential demographic and clinical information about a
+    patient, such as their medical record number (MRN), name, age, and
+    primary diagnosis.
+
+    Attributes:
+        mrn: The patient's unique Medical Record Number.
+        name: The full name of the patient.
+        age: The age of the patient.
+        gender: The gender of the patient.
+        ward: The ward where the patient is currently located.
+        bed_number: The patient's bed number in the ward.
+        primary_department: The department primarily responsible for the
+                            patient's care.
+        primary_diagnosis: The patient's primary diagnosis.
     """
     
     GENDER_CHOICES = [
@@ -49,10 +63,18 @@ class Patient(models.Model):
     
     @property
     def location(self):
-        """Get patient location as formatted string"""
+        """Returns the patient's location as a formatted string.
+
+        Returns:
+            A string in the format "Ward, Bed Bed Number".
+        """
         return f"{self.ward}, Bed {self.bed_number}"
     
     @property
     def consults_count(self):
-        """Get number of consults for this patient"""
+        """Returns the number of consults associated with this patient.
+
+        Returns:
+            An integer representing the total number of consults.
+        """
         return self.consults.count()

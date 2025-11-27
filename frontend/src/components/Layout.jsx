@@ -2,6 +2,18 @@ import { useAuth } from '../context/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
 import { useWebSocket } from '../hooks/useWebSocket';
 
+/**
+ * A shared layout component for the application.
+ *
+ * This component provides the main structure for all pages, including a
+ * navigation bar with links to the dashboard and consults, a user menu
+ * with a logout button, and a real-time notification indicator.
+ *
+ * @param {object} props - The component's props.
+ * @param {React.ReactNode} props.children - The child components to be
+ *   rendered within the layout.
+ * @returns {React.ReactElement} The rendered layout component.
+ */
 export default function Layout({ children }) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();

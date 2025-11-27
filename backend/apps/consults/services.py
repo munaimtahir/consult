@@ -8,11 +8,30 @@ from .models import ConsultRequest, ConsultNote
 from apps.notifications.services import NotificationService
 
 class ConsultService:
-    """Business logic for consult workflow"""
+    """Encapsulates the business logic for the consult workflow.
+
+    This service class provides a set of static methods for performing
+    actions related to consult requests, such as creating, assigning, and
+    completing them. It ensures that state transitions are handled
+    correctly and that necessary side effects, like sending notifications,
+    are triggered.
+    """
     
     @staticmethod
     def create_consult(requester, patient, target_department, urgency, reason_for_consult, **kwargs):
-        """Create a new consult request"""
+        """Creates a new consult request and sends notifications.
+
+        Args:
+            requester: The user initiating the request.
+            patient: The patient for whom the consult is requested.
+            target_department: The department the consult is directed to.
+            urgency: The urgency level of the consult.
+            reason_for_consult: The reason for the consult.
+            **kwargs: Additional fields for the `ConsultRequest` model.
+
+        Returns:
+            The newly created `ConsultRequest` instance.
+        """
         consult = ConsultRequest.objects.create(
             patient=patient,
             requester=requester,
@@ -29,7 +48,15 @@ class ConsultService:
     
     @staticmethod
     def assign_consult(consult, doctor):
-        """Assign consult to a specific doctor"""
+        """Assigns a consult to a doctor and updates its status.
+
+        Args:
+            consult: The `ConsultRequest` to be assigned.
+            doctor: The `User` to whom the consult is being assigned.
+
+        Returns:
+            The updated `ConsultRequest` instance.
+        """
         consult.assigned_to = doctor
         
         # Update status based on current state
@@ -47,7 +74,15 @@ class ConsultService:
     
     @staticmethod
     def acknowledge_consult(consult, user):
-        """Acknowledge a consult request"""
+        """Acknowledges a consult request.
+
+        Args:
+            consult: The `ConsultRequest` to be acknowledged.
+            user: The user acknowledging the consult.
+
+        Returns:
+            The updated `ConsultRequest` instance.
+        """
         consult.status = 'ACKNOWLEDGED'
         consult.acknowledged_at = timezone.now()
         consult.save()
@@ -56,7 +91,20 @@ class ConsultService:
     
     @staticmethod
     def add_note(consult, author, content, note_type='PROGRESS', **kwargs):
-        """Add a consult note and update timestamps"""
+        """Adds a note to a consult and updates its status.
+
+        If the note is final, it also completes the consult.
+
+        Args:
+            consult: The `ConsultRequest` to add the note to.
+            author: The `User` writing the note.
+            content: The content of the note.
+            note_type: The type of the note.
+            **kwargs: Additional fields for the `ConsultNote` model.
+
+        Returns:
+            The newly created `ConsultNote` instance.
+        """
         note = ConsultNote.objects.create(
             consult=consult,
             author=author,
@@ -81,7 +129,14 @@ class ConsultService:
     
     @staticmethod
     def complete_consult(consult):
-        """Mark consult as completed"""
+        """Marks a consult as completed.
+
+        Args:
+            consult: The `ConsultRequest` to be completed.
+
+        Returns:
+            The updated `ConsultRequest` instance.
+        """
         consult.status = 'COMPLETED'
         consult.completed_at = timezone.now()
         consult.save()
@@ -92,7 +147,14 @@ class ConsultService:
         
     @staticmethod
     def cancel_consult(consult):
-        """Cancel a consult request"""
+        """Cancels a consult request.
+
+        Args:
+            consult: The `ConsultRequest` to be cancelled.
+
+        Returns:
+            The updated `ConsultRequest` instance.
+        """
         consult.status = 'CANCELLED'
         consult.save()
         

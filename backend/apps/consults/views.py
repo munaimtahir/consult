@@ -19,16 +19,28 @@ from .serializers import (
 
 
 class ConsultRequestViewSet(viewsets.ModelViewSet):
-    """
-    ViewSet for ConsultRequest model.
-    Provides CRUD operations and custom actions for consult workflow.
+    """Provides API endpoints for managing consult requests.
+
+    This ViewSet handles the entire lifecycle of a consult request, from
+    creation to completion. It includes standard CRUD operations as well as
+    custom actions for workflow management, such as acknowledging,
+    assigning, and adding notes to a consult.
+
+    Access is restricted to authenticated users, and the queryset is
+    dynamically filtered based on the user's role and permissions.
     """
     
     permission_classes = [IsAuthenticated]
     
     def get_queryset(self):
-        """
-        Filter queryset based on user role and permissions.
+        """Constructs the queryset for the view, with dynamic filtering.
+
+        This method applies filters based on the user's role and query
+        parameters. It allows filtering by status, urgency, overdue status,
+        and provides different views ('my_department', 'assigned_to_me', etc.).
+
+        Returns:
+            A Django QuerySet of `ConsultRequest` objects.
         """
         user = self.request.user
         queryset = ConsultRequest.objects.select_related(
@@ -77,8 +89,14 @@ class ConsultRequestViewSet(viewsets.ModelViewSet):
         return queryset.order_by('-created_at')
     
     def get_serializer_class(self):
-        """
-        Return appropriate serializer based on action.
+        """Selects the appropriate serializer for the current action.
+
+        Uses `ConsultRequestListSerializer` for 'list',
+        `ConsultRequestCreateSerializer` for 'create', and
+        `ConsultRequestDetailSerializer` for all other actions.
+
+        Returns:
+            The serializer class to be used for the request.
         """
         if self.action == 'list':
             return ConsultRequestListSerializer
@@ -87,8 +105,15 @@ class ConsultRequestViewSet(viewsets.ModelViewSet):
         return ConsultRequestDetailSerializer
     
     def perform_create(self, serializer):
-        """
-        Use service to create consult.
+        """Sets the requester and triggers notifications on creation.
+
+        This method is called after the serializer has been validated and is
+        ready to be saved. It sets the `requester` to the current user and
+        then calls the `NotificationService` to send out notifications about
+        the new consult.
+
+        Args:
+            serializer: The serializer instance.
         """
         from .services import ConsultService
         
@@ -113,8 +138,18 @@ class ConsultRequestViewSet(viewsets.ModelViewSet):
     
     @action(detail=True, methods=['post'])
     def acknowledge(self, request, pk=None):
-        """
-        Acknowledge a consult request.
+        """Acknowledges a pending consult request.
+
+        This action is for users in the target department to officially
+        acknowledge receipt of a new consult.
+
+        Args:
+            request: The Django HttpRequest object.
+            pk: The primary key of the `ConsultRequest`.
+
+        Returns:
+            A DRF Response object with the updated consult data, or an
+            error response.
         """
         consult = self.get_object()
         from .services import ConsultService
@@ -139,8 +174,19 @@ class ConsultRequestViewSet(viewsets.ModelViewSet):
     
     @action(detail=True, methods=['post'])
     def assign(self, request, pk=None):
-        """
-        Assign a consult to a specific user.
+        """Assigns a consult to a specific user within the department.
+
+        This action is typically performed by a Head of Department or an
+        administrator. The `assigned_to` user ID must be provided in the
+        request body.
+
+        Args:
+            request: The Django HttpRequest object.
+            pk: The primary key of the `ConsultRequest`.
+
+        Returns:
+            A DRF Response object with the updated consult data, or an
+            error response.
         """
         consult = self.get_object()
         from .services import ConsultService
@@ -189,8 +235,19 @@ class ConsultRequestViewSet(viewsets.ModelViewSet):
     
     @action(detail=True, methods=['post'])
     def add_note(self, request, pk=None):
-        """
-        Add a note to the consult.
+        """Adds a new note to a consult.
+
+        This action allows authorized users to add a `ConsultNote` to the
+        specified `ConsultRequest`. The note data should be provided in the
+        request body.
+
+        Args:
+            request: The Django HttpRequest object.
+            pk: The primary key of the `ConsultRequest`.
+
+        Returns:
+            A DRF Response object with the newly created note's data, or
+            an error response.
         """
         consult = self.get_object()
         from .services import ConsultService
@@ -223,8 +280,18 @@ class ConsultRequestViewSet(viewsets.ModelViewSet):
     
     @action(detail=True, methods=['post'])
     def complete(self, request, pk=None):
-        """
-        Mark consult as completed.
+        """Marks a consult as completed.
+
+        This action is for the assigned user or a HOD to officially close
+        a consult.
+
+        Args:
+            request: The Django HttpRequest object.
+            pk: The primary key of the `ConsultRequest`.
+
+        Returns:
+            A DRF Response object with the updated consult data, or an
+            error response.
         """
         consult = self.get_object()
         from .services import ConsultService
@@ -244,8 +311,18 @@ class ConsultRequestViewSet(viewsets.ModelViewSet):
     
     @action(detail=True, methods=['post'])
     def cancel(self, request, pk=None):
-        """
-        Cancel a consult request.
+        """Cancels a consult request.
+
+        This action can only be performed by the original requester or an
+        administrator. Completed consults cannot be cancelled.
+
+        Args:
+            request: The Django HttpRequest object.
+            pk: The primary key of the `ConsultRequest`.
+
+        Returns:
+            A DRF Response object with the updated consult data, or an
+            error response.
         """
         consult = self.get_object()
         from .services import ConsultService
@@ -270,8 +347,16 @@ class ConsultRequestViewSet(viewsets.ModelViewSet):
     
     @action(detail=False, methods=['get'])
     def dashboard_stats(self, request):
-        """
-        Get dashboard statistics for the current user.
+        """Retrieves dashboard statistics for the current user.
+
+        This action provides a summary of consults, categorized by
+        department, assigned to the user, and requested by the user.
+
+        Args:
+            request: The Django HttpRequest object.
+
+        Returns:
+            A DRF Response object containing the dashboard statistics.
         """
         user = request.user
         
@@ -315,17 +400,24 @@ class ConsultRequestViewSet(viewsets.ModelViewSet):
 
 
 class ConsultNoteViewSet(viewsets.ModelViewSet):
-    """
-    ViewSet for ConsultNote model.
-    Provides CRUD operations for consult notes.
+    """Provides API endpoints for managing consult notes.
+
+    This ViewSet allows for the creation, retrieval, updating, and deletion
+    of notes associated with a consult. It is typically used in the context
+    of a specific consult request.
     """
     
     serializer_class = ConsultNoteSerializer
     permission_classes = [IsAuthenticated]
     
     def get_queryset(self):
-        """
-        Filter notes based on consult access.
+        """Constructs the queryset for the view.
+
+        Filters notes by the `consult` ID if provided as a query
+        parameter.
+
+        Returns:
+            A Django QuerySet of `ConsultNote` objects.
         """
         user = self.request.user
         queryset = ConsultNote.objects.select_related(
@@ -342,6 +434,10 @@ class ConsultNoteViewSet(viewsets.ModelViewSet):
     
     def perform_create(self, serializer):
         """
-        Set author to current user on creation.
+        Called after validation and before saving the note instance.
+
+        Sets the author of the note to the current user.
+        Args:
+            serializer: The serializer instance.
         """
         serializer.save(author=self.request.user)

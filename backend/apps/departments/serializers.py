@@ -7,7 +7,12 @@ from .models import Department
 
 
 class DepartmentSerializer(serializers.ModelSerializer):
-    """Serializer for Department model."""
+    """Serializes the `Department` model for detailed views.
+
+    This serializer includes detailed information about a department,
+    including calculated fields for the head's name, user count, and
+    active consults count.
+    """
     
     head_name = serializers.CharField(source='head.get_full_name', read_only=True)
     user_count = serializers.IntegerField(read_only=True)
@@ -35,7 +40,11 @@ class DepartmentSerializer(serializers.ModelSerializer):
 
 
 class DepartmentListSerializer(serializers.ModelSerializer):
-    """Lightweight serializer for list views."""
+    """A lightweight serializer for listing departments.
+
+    This serializer provides a minimal set of department fields, optimized
+    for use in list views.
+    """
     
     head_name = serializers.CharField(source='head.get_full_name', read_only=True)
     

@@ -8,6 +8,11 @@ from .models import Patient
 
 @admin.register(Patient)
 class PatientAdmin(admin.ModelAdmin):
+    """Customizes the Django admin interface for the `Patient` model.
+
+    Provides a more organized and user-friendly interface for managing
+    patients in the admin panel.
+    """
     list_display = [
         'mrn',
         'name',

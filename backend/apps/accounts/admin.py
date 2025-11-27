@@ -14,8 +14,13 @@ import io
 
 @admin.register(User)
 class UserAdmin(BaseUserAdmin):
-    """
-    Custom User admin with CSV import functionality.
+    """Customizes the Django admin interface for the `User` model.
+
+    This admin class provides a more detailed and organized view of user
+    data in the admin panel. It includes custom list displays, filters,
+    search fields, and fieldsets for better usability.
+
+    It also adds a custom feature for bulk importing users from a CSV file.
     """
     
     list_display = ['email', 'get_full_name', 'department', 'designation', 'role', 'seniority_level', 'is_active']
@@ -41,6 +46,14 @@ class UserAdmin(BaseUserAdmin):
     readonly_fields = ['seniority_level', 'role']
     
     def get_urls(self):
+        """Adds the CSV import URL to the admin URLs.
+
+        This method extends the default set of URLs for the user admin to
+        include a custom path for the CSV import functionality.
+
+        Returns:
+            A list of URL patterns, including the custom CSV import URL.
+        """
         urls = super().get_urls()
         custom_urls = [
             path(
@@ -52,7 +65,19 @@ class UserAdmin(BaseUserAdmin):
         return custom_urls + urls
     
     def import_csv_view(self, request):
-        """Handle CSV upload for bulk user import"""
+        """Handles the CSV upload and user import process.
+
+        On GET requests, it displays a form for uploading a CSV file.
+        On POST requests, it processes the uploaded CSV, creates or updates
+        users, and displays messages indicating the results of the import.
+
+        Args:
+            request: The Django HttpRequest object.
+
+        Returns:
+            An HttpResponse object, either rendering the upload form or
+            redirecting back to the user list with status messages.
+        """
         if request.method == 'POST':
             csv_file = request.FILES.get('csv_file')
             

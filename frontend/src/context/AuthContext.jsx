@@ -3,6 +3,19 @@ import { authAPI } from '../api';
 
 const AuthContext = createContext(null);
 
+/**
+ * Provides authentication state and functions to the application.
+ *
+ * This component manages the user's authentication state, including the
+ * current user object, and provides `login` and `logout` functions. It also
+ * handles loading the user's data from the server when the application
+ * starts.
+ *
+ * @param {object} props - The component's props.
+ * @param {React.ReactNode} props.children - The child components to be
+ *   rendered within the provider.
+ * @returns {React.ReactElement} The rendered auth provider component.
+ */
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -50,6 +63,19 @@ export const AuthProvider = ({ children }) => {
     );
 };
 
+/**
+ * A custom hook for accessing the authentication context.
+ *
+ * This hook provides an easy way to access the `user` object, `login` and
+ * `logout` functions, and the `loading` state from the `AuthContext`.
+ *
+ * @returns {{
+ *   user: object | null,
+ *   login: (email, password) => Promise<object>,
+ *   logout: () => void,
+ *   loading: boolean
+ * }} The authentication context.
+ */
 export const useAuth = () => {
     const context = useContext(AuthContext);
     if (!context) {

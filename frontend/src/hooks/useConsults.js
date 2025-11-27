@@ -1,6 +1,13 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { consultsAPI } from '../api';
 
+/**
+ * A custom hook for fetching a list of consults.
+ *
+ * @param {object} params - The query parameters for filtering the consults.
+ * @returns {import('@tanstack/react-query').UseQueryResult} The result of
+ *   the query.
+ */
 export const useConsults = (params = {}) => {
     return useQuery({
         queryKey: ['consults', params],
@@ -8,6 +15,13 @@ export const useConsults = (params = {}) => {
     });
 };
 
+/**
+ * A custom hook for fetching a single consult by its ID.
+ *
+ * @param {string} id - The ID of the consult to fetch.
+ * @returns {import('@tanstack/react-query').UseQueryResult} The result of
+ *   the query.
+ */
 export const useConsult = (id) => {
     return useQuery({
         queryKey: ['consult', id],
@@ -16,6 +30,12 @@ export const useConsult = (id) => {
     });
 };
 
+/**
+ * A custom hook for creating a new consult.
+ *
+ * @returns {import('@tanstack/react-query').UseMutationResult} The result of
+ *   the mutation.
+ */
 export const useCreateConsult = () => {
     const queryClient = useQueryClient();
 
@@ -27,6 +47,12 @@ export const useCreateConsult = () => {
     });
 };
 
+/**
+ * A custom hook for acknowledging a consult.
+ *
+ * @returns {import('@tanstack/react-query').UseMutationResult} The result of
+ *   the mutation.
+ */
 export const useAcknowledgeConsult = () => {
     const queryClient = useQueryClient();
 
@@ -38,6 +64,12 @@ export const useAcknowledgeConsult = () => {
     });
 };
 
+/**
+ * A custom hook for assigning a consult to a user.
+ *
+ * @returns {import('@tanstack/react-query').UseMutationResult} The result of
+ *   the mutation.
+ */
 export const useAssignConsult = () => {
     const queryClient = useQueryClient();
 
@@ -49,6 +81,12 @@ export const useAssignConsult = () => {
     });
 };
 
+/**
+ * A custom hook for adding a note to a consult.
+ *
+ * @returns {import('@tanstack/react-query').UseMutationResult} The result of
+ *   the mutation.
+ */
 export const useAddNote = () => {
     const queryClient = useQueryClient();
 
@@ -61,6 +99,12 @@ export const useAddNote = () => {
     });
 };
 
+/**
+ * A custom hook for completing a consult.
+ *
+ * @returns {import('@tanstack/react-query').UseMutationResult} The result of
+ *   the mutation.
+ */
 export const useCompleteConsult = () => {
     const queryClient = useQueryClient();
 
@@ -72,6 +116,12 @@ export const useCompleteConsult = () => {
     });
 };
 
+/**
+ * A custom hook for fetching dashboard statistics.
+ *
+ * @returns {import('@tanstack/react-query').UseQueryResult} The result of
+ *   the query.
+ */
 export const useDashboardStats = () => {
     return useQuery({
         queryKey: ['dashboard-stats'],

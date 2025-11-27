@@ -2,6 +2,16 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
+/**
+ * Renders the login page.
+ *
+ * This component provides a form for users to enter their email and
+ * password to authenticate. It handles the form submission, calls the
+ * login function from the `AuthContext`, and navigates to the dashboard
+ * on successful login.
+ *
+ * @returns {React.ReactElement} The rendered login page component.
+ */
 export default function LoginPage() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');

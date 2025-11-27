@@ -1,6 +1,21 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
 
+/**
+ * A custom hook for managing a WebSocket connection for real-time
+ * notifications.
+ *
+ * This hook establishes a WebSocket connection, handles incoming messages,
+ * and manages the connection state. It also includes logic for
+ * auto-reconnection and browser notifications.
+ *
+ * @returns {{
+ *   notifications: object[],
+ *   isConnected: boolean,
+ *   clearNotifications: () => void
+ * }} An object containing the list of notifications, the connection
+ * status, and a function to clear notifications.
+ */
 export const useWebSocket = () => {
     const { user } = useAuth();
     const [socket, setSocket] = useState(null);
