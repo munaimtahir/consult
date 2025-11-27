@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { consultsAPI, departmentsAPI } from '../api';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../hooks/useAuth';
 import PatientSearch from '../components/PatientSearch';
 import PatientCreateModal from '../components/PatientCreateModal';
 

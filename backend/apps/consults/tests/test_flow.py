@@ -31,7 +31,7 @@ class ConsultFlowTests(TestCase):
             first_name="Cardio",
             last_name="Doc",
             department=self.dept_cardio,
-            role='DOCTOR'
+            role='HOD'  # HOD can assign consults
         )
         
         self.receptionist = User.objects.create_user(
@@ -47,14 +47,17 @@ class ConsultFlowTests(TestCase):
         self.patient = Patient.objects.create(
             name="John Doe",
             mrn="MRN12345",
-            date_of_birth="1980-01-01",
+            age=44,
             gender="M",
-            contact_number="1234567890"
+            ward="General Ward",
+            bed_number="A1",
+            primary_department=self.dept_er,
+            primary_diagnosis="Chest pain"
         )
 
     def test_full_consult_flow(self):
         # 1. Login as ER Doctor
-        response = self.client.post('/api/accounts/token/', {
+        response = self.client.post('/api/v1/auth/token/', {
             'email': 'er_doc@pmc.edu.pk',
             'password': 'password123'
         })
@@ -70,12 +73,12 @@ class ConsultFlowTests(TestCase):
             'reason_for_consult': 'Chest pain',
             'requesting_department': self.dept_er.id
         }
-        response = self.client.post('/api/consults/requests/', consult_data)
+        response = self.client.post('/api/v1/consults/requests/', consult_data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         consult_id = response.data['id']
         
         # 3. Switch to Cardio Doctor
-        response = self.client.post('/api/accounts/token/', {
+        response = self.client.post('/api/v1/auth/token/', {
             'email': 'cardio_doc@pmc.edu.pk',
             'password': 'password123'
         })
@@ -83,23 +86,23 @@ class ConsultFlowTests(TestCase):
         self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {cardio_token}')
         
         # 4. Acknowledge Consult
-        response = self.client.post(f'/api/consults/requests/{consult_id}/acknowledge/')
+        response = self.client.post(f'/api/v1/consults/requests/{consult_id}/acknowledge/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['status'], 'ACKNOWLEDGED')
         
         # 5. Assign to Self (or another doc)
-        response = self.client.post(f'/api/consults/requests/{consult_id}/assign/', {
+        response = self.client.post(f'/api/v1/consults/requests/{consult_id}/assign/', {
             'assigned_to': self.doctor_cardio.id
         })
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['assigned_to'], self.doctor_cardio.id)
+        self.assertEqual(response.data['assigned_to']['id'], self.doctor_cardio.id)
         
         # 6. Add Progress Note
         note_data = {
             'content': 'Patient examined. ECG normal.',
             'note_type': 'PROGRESS'
         }
-        response = self.client.post(f'/api/consults/requests/{consult_id}/add_note/', note_data)
+        response = self.client.post(f'/api/v1/consults/requests/{consult_id}/add_note/', note_data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         
         # 7. Add Final Note (Complete Consult)
@@ -108,11 +111,11 @@ class ConsultFlowTests(TestCase):
             'note_type': 'FINAL',
             'is_final': True
         }
-        response = self.client.post(f'/api/consults/requests/{consult_id}/add_note/', final_note_data)
+        response = self.client.post(f'/api/v1/consults/requests/{consult_id}/add_note/', final_note_data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         
         # Verify Consult is Completed
-        response = self.client.get(f'/api/consults/requests/{consult_id}/')
+        response = self.client.get(f'/api/v1/consults/requests/{consult_id}/')
         self.assertEqual(response.data['status'], 'COMPLETED')
         self.assertIsNotNone(response.data['completed_at'])
 
@@ -140,11 +143,11 @@ class ConsultFlowTests(TestCase):
         self.client.force_authenticate(user=doctor_neuro)
         
         # Try to access consult
-        response = self.client.get(f'/api/consults/requests/{consult.id}/')
+        response = self.client.get(f'/api/v1/consults/requests/{consult.id}/')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         
         # Try to add note
-        response = self.client.post(f'/api/consults/requests/{consult.id}/add_note/', {
+        response = self.client.post(f'/api/v1/consults/requests/{consult.id}/add_note/', {
             'content': 'Hacking in'
         })
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
