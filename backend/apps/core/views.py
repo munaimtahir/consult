@@ -1,5 +1,3 @@
-from rest_framework import viewsets
-from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -8,7 +6,7 @@ class APIRootView(APIView):
     """API root endpoint for the Hospital Consult System.
 
     This view provides a basic entry point to the API, returning a
-    simple JSON response.
+    simple JSON response with links to the main API endpoints.
     """
 
     def get(self, request):
@@ -18,11 +16,15 @@ class APIRootView(APIView):
             request: The Django HttpRequest object.
 
         Returns:
-            A DRF Response object with a welcome message.
+            A DRF Response object with API information.
         """
         return Response({
-            "detail": "Hospital Consult System API root - TODO: expand."
+            "message": "Hospital Consult System API",
+            "version": "1.0.0",
+            "endpoints": {
+                "auth": "/api/v1/auth/",
+                "departments": "/api/v1/departments/",
+                "patients": "/api/v1/patients/",
+                "consults": "/api/v1/consults/",
+            }
         })
-
-
-# TODO: implement additional API views
