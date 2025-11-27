@@ -1,5 +1,5 @@
-import { useEffect, useState, useCallback } from 'react';
-import { useAuth } from '../context/AuthContext';
+import { useEffect, useState, useRef } from 'react';
+import { useAuth } from './useAuth';
 
 /**
  * A custom hook for managing a WebSocket connection for real-time
@@ -18,53 +18,10 @@ import { useAuth } from '../context/AuthContext';
  */
 export const useWebSocket = () => {
     const { user } = useAuth();
-    const [socket, setSocket] = useState(null);
+    const socketRef = useRef(null);
+    const reconnectTimeoutRef = useRef(null);
     const [notifications, setNotifications] = useState([]);
     const [isConnected, setIsConnected] = useState(false);
-
-    const connect = useCallback(() => {
-        if (!user) return;
-
-        const token = localStorage.getItem('access_token');
-        const wsUrl = `${import.meta.env.VITE_WS_URL}/notifications/?token=${token}`;
-
-        const ws = new WebSocket(wsUrl);
-
-        ws.onopen = () => {
-            console.log('WebSocket connected');
-            setIsConnected(true);
-        };
-
-        ws.onmessage = (event) => {
-            const data = JSON.parse(event.data);
-            setNotifications((prev) => [data, ...prev]);
-
-            // Show browser notification if permitted
-            if (Notification.permission === 'granted') {
-                new Notification(data.message || 'New notification', {
-                    body: data.message,
-                    icon: '/icon.png',
-                });
-            }
-        };
-
-        ws.onerror = (error) => {
-            console.error('WebSocket error:', error);
-        };
-
-        ws.onclose = () => {
-            console.log('WebSocket disconnected');
-            setIsConnected(false);
-            // Attempt to reconnect after 5 seconds
-            setTimeout(connect, 5000);
-        };
-
-        setSocket(ws);
-
-        return () => {
-            ws.close();
-        };
-    }, [user]);
 
     useEffect(() => {
         // Request notification permission
@@ -72,9 +29,57 @@ export const useWebSocket = () => {
             Notification.requestPermission();
         }
 
-        const cleanup = connect();
-        return cleanup;
-    }, [connect]);
+        if (!user) return;
+
+        const connect = () => {
+            const token = localStorage.getItem('access_token');
+            const wsUrl = `${import.meta.env.VITE_WS_URL}/notifications/?token=${token}`;
+
+            const ws = new WebSocket(wsUrl);
+
+            ws.onopen = () => {
+                console.log('WebSocket connected');
+                setIsConnected(true);
+            };
+
+            ws.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                setNotifications((prev) => [data, ...prev]);
+
+                // Show browser notification if permitted
+                if (Notification.permission === 'granted') {
+                    new Notification(data.message || 'New notification', {
+                        body: data.message,
+                        icon: '/icon.png',
+                    });
+                }
+            };
+
+            ws.onerror = (error) => {
+                console.error('WebSocket error:', error);
+            };
+
+            ws.onclose = () => {
+                console.log('WebSocket disconnected');
+                setIsConnected(false);
+                // Attempt to reconnect after 5 seconds
+                reconnectTimeoutRef.current = setTimeout(connect, 5000);
+            };
+
+            socketRef.current = ws;
+        };
+
+        connect();
+
+        return () => {
+            if (reconnectTimeoutRef.current) {
+                clearTimeout(reconnectTimeoutRef.current);
+            }
+            if (socketRef.current) {
+                socketRef.current.close();
+            }
+        };
+    }, [user]);
 
     const clearNotifications = () => {
         setNotifications([]);

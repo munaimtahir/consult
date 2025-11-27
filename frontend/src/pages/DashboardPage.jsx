@@ -1,4 +1,4 @@
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../hooks/useAuth';
 import { useDashboardStats } from '../hooks/useConsults';
 import { Link } from 'react-router-dom';
 
