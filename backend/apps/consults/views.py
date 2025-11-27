@@ -433,8 +433,10 @@ class ConsultNoteViewSet(viewsets.ModelViewSet):
         return queryset.order_by('created_at')
     
     def perform_create(self, serializer):
-        """Sets the author of the note to the current user.
+        """
+        Called after validation and before saving the note instance.
 
+        Sets the author of the note to the current user.
         Args:
             serializer: The serializer instance.
         """
