@@ -120,11 +120,10 @@ AUTH_USER_MODEL = 'accounts.User'
 # Django Sites Framework
 SITE_ID = config('SITE_ID', default=1, cast=int)
 
-# Django Allauth Configuration
-ACCOUNT_EMAIL_REQUIRED = True
+# Django Allauth Configuration (updated for allauth 65.x)
+ACCOUNT_LOGIN_METHODS = {'email'}
+ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']
 ACCOUNT_EMAIL_VERIFICATION = 'optional'  # Changed from 'mandatory' for easier development
-ACCOUNT_AUTHENTICATION_METHOD = 'email'
-ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 
 # Social Account Configuration

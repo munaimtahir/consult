@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { useConsults } from '../hooks/useConsults';
 

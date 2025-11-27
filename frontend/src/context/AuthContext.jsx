@@ -1,7 +1,6 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { authAPI } from '../api';
-
-const AuthContext = createContext(null);
+import { AuthContext } from './authContextValue';
 
 /**
  * Provides authentication state and functions to the application.
@@ -16,21 +15,17 @@ const AuthContext = createContext(null);
  *   rendered within the provider.
  * @returns {React.ReactElement} The rendered auth provider component.
  */
-export const AuthProvider = ({ children }) => {
+export function AuthProvider({ children }) {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        // Check if user is logged in on mount
-        const token = localStorage.getItem('access_token');
-        if (token) {
-            loadUser();
-        } else {
-            setLoading(false);
-        }
+    const logout = useCallback(() => {
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
+        setUser(null);
     }, []);
 
-    const loadUser = async () => {
+    const loadUser = useCallback(async () => {
         try {
             const userData = await authAPI.getCurrentUser();
             setUser(userData);
@@ -40,7 +35,17 @@ export const AuthProvider = ({ children }) => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [logout]);
+
+    useEffect(() => {
+        // Check if user is logged in on mount
+        const token = localStorage.getItem('access_token');
+        if (token) {
+            loadUser();
+        } else {
+            setLoading(false);
+        }
+    }, [loadUser]);
 
     const login = async (email, password) => {
         const data = await authAPI.login(email, password);
@@ -50,36 +55,9 @@ export const AuthProvider = ({ children }) => {
         return data;
     };
 
-    const logout = () => {
-        localStorage.removeItem('access_token');
-        localStorage.removeItem('refresh_token');
-        setUser(null);
-    };
-
     return (
         <AuthContext.Provider value={{ user, login, logout, loading }}>
             {children}
         </AuthContext.Provider>
     );
-};
-
-/**
- * A custom hook for accessing the authentication context.
- *
- * This hook provides an easy way to access the `user` object, `login` and
- * `logout` functions, and the `loading` state from the `AuthContext`.
- *
- * @returns {{
- *   user: object | null,
- *   login: (email, password) => Promise<object>,
- *   logout: () => void,
- *   loading: boolean
- * }} The authentication context.
- */
-export const useAuth = () => {
-    const context = useContext(AuthContext);
-    if (!context) {
-        throw new Error('useAuth must be used within AuthProvider');
-    }
-    return context;
-};
+}

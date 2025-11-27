@@ -6,15 +6,15 @@ A comprehensive digital system for managing inter-departmental patient consultat
 
 The Hospital Consult System is a paperless, digital application that streamlines communication between primary treating teams and specialty departments, ensuring timely patient reviews and reducing medical errors. This repository contains the complete codebase for the project, with a Django backend and a React frontend.
 
-## 🎯 Key Features
+## 🎯 MVP Features
 
-- **Google Workspace SSO**: Secure authentication using `@pmc.edu.pk` accounts
+- **Authentication**: JWT-based authentication with email login
 - **Real-time Notifications**: WebSocket-based live updates for consult requests
 - **Role-Based Access**: Doctor, Department User, HOD, and Admin roles
-- **SLA Monitoring**: Automatic escalation for overdue consults
-- **Analytics Dashboard**: Live insights for department performance
-- **Email Notifications**: Google Workspace SMTP for alerts and escalations
-- **CSV User Import**: Bulk import users with hierarchy levels
+- **Patient Management**: Create and search patients
+- **Consult Workflow**: Full lifecycle from creation to completion
+- **Dashboard**: Statistics and quick actions for consult management
+- **Email Notifications**: Configurable SMTP for alerts
 
 ## 🛠️ Technology Stack
 
@@ -22,15 +22,14 @@ The Hospital Consult System is a paperless, digital application that streamlines
 - **Framework**: Django 5.x
 - **API**: Django REST Framework
 - **Database**: PostgreSQL (Production), SQLite (Development)
-- **Authentication**: Google Workspace SSO via django-allauth
+- **Authentication**: JWT via djangorestframework-simplejwt
 - **Real-time**: Django Channels (WebSockets)
-- **Background Tasks**: Celery + Redis
-- **Email**: Google Workspace SMTP
+- **Email**: SMTP (configurable)
 
 ### Frontend
-- **Framework**: React (Vite)
-- **State Management**: React Query (TanStack Query)
-- **Authentication**: Context API
+- **Framework**: React 19 (Vite)
+- **State Management**: TanStack Query (React Query)
+- **Routing**: React Router v7
 - **HTTP Client**: Axios
 - **Real-time**: WebSocket client
 
@@ -38,9 +37,21 @@ The Hospital Consult System is a paperless, digital application that streamlines
 
 ```
 consult/
-├── backend/          # Django project
-├── frontend/         # React project
-└── README.md         # This file
+├── backend/              # Django project
+│   ├── apps/             # Django apps (accounts, consults, patients, etc.)
+│   ├── config/           # Django settings and configuration
+│   └── templates/        # Email templates
+├── frontend/             # React project
+│   ├── src/
+│   │   ├── api/          # API client and services
+│   │   ├── components/   # Reusable React components
+│   │   ├── context/      # React context providers
+│   │   ├── hooks/        # Custom React hooks
+│   │   ├── pages/        # Page components
+│   │   └── router/       # Route configuration
+├── nginx/                # Nginx configuration for Docker
+├── docker-compose.yml    # Docker Compose configuration
+└── README.md
 ```
 
 ## 🚀 Getting Started
@@ -50,10 +61,29 @@ consult/
 - Python 3.11+
 - Node.js 18+
 - PostgreSQL 14+ (for production)
-- Redis (for Celery and WebSockets)
-- Google Workspace account with `@pmc.edu.pk` domain
+- Redis (for WebSockets)
 
-### Backend Setup
+### Quick Start with Docker
+
+The easiest way to run the full stack:
+
+```bash
+# Clone the repository
+git clone <repository-url>
+cd consult
+
+# Start all services
+docker compose up --build
+
+# Access the application
+# Frontend: http://localhost:3000
+# Backend API: http://localhost:8000/api/v1
+# Admin: http://localhost:8000/admin
+```
+
+### Local Development Setup
+
+#### Backend Setup
 
 ```bash
 cd backend
@@ -64,22 +94,22 @@ source venv/bin/activate  # Windows: venv\Scripts\activate
 
 # Install dependencies
 pip install -r requirements.txt
+pip install django-filter requests daphne
 
-# Copy environment variables
-cp .env.example .env
-# Edit .env with your configuration
+# Create logs directory
+mkdir -p logs
 
 # Run migrations
-python manage.py migrate
+DJANGO_SETTINGS_MODULE=config.settings.development python manage.py migrate
 
-# Create superuser
-python manage.py createsuperuser
+# Create sample data (optional)
+python setup_data.py
 
 # Run development server
-python manage.py runserver
+DJANGO_SETTINGS_MODULE=config.settings.development python manage.py runserver
 ```
 
-### Frontend Setup
+#### Frontend Setup
 
 ```bash
 cd frontend
@@ -89,46 +119,12 @@ npm install
 
 # Copy environment variables
 cp .env.example .env
-# Edit .env with your configuration
 
 # Run development server
 npm run dev
 ```
 
-### Access the Application
-
-- **Frontend**: http://localhost:5173
-- **Backend API**: http://localhost:8000/api/v1
-- **Django Admin**: http://localhost:8000/admin
-
-## 🔐 Google Workspace Configuration
-
-See [GOOGLE_WORKSPACE_SETUP.md](./GOOGLE_WORKSPACE_SETUP.md) for detailed instructions on:
-- Setting up OAuth 2.0 credentials
-- Configuring SMTP for email notifications
-- Domain verification and DNS configuration
-
-## 📊 User Management
-
-### CSV User Import
-
-Admins can bulk import users via CSV with the following format:
-
-```csv
-email,first_name,last_name,department,designation,phone_number
-john.doe@pmc.edu.pk,John,Doe,Cardiology,Resident 1,+92-300-1234567
-```
-
-**Supported Designations**:
-- Resident 1-5
-- Senior Registrar
-- Assistant Professor
-- Professor
-- HOD (Head of Department)
-
-See [CSV_USER_IMPORT_SPEC.md](./CSV_USER_IMPORT_SPEC.md) for detailed specifications.
-
-## 📖 Documentation
+### Access Points
 
 The codebase is thoroughly documented with docstrings (Python) and JSDoc comments (JavaScript). You can generate a full documentation set using the following tools:
 
@@ -152,13 +148,14 @@ In addition to the in-code documentation, the following documents provide a comp
 ### Backend Tests
 ```bash
 cd backend
-python manage.py test
+source venv/bin/activate
+DJANGO_SETTINGS_MODULE=config.settings.development python manage.py test
 ```
 
-### Frontend Tests
+### Frontend Linting
 ```bash
 cd frontend
-npm test
+npm run lint
 ```
 
 ## 🚢 Deployment
@@ -169,19 +166,61 @@ See [IMPLEMENTATION_PLAN.md](./IMPLEMENTATION_PLAN.md) for VPS deployment instru
 
 The project has made significant progress and the core functionality is complete. For a detailed breakdown of completed, in-progress, and planned features, please see the **[CURRENT_STATUS.md](CURRENT_STATUS.md)** file.
 
-## 🤝 Contributing
+## 🔧 Environment Variables
 
-This is an internal PMC project. For questions or issues, contact the development team.
+### Backend (.env)
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `SECRET_KEY` | Django secret key | (required in production) |
+| `DEBUG` | Enable debug mode | `True` |
+| `ALLOWED_HOSTS` | Comma-separated allowed hosts | `localhost,127.0.0.1` |
+| `DB_NAME` | Database name | `consult_db` |
+| `DB_USER` | Database user | `consult_user` |
+| `DB_PASSWORD` | Database password | (required) |
+| `DB_HOST` | Database host | `localhost` |
+| `REDIS_URL` | Redis URL for channels | `redis://localhost:6379/0` |
+| `CORS_ALLOWED_ORIGINS` | CORS origins | `http://localhost:3000` |
+
+### Frontend (.env)
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `VITE_API_URL` | Backend API URL | `http://localhost:8000/api/v1` |
+| `VITE_WS_URL` | WebSocket URL | `ws://localhost:8000/ws` |
+
+## 📝 Development Status
+
+### Completed (MVP)
+- ✅ User authentication (JWT)
+- ✅ Department management
+- ✅ Patient creation and search
+- ✅ Consult creation and workflow
+- ✅ Status transitions (Pending → Acknowledged → In Progress → Completed)
+- ✅ Notes and final note completion
+- ✅ Permission controls
+- ✅ Dashboard with statistics
+- ✅ Real-time WebSocket notifications
+- ✅ CI/CD pipelines (GitHub Actions)
+- ✅ Docker deployment
+
+### Future Enhancements
+- Google Workspace SSO integration
+- SLA monitoring and escalation
+- Analytics dashboard
+- CSV user import
+- Email notifications (templates ready)
+
+## 📖 Additional Documentation
+
+- [Technical Plan](./TECHNICAL_PLAN.md) - Complete technical architecture
+- [Data Model](./DATA_MODEL.md) - Database schema
+- [Workflow](./WORKFLOW.md) - Consult workflow documentation
+- [Implementation Plan](./IMPLEMENTATION_PLAN.md) - Detailed implementation guide
 
 ## 📄 License
 
 Proprietary - Pakistan Medical Commission
-
-## 🆘 Support
-
-For technical support or questions:
-- Email: consult@pmc.edu.pk
-- Internal Documentation: See the other documents in the root directory.
 
 ---
 
