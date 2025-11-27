@@ -3,6 +3,8 @@
 ## Overview
 We have established the foundational documentation for the **Hospital Consult System**, a digital platform to replace paper-based inter-departmental consultations.
 
+**For the latest development progress, please see [CURRENT_STATUS.md](CURRENT_STATUS.md).**
+
 ## Documentation Created
 
 ### 1. [VISION.md](VISION.md)

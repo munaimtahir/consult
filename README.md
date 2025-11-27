@@ -135,15 +135,17 @@ The codebase is thoroughly documented with docstrings (Python) and JSDoc comment
 - **Backend (Python)**: [Sphinx](https://www.sphinx-doc.org/en/master/) or [pdoc](https://pdoc.dev/)
 - **Frontend (JavaScript)**: [JSDoc](https://jsdoc.app/)
 
-In addition to the in-code documentation, the following documents provide further details on the project:
+In addition to the in-code documentation, the following documents provide a comprehensive overview of the project's planning, architecture, and current status:
 
-- [Technical Plan](./TECHNICAL_PLAN.md) - Complete technical architecture
-- [Implementation Plan](./IMPLEMENTATION_PLAN.md) - Detailed implementation guide
-- [Google Workspace Setup](./GOOGLE_WORKSPACE_SETUP.md) - OAuth and SMTP configuration
-- [CSV User Import](./CSV_USER_IMPORT_SPEC.md) - User import specifications
-- [Vision Document](./VISION.md) - Project vision and goals
-- [Workflow](./WORKFLOW.md) - Consult workflow documentation
-- [Data Model](./DATA_MODEL.md) - Database schema
+- **[PROJECT_SUMMARY.md](PROJECT_SUMMARY.md)**: A high-level summary of all project documentation.
+- **[CURRENT_STATUS.md](CURRENT_STATUS.md)**: The latest development progress report.
+- [VISION.md](./VISION.md) - Project vision and goals
+- [WORKFLOW.md](./WORKFLOW.md) - Consult workflow documentation
+- [DATA_MODEL.md](./DATA_MODEL.md) - Database schema
+- [TECHNICAL_PLAN.md](./TECHNICAL_PLAN.md) - Complete technical architecture
+- [IMPLEMENTATION_PLAN.md](./IMPLEMENTATION_PLAN.md) - Detailed implementation guide
+- [GOOGLE_WORKSPACE_SETUP.md](./GOOGLE_WORKSPACE_SETUP.md) - OAuth and SMTP configuration
+- [CSV_USER_IMPORT_SPEC.md](./CSV_USER_IMPORT_SPEC.md) - User import specifications
 
 ## 🧪 Testing
 
@@ -163,17 +165,9 @@ npm test
 
 See [IMPLEMENTATION_PLAN.md](./IMPLEMENTATION_PLAN.md) for VPS deployment instructions.
 
-## 📝 Development Phases
+## Project Status
 
-The project is currently in the initial development phase. The core models and APIs have been implemented, and the frontend has been set up with basic functionality.
-
-- ✅ **Phase 1**: Foundation & Authentication
-- ⏳ **Phase 2**: Core Models & API
-- ⏳ **Phase 3**: Consult Workflow
-- ⏳ **Phase 4**: Real-time Features
-- ⏳ **Phase 5**: Advanced Features
-- ⏳ **Phase 6**: Testing & Polish
-- ⏳ **Phase 7**: VPS Deployment
+The project has made significant progress and the core functionality is complete. For a detailed breakdown of completed, in-progress, and planned features, please see the **[CURRENT_STATUS.md](CURRENT_STATUS.md)** file.
 
 ## 🤝 Contributing
 
