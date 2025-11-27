@@ -126,11 +126,22 @@ npm run dev
 
 ### Access Points
 
-| Service | Development | Docker |
-|---------|-------------|--------|
-| Frontend | http://localhost:5173 | http://localhost:3000 |
-| Backend API | http://localhost:8000/api/v1 | http://localhost:8000/api/v1 |
-| Admin | http://localhost:8000/admin | http://localhost:8000/admin |
+The codebase is thoroughly documented with docstrings (Python) and JSDoc comments (JavaScript). You can generate a full documentation set using the following tools:
+
+- **Backend (Python)**: [Sphinx](https://www.sphinx-doc.org/en/master/) or [pdoc](https://pdoc.dev/)
+- **Frontend (JavaScript)**: [JSDoc](https://jsdoc.app/)
+
+In addition to the in-code documentation, the following documents provide a comprehensive overview of the project's planning, architecture, and current status:
+
+- **[PROJECT_SUMMARY.md](PROJECT_SUMMARY.md)**: A high-level summary of all project documentation.
+- **[CURRENT_STATUS.md](CURRENT_STATUS.md)**: The latest development progress report.
+- [VISION.md](./VISION.md) - Project vision and goals
+- [WORKFLOW.md](./WORKFLOW.md) - Consult workflow documentation
+- [DATA_MODEL.md](./DATA_MODEL.md) - Database schema
+- [TECHNICAL_PLAN.md](./TECHNICAL_PLAN.md) - Complete technical architecture
+- [IMPLEMENTATION_PLAN.md](./IMPLEMENTATION_PLAN.md) - Detailed implementation guide
+- [GOOGLE_WORKSPACE_SETUP.md](./GOOGLE_WORKSPACE_SETUP.md) - OAuth and SMTP configuration
+- [CSV_USER_IMPORT_SPEC.md](./CSV_USER_IMPORT_SPEC.md) - User import specifications
 
 ## 🧪 Testing
 
@@ -147,11 +158,13 @@ cd frontend
 npm run lint
 ```
 
-### Frontend Build
-```bash
-cd frontend
-npm run build
-```
+## 🚢 Deployment
+
+See [IMPLEMENTATION_PLAN.md](./IMPLEMENTATION_PLAN.md) for VPS deployment instructions.
+
+## Project Status
+
+The project has made significant progress and the core functionality is complete. For a detailed breakdown of completed, in-progress, and planned features, please see the **[CURRENT_STATUS.md](CURRENT_STATUS.md)** file.
 
 ## 🔧 Environment Variables
 
