@@ -28,5 +28,4 @@ RUN mkdir -p /app/staticfiles /app/media
 # Entrypoint script
 COPY ./entrypoint.sh /app/entrypoint.sh
 RUN chmod +x /app/entrypoint.sh
-
 ENTRYPOINT ["sh", "/app/entrypoint.sh"]
