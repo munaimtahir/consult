@@ -36,7 +36,7 @@ class ConsultNoteSerializer(serializers.ModelSerializer):
             'created_at',
             'updated_at'
         ]
-        read_only_fields = ['created_at', 'updated_at']
+        read_only_fields = ['created_at', 'updated_at', 'consult', 'author']
 
 
 class ConsultRequestListSerializer(serializers.ModelSerializer):

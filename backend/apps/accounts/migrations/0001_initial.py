@@ -138,7 +138,7 @@ class Migration(migrations.Migration):
             ],
             options={
                 "db_table": "users",
-                "ordering": ["department", "-seniority_level"],
+                "ordering": ["-date_joined"],
             },
             managers=[
                 ("objects", django.contrib.auth.models.UserManager()),
