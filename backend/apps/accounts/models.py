@@ -101,6 +101,32 @@ class User(AbstractUser):
     profile_photo = models.URLField(blank=True, help_text='Photo from Google OAuth')
     is_on_call = models.BooleanField(default=False)
     
+    # Admin Panel Permission Flags
+    can_manage_users = models.BooleanField(
+        default=False,
+        help_text='Can create, edit, and manage users in the Admin Panel'
+    )
+    can_manage_departments = models.BooleanField(
+        default=False,
+        help_text='Can create, edit, and manage departments in the Admin Panel'
+    )
+    can_view_department_dashboard = models.BooleanField(
+        default=False,
+        help_text='Can view department-level dashboards and analytics'
+    )
+    can_view_global_dashboard = models.BooleanField(
+        default=False,
+        help_text='Can view global dashboards across all departments'
+    )
+    can_manage_consults_globally = models.BooleanField(
+        default=False,
+        help_text='Can reassign and manage consults across all departments'
+    )
+    can_manage_permissions = models.BooleanField(
+        default=False,
+        help_text='Can modify admin permission flags for other users (SuperAdmin only)'
+    )
+    
     # Use email as the username field
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['first_name', 'last_name']
@@ -205,3 +231,49 @@ class User(AbstractUser):
             False otherwise.
         """
         return self.role in ['HOD', 'DEPARTMENT_USER', 'ADMIN']
+    
+    def has_admin_panel_access(self):
+        """Checks if the user can access the Admin Panel.
+
+        Returns:
+            True if the user has any admin-level capability, False otherwise.
+        """
+        return (
+            self.is_admin_user or
+            self.can_manage_users or
+            self.can_manage_departments or
+            self.can_view_department_dashboard or
+            self.can_view_global_dashboard or
+            self.can_manage_consults_globally or
+            self.can_manage_permissions
+        )
+    
+    def can_view_department_dashboard_for(self, department):
+        """Checks if the user can view the dashboard for a specific department.
+
+        Args:
+            department: The Department instance to check access for.
+
+        Returns:
+            True if the user can view the department's dashboard, False otherwise.
+        """
+        if self.is_superuser or self.can_view_global_dashboard:
+            return True
+        if not self.can_view_department_dashboard:
+            return False
+        return self.department == department or self.is_admin_user
+    
+    def get_permissions_dict(self):
+        """Returns a dictionary of all admin permission flags.
+
+        Returns:
+            A dict with boolean values for each permission flag.
+        """
+        return {
+            'can_manage_users': self.can_manage_users or self.is_superuser,
+            'can_manage_departments': self.can_manage_departments or self.is_superuser,
+            'can_view_department_dashboard': self.can_view_department_dashboard or self.is_superuser,
+            'can_view_global_dashboard': self.can_view_global_dashboard or self.is_superuser,
+            'can_manage_consults_globally': self.can_manage_consults_globally or self.is_superuser,
+            'can_manage_permissions': self.can_manage_permissions or self.is_superuser,
+        }
