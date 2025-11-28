@@ -1,5 +1,8 @@
 #!/bin/sh
 
+# Create necessary directories
+mkdir -p /app/logs /app/staticfiles /app/media
+
 if [ "$DATABASE" = "postgres" ]
 then
     echo "Waiting for postgres..."
@@ -13,7 +16,7 @@ fi
 
 # Apply database migrations
 echo "Applying database migrations..."
-python manage.py migrate
+python manage.py migrate --noinput
 
 # Seed the database with initial data
 echo "Seeding the database..."

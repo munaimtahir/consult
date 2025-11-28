@@ -14,7 +14,26 @@ The Hospital Consult System is a paperless, digital application that streamlines
 - **Patient Management**: Create and search patients
 - **Consult Workflow**: Full lifecycle from creation to completion
 - **Dashboard**: Statistics and quick actions for consult management
+- **Admin Panel**: User management, department configuration, SLA setup
 - **Email Notifications**: Configurable SMTP for alerts
+
+## 🔐 Demo Credentials
+
+The system includes pre-seeded demo data. Use these credentials to explore:
+
+| Role | Email | Password |
+|------|-------|----------|
+| **Superuser** | admin@pmc.edu.pk | adminpassword123 |
+| **System Admin** | sysadmin@pmc.edu.pk | password123 |
+| **Cardiology HOD** | cardio.hod@pmc.edu.pk | password123 |
+| **Cardiology Doctor** | cardio.doc@pmc.edu.pk | password123 |
+| **Neurology HOD** | neuro.hod@pmc.edu.pk | password123 |
+| **Neurology Doctor** | neuro.doc@pmc.edu.pk | password123 |
+| **Orthopedics HOD** | ortho.hod@pmc.edu.pk | password123 |
+| **ER Doctor** | er.doc@pmc.edu.pk | password123 |
+| **Medicine HOD** | med.hod@pmc.edu.pk | password123 |
+
+> **Note:** All department users follow the pattern `{dept}.{role}@pmc.edu.pk` with password `password123`
 
 ## 🛠️ Technology Stack
 
@@ -31,7 +50,7 @@ The Hospital Consult System is a paperless, digital application that streamlines
 - **State Management**: TanStack Query (React Query)
 - **Routing**: React Router v7
 - **HTTP Client**: Axios
-- **Real-time**: WebSocket client
+- **Styling**: Tailwind CSS
 
 ## 📁 Project Structure
 
@@ -81,6 +100,8 @@ docker compose up --build
 # Admin: http://localhost:8000/admin
 ```
 
+The database will be automatically seeded with demo data on first run.
+
 ### Local Development Setup
 
 #### Backend Setup
@@ -94,19 +115,18 @@ source venv/bin/activate  # Windows: venv\Scripts\activate
 
 # Install dependencies
 pip install -r requirements.txt
-pip install django-filter requests daphne
 
 # Create logs directory
 mkdir -p logs
 
 # Run migrations
-DJANGO_SETTINGS_MODULE=config.settings.development python manage.py migrate
+python manage.py migrate
 
-# Create sample data (optional)
-python setup_data.py
+# Seed demo data
+python manage.py seed_data
 
 # Run development server
-DJANGO_SETTINGS_MODULE=config.settings.development python manage.py runserver
+python manage.py runserver
 ```
 
 #### Frontend Setup
@@ -117,8 +137,9 @@ cd frontend
 # Install dependencies
 npm install
 
-# Copy environment variables
-cp .env.example .env
+# Create environment file
+echo "VITE_API_URL=http://localhost:8000/api/v1" > .env
+echo "VITE_WS_URL=ws://localhost:8000/ws" >> .env
 
 # Run development server
 npm run dev
@@ -126,30 +147,33 @@ npm run dev
 
 ### Access Points
 
-The codebase is thoroughly documented with docstrings (Python) and JSDoc comments (JavaScript). You can generate a full documentation set using the following tools:
+| Service | URL |
+|---------|-----|
+| Frontend | http://localhost:3000 |
+| Backend API | http://localhost:8000/api/v1 |
+| Django Admin | http://localhost:8000/admin |
 
-- **Backend (Python)**: [Sphinx](https://www.sphinx-doc.org/en/master/) or [pdoc](https://pdoc.dev/)
-- **Frontend (JavaScript)**: [JSDoc](https://jsdoc.app/)
+## 📚 Documentation
 
-In addition to the in-code documentation, the following documents provide a comprehensive overview of the project's planning, architecture, and current status:
+The codebase is thoroughly documented with docstrings (Python) and JSDoc comments (JavaScript).
 
-- **[PROJECT_SUMMARY.md](PROJECT_SUMMARY.md)**: A high-level summary of all project documentation.
-- **[CURRENT_STATUS.md](CURRENT_STATUS.md)**: The latest development progress report.
-- [VISION.md](./VISION.md) - Project vision and goals
-- [WORKFLOW.md](./WORKFLOW.md) - Consult workflow documentation
-- [DATA_MODEL.md](./DATA_MODEL.md) - Database schema
-- [TECHNICAL_PLAN.md](./TECHNICAL_PLAN.md) - Complete technical architecture
-- [IMPLEMENTATION_PLAN.md](./IMPLEMENTATION_PLAN.md) - Detailed implementation guide
-- [GOOGLE_WORKSPACE_SETUP.md](./GOOGLE_WORKSPACE_SETUP.md) - OAuth and SMTP configuration
-- [CSV_USER_IMPORT_SPEC.md](./CSV_USER_IMPORT_SPEC.md) - User import specifications
+### Key Documents
+
+- **[DEMO_SCRIPT.md](DEMO_SCRIPT.md)**: Step-by-step demo presentation guide
+- **[PROJECT_SUMMARY.md](PROJECT_SUMMARY.md)**: High-level project overview
+- **[CURRENT_STATUS.md](CURRENT_STATUS.md)**: Latest development progress
+- **[ADMIN_PANEL.md](ADMIN_PANEL.md)**: Admin panel features and usage
+- **[VISION.md](./VISION.md)**: Project vision and goals
+- **[WORKFLOW.md](./WORKFLOW.md)**: Consult workflow documentation
+- **[DATA_MODEL.md](./DATA_MODEL.md)**: Database schema
+- **[TECHNICAL_PLAN.md](./TECHNICAL_PLAN.md)**: Complete technical architecture
 
 ## 🧪 Testing
 
 ### Backend Tests
 ```bash
 cd backend
-source venv/bin/activate
-DJANGO_SETTINGS_MODULE=config.settings.development python manage.py test
+python manage.py test
 ```
 
 ### Frontend Linting
@@ -158,23 +182,37 @@ cd frontend
 npm run lint
 ```
 
+### Frontend Build
+```bash
+cd frontend
+npm run build
+```
+
 ## 🚢 Deployment
 
-See [IMPLEMENTATION_PLAN.md](./IMPLEMENTATION_PLAN.md) for VPS deployment instructions.
+### Docker Deployment (Recommended)
 
-## Project Status
+```bash
+# Production deployment
+docker-compose up -d
 
-The project has made significant progress and the core functionality is complete. For a detailed breakdown of completed, in-progress, and planned features, please see the **[CURRENT_STATUS.md](CURRENT_STATUS.md)** file.
+# View logs
+docker-compose logs -f backend
 
-## 🔧 Environment Variables
+# Restart services
+docker-compose restart
+```
 
-### Backend (.env)
+### Environment Variables
+
+#### Backend (.env)
 
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `SECRET_KEY` | Django secret key | (required in production) |
 | `DEBUG` | Enable debug mode | `True` |
 | `ALLOWED_HOSTS` | Comma-separated allowed hosts | `localhost,127.0.0.1` |
+| `DATABASE` | Database type | `postgres` |
 | `DB_NAME` | Database name | `consult_db` |
 | `DB_USER` | Database user | `consult_user` |
 | `DB_PASSWORD` | Database password | (required) |
@@ -182,7 +220,7 @@ The project has made significant progress and the core functionality is complete
 | `REDIS_URL` | Redis URL for channels | `redis://localhost:6379/0` |
 | `CORS_ALLOWED_ORIGINS` | CORS origins | `http://localhost:3000` |
 
-### Frontend (.env)
+#### Frontend (.env)
 
 | Variable | Description | Default |
 |----------|-------------|---------|
@@ -193,16 +231,18 @@ The project has made significant progress and the core functionality is complete
 
 ### Completed (MVP)
 - ✅ User authentication (JWT)
-- ✅ Department management
+- ✅ Department management with SLA configuration
 - ✅ Patient creation and search
 - ✅ Consult creation and workflow
 - ✅ Status transitions (Pending → Acknowledged → In Progress → Completed)
 - ✅ Notes and final note completion
 - ✅ Permission controls
 - ✅ Dashboard with statistics
+- ✅ Admin Panel (user management, department management)
 - ✅ Real-time WebSocket notifications
 - ✅ CI/CD pipelines (GitHub Actions)
 - ✅ Docker deployment
+- ✅ Comprehensive demo data
 
 ### Future Enhancements
 - Google Workspace SSO integration
@@ -210,13 +250,6 @@ The project has made significant progress and the core functionality is complete
 - Analytics dashboard
 - CSV user import
 - Email notifications (templates ready)
-
-## 📖 Additional Documentation
-
-- [Technical Plan](./TECHNICAL_PLAN.md) - Complete technical architecture
-- [Data Model](./DATA_MODEL.md) - Database schema
-- [Workflow](./WORKFLOW.md) - Consult workflow documentation
-- [Implementation Plan](./IMPLEMENTATION_PLAN.md) - Detailed implementation guide
 
 ## 📄 License
 
