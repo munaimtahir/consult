@@ -22,6 +22,17 @@ export default function Layout({ children }) {
     navigate('/login');
   };
 
+  // Check if user has admin panel access
+  const hasAdminAccess = user?.has_admin_panel_access || 
+    user?.is_admin_user || 
+    user?.is_superuser ||
+    user?.permissions?.can_manage_users ||
+    user?.permissions?.can_manage_departments ||
+    user?.permissions?.can_view_department_dashboard ||
+    user?.permissions?.can_view_global_dashboard ||
+    user?.permissions?.can_manage_consults_globally ||
+    user?.permissions?.can_manage_permissions;
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Navigation Bar */}
@@ -39,6 +50,14 @@ export default function Layout({ children }) {
                 >
                   Consults
                 </Link>
+                {hasAdminAccess && (
+                  <Link
+                    to="/admin"
+                    className="text-purple-700 hover:text-purple-900 px-3 py-2 rounded-md text-sm font-medium"
+                  >
+                    Admin Panel
+                  </Link>
+                )}
               </div>
             </div>
 
