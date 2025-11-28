@@ -56,6 +56,7 @@ class NotificationService:
                 'id': consult.id,
                 'patient_name': consult.patient.name,
                 'urgency': consult.urgency,
+                'urgency_color': NotificationService._get_urgency_color(consult.urgency),
                 'message': f"New {consult.urgency} consult for {consult.patient.name}"
             }
         )
@@ -79,6 +80,7 @@ class NotificationService:
                 'id': consult.id,
                 'patient_name': consult.patient.name,
                 'urgency': consult.urgency,
+                'urgency_color': NotificationService._get_urgency_color(consult.urgency),
                 'message': f"You have been assigned a consult for {consult.patient.name}"
             }
         )
@@ -103,6 +105,7 @@ class NotificationService:
                     'id': consult.id,
                     'note_id': note.id,
                     'author': note.author.get_full_name(),
+                    'note_type': note.note_type,
                     'message': f"New note from {note.author.get_full_name()} on consult #{consult.id}"
                 }
             )
@@ -116,6 +119,7 @@ class NotificationService:
                     'id': consult.id,
                     'note_id': note.id,
                     'author': note.author.get_full_name(),
+                    'note_type': note.note_type,
                     'message': f"New note from {note.author.get_full_name()} on consult #{consult.id}"
                 }
             )
@@ -157,6 +161,163 @@ class NotificationService:
                     'id': consult.id,
                     'patient_name': consult.patient.name,
                     'urgency': consult.urgency,
+                    'urgency_color': NotificationService._get_urgency_color(consult.urgency),
                     'message': f"URGENT: Consult for {consult.patient.name} is overdue"
                 }
             )
+
+    @staticmethod
+    def notify_consult_escalated(consult, from_user, to_user, level):
+        """Sends notifications when a consult is escalated.
+
+        Args:
+            consult: The ConsultRequest instance.
+            from_user: The user the consult was escalated from.
+            to_user: The user the consult was escalated to.
+            level: The new escalation level.
+        """
+        # Notify the new assignee
+        if to_user:
+            NotificationService._send_ws_message(
+                f'user_{to_user.id}',
+                'CONSULT_ESCALATED_TO_YOU',
+                {
+                    'id': consult.id,
+                    'patient_name': consult.patient.name,
+                    'urgency': consult.urgency,
+                    'urgency_color': NotificationService._get_urgency_color(consult.urgency),
+                    'escalation_level': level,
+                    'message': f"Escalated consult for {consult.patient.name} assigned to you"
+                }
+            )
+
+        # Notify the previous assignee
+        if from_user and from_user != to_user:
+            NotificationService._send_ws_message(
+                f'user_{from_user.id}',
+                'CONSULT_ESCALATED_FROM_YOU',
+                {
+                    'id': consult.id,
+                    'patient_name': consult.patient.name,
+                    'message': f"Consult for {consult.patient.name} has been escalated"
+                }
+            )
+
+    @staticmethod
+    def notify_hod_escalation(consult, hod):
+        """Notifies HOD about an escalated consult.
+
+        Args:
+            consult: The ConsultRequest instance.
+            hod: The HOD User to notify.
+        """
+        NotificationService._send_ws_message(
+            f'user_{hod.id}',
+            'HOD_ESCALATION_ALERT',
+            {
+                'id': consult.id,
+                'patient_name': consult.patient.name,
+                'urgency': consult.urgency,
+                'urgency_color': NotificationService._get_urgency_color(consult.urgency),
+                'escalation_level': consult.escalation_level,
+                'message': f"ATTENTION: Consult #{consult.id} for {consult.patient.name} has been escalated"
+            }
+        )
+
+    @staticmethod
+    def notify_requester_delay(consult):
+        """Notifies the requester that their consult is delayed.
+
+        Args:
+            consult: The ConsultRequest instance.
+        """
+        NotificationService._send_ws_message(
+            f'user_{consult.requester.id}',
+            'CONSULT_DELAYED',
+            {
+                'id': consult.id,
+                'patient_name': consult.patient.name,
+                'target_department': consult.target_department.name,
+                'message': f"Your consult for {consult.patient.name} is taking longer than expected"
+            }
+        )
+
+    @staticmethod
+    def notify_sla_warning(consult):
+        """Sends a warning when consult is approaching SLA deadline.
+
+        Args:
+            consult: The ConsultRequest instance.
+        """
+        # Notify assigned doctor
+        if consult.assigned_to:
+            NotificationService._send_ws_message(
+                f'user_{consult.assigned_to.id}',
+                'SLA_WARNING',
+                {
+                    'id': consult.id,
+                    'patient_name': consult.patient.name,
+                    'urgency': consult.urgency,
+                    'urgency_color': NotificationService._get_urgency_color(consult.urgency),
+                    'message': f"Warning: Consult for {consult.patient.name} is approaching deadline"
+                }
+            )
+
+        # Notify department
+        NotificationService._send_ws_message(
+            f'dept_{consult.target_department.id}',
+            'SLA_WARNING',
+            {
+                'id': consult.id,
+                'patient_name': consult.patient.name,
+                'urgency': consult.urgency,
+                'urgency_color': NotificationService._get_urgency_color(consult.urgency),
+                'message': f"Warning: Consult #{consult.id} is approaching deadline"
+            }
+        )
+
+    @staticmethod
+    def notify_auto_assignment(consult, doctor, assignment_mode):
+        """Notifies about automatic assignment.
+
+        Args:
+            consult: The ConsultRequest instance.
+            doctor: The assigned User.
+            assignment_mode: The mode used for assignment.
+        """
+        mode_display = {
+            'LOAD_BALANCE': 'load balancing',
+            'ON_CALL': 'on-call schedule',
+            'ROUND_ROBIN': 'round robin',
+            'SENIORITY': 'seniority-based'
+        }.get(assignment_mode, 'auto-assignment')
+
+        NotificationService._send_ws_message(
+            f'user_{doctor.id}',
+            'AUTO_ASSIGNED',
+            {
+                'id': consult.id,
+                'patient_name': consult.patient.name,
+                'urgency': consult.urgency,
+                'urgency_color': NotificationService._get_urgency_color(consult.urgency),
+                'assignment_mode': assignment_mode,
+                'message': f"New {consult.urgency} consult auto-assigned to you via {mode_display}"
+            }
+        )
+
+    @staticmethod
+    def _get_urgency_color(urgency):
+        """Returns the color code for an urgency level.
+
+        Args:
+            urgency: The urgency level string.
+
+        Returns:
+            Color code string (for frontend styling).
+        """
+        colors = {
+            'EMERGENCY': 'red',
+            'URGENT': 'orange',
+            'ROUTINE': 'blue'
+        }
+        return colors.get(urgency, 'gray')
