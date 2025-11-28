@@ -34,7 +34,7 @@ function App() {
           <Routes>
             <Route path="/login" element={<LoginPage />} />
 
-            <Route
+            {/* <Route
               path="/dashboard"
               element={
                 <ProtectedRoute>
@@ -43,7 +43,7 @@ function App() {
                   </Layout>
                 </ProtectedRoute>
               }
-            />
+            /> */}
 
             <Route
               path="/consults"
@@ -78,7 +78,7 @@ function App() {
               }
             />
 
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/" element={<Navigate to="/consults" replace />} />
           </Routes>
         </BrowserRouter>
       </AuthProvider>

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { useConsult, useAddNote } from '../hooks/useConsults';
 
 const urgencyColors = {
@@ -73,6 +73,14 @@ export default function ConsultDetailPage() {
                             <h1 className="text-3xl font-bold text-gray-900 mb-2">
                                 Consult #{consult.id}
                             </h1>
+                        </div>
+                        <div>
+                            <Link
+                                to="/consults/new"
+                                className="px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700"
+                            >
+                                + New Consult
+                            </Link>
                             <div className="flex items-center gap-3">
                                 <span className={`px-4 py-2 rounded-lg text-sm font-semibold border-2 ${urgencyColors[consult.urgency]}`}>
                                     {consult.urgency}
