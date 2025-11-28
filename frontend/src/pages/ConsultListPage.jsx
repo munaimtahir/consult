@@ -59,7 +59,7 @@ export default function ConsultListPage() {
 
                 {/* Filters */}
                 <div className="bg-white rounded-lg shadow p-6 mb-6">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">
                                 View
@@ -108,6 +108,14 @@ export default function ConsultListPage() {
                                 <option value="URGENT">Urgent</option>
                                 <option value="ROUTINE">Routine</option>
                             </select>
+                        </div>
+                        <div className="flex items-end">
+                            <button
+                                onClick={() => setSearchParams({})}
+                                className="w-full px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+                            >
+                                Clear Filters
+                            </button>
                         </div>
                     </div>
                 </div>
