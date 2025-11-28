@@ -5,10 +5,7 @@ Dashboard API views for Admin Panel.
 from rest_framework import views, status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from django.db.models import Count, Q, Avg, F
-from django.db.models.functions import Coalesce
 from django.utils import timezone
-from datetime import timedelta
 
 from apps.consults.models import ConsultRequest
 from apps.departments.models import Department
@@ -358,7 +355,6 @@ class ConsultReassignView(views.APIView):
         # Get reassignment data
         assigned_to_id = request.data.get('assigned_to')
         target_department_id = request.data.get('target_department')
-        reason = request.data.get('reason', '')
         
         if assigned_to_id:
             try:
