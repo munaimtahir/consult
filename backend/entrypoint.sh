@@ -15,6 +15,10 @@ fi
 echo "Applying database migrations..."
 python manage.py migrate
 
+# Seed the database with initial data
+echo "Seeding the database..."
+python manage.py seed_data
+
 # Collect static files
 echo "Collecting static files..."
 python manage.py collectstatic --noinput
