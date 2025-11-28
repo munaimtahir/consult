@@ -7,6 +7,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import viewsets, status
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.exceptions import PermissionDenied
 
 from apps.core.models import FilterPreset, AuditLog, OnCallSchedule, AssignmentPolicy
 from apps.core.serializers import (
@@ -140,12 +141,12 @@ class OnCallScheduleViewSet(viewsets.ModelViewSet):
         
         # Only HOD or admin can create schedules
         if not user.is_admin_user and user.role != 'HOD':
-            raise PermissionError('Only HOD or admin can create on-call schedules')
+            raise PermissionDenied('Only HOD or admin can create on-call schedules')
         
         # HOD can only create for their department
         department = serializer.validated_data.get('department')
         if user.role == 'HOD' and department != user.department:
-            raise PermissionError('HOD can only create schedules for their department')
+            raise PermissionDenied('HOD can only create schedules for their department')
         
         serializer.save()
 
@@ -176,11 +177,11 @@ class AssignmentPolicyViewSet(viewsets.ModelViewSet):
         
         # Only HOD or admin can create policies
         if not user.is_admin_user and user.role != 'HOD':
-            raise PermissionError('Only HOD or admin can create assignment policies')
+            raise PermissionDenied('Only HOD or admin can create assignment policies')
         
         # HOD can only create for their department
         department = serializer.validated_data.get('department')
         if user.role == 'HOD' and department != user.department:
-            raise PermissionError('HOD can only create policies for their department')
+            raise PermissionDenied('HOD can only create policies for their department')
         
         serializer.save()

@@ -6,6 +6,7 @@ Handles sending real-time notifications and emails.
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 from apps.core.services.email_service import EmailService
+from apps.core.constants import get_urgency_color
 
 class NotificationService:
     """Provides a centralized service for handling notifications.
@@ -56,7 +57,7 @@ class NotificationService:
                 'id': consult.id,
                 'patient_name': consult.patient.name,
                 'urgency': consult.urgency,
-                'urgency_color': NotificationService._get_urgency_color(consult.urgency),
+                'urgency_color': get_urgency_color(consult.urgency),
                 'message': f"New {consult.urgency} consult for {consult.patient.name}"
             }
         )
@@ -80,7 +81,7 @@ class NotificationService:
                 'id': consult.id,
                 'patient_name': consult.patient.name,
                 'urgency': consult.urgency,
-                'urgency_color': NotificationService._get_urgency_color(consult.urgency),
+                'urgency_color': get_urgency_color(consult.urgency),
                 'message': f"You have been assigned a consult for {consult.patient.name}"
             }
         )
@@ -161,7 +162,7 @@ class NotificationService:
                     'id': consult.id,
                     'patient_name': consult.patient.name,
                     'urgency': consult.urgency,
-                    'urgency_color': NotificationService._get_urgency_color(consult.urgency),
+                    'urgency_color': get_urgency_color(consult.urgency),
                     'message': f"URGENT: Consult for {consult.patient.name} is overdue"
                 }
             )
@@ -185,7 +186,7 @@ class NotificationService:
                     'id': consult.id,
                     'patient_name': consult.patient.name,
                     'urgency': consult.urgency,
-                    'urgency_color': NotificationService._get_urgency_color(consult.urgency),
+                    'urgency_color': get_urgency_color(consult.urgency),
                     'escalation_level': level,
                     'message': f"Escalated consult for {consult.patient.name} assigned to you"
                 }
@@ -218,7 +219,7 @@ class NotificationService:
                 'id': consult.id,
                 'patient_name': consult.patient.name,
                 'urgency': consult.urgency,
-                'urgency_color': NotificationService._get_urgency_color(consult.urgency),
+                'urgency_color': get_urgency_color(consult.urgency),
                 'escalation_level': consult.escalation_level,
                 'message': f"ATTENTION: Consult #{consult.id} for {consult.patient.name} has been escalated"
             }
@@ -258,7 +259,7 @@ class NotificationService:
                     'id': consult.id,
                     'patient_name': consult.patient.name,
                     'urgency': consult.urgency,
-                    'urgency_color': NotificationService._get_urgency_color(consult.urgency),
+                    'urgency_color': get_urgency_color(consult.urgency),
                     'message': f"Warning: Consult for {consult.patient.name} is approaching deadline"
                 }
             )
@@ -271,7 +272,7 @@ class NotificationService:
                 'id': consult.id,
                 'patient_name': consult.patient.name,
                 'urgency': consult.urgency,
-                'urgency_color': NotificationService._get_urgency_color(consult.urgency),
+                'urgency_color': get_urgency_color(consult.urgency),
                 'message': f"Warning: Consult #{consult.id} is approaching deadline"
             }
         )
@@ -299,25 +300,8 @@ class NotificationService:
                 'id': consult.id,
                 'patient_name': consult.patient.name,
                 'urgency': consult.urgency,
-                'urgency_color': NotificationService._get_urgency_color(consult.urgency),
+                'urgency_color': get_urgency_color(consult.urgency),
                 'assignment_mode': assignment_mode,
                 'message': f"New {consult.urgency} consult auto-assigned to you via {mode_display}"
             }
         )
-
-    @staticmethod
-    def _get_urgency_color(urgency):
-        """Returns the color code for an urgency level.
-
-        Args:
-            urgency: The urgency level string.
-
-        Returns:
-            Color code string (for frontend styling).
-        """
-        colors = {
-            'EMERGENCY': 'red',
-            'URGENT': 'orange',
-            'ROUTINE': 'blue'
-        }
-        return colors.get(urgency, 'gray')

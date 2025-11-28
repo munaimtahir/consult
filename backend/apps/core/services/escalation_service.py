@@ -3,6 +3,7 @@ Escalation Service
 Handles delayed consult escalation and notifications.
 """
 
+from datetime import timedelta
 from django.utils import timezone
 from django.db.models import Q
 
@@ -226,7 +227,7 @@ class EscalationService:
         Returns:
             QuerySet of ConsultRequest objects approaching deadline.
         """
-        threshold_time = timezone.now() + timezone.timedelta(minutes=threshold_minutes)
+        threshold_time = timezone.now() + timedelta(minutes=threshold_minutes)
         
         queryset = ConsultRequest.objects.filter(
             is_overdue=False,

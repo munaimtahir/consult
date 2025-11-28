@@ -8,6 +8,7 @@ from .models import ConsultRequest, ConsultNote
 from apps.patients.serializers import PatientSerializer
 from apps.accounts.serializers import UserSerializer
 from apps.departments.serializers import DepartmentSerializer
+from apps.core.constants import get_urgency_color, get_status_color
 
 
 def humanize_timestamp(timestamp):
@@ -32,28 +33,6 @@ def humanize_timestamp(timestamp):
         return f'{diff.days} days ago'
     else:
         return timestamp.strftime('%b %d, %Y at %I:%M %p')
-
-
-def get_urgency_color(urgency):
-    """Returns the color code for an urgency level."""
-    colors = {
-        'EMERGENCY': 'red',
-        'URGENT': 'orange',
-        'ROUTINE': 'blue'
-    }
-    return colors.get(urgency, 'gray')
-
-
-def get_status_color(status):
-    """Returns the color code for a status."""
-    colors = {
-        'PENDING': 'yellow',
-        'ACKNOWLEDGED': 'blue',
-        'IN_PROGRESS': 'indigo',
-        'COMPLETED': 'green',
-        'CANCELLED': 'gray'
-    }
-    return colors.get(status, 'gray')
 
 
 class ConsultNoteSerializer(serializers.ModelSerializer):
