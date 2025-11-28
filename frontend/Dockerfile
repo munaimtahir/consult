@@ -7,6 +7,12 @@ COPY package.json package-lock.json ./
 RUN npm install
 
 COPY . .
+
+# Set environment variables for build
+# In Docker, the frontend will be served behind nginx which proxies to backend
+ENV VITE_API_URL=/api/v1
+ENV VITE_WS_URL=/ws
+
 RUN npm run build
 
 # Production stage
