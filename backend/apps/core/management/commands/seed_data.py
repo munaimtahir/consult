@@ -295,6 +295,7 @@ class Command(BaseCommand):
                 if not from_department or not to_department:
                     continue
                 
+                # Get the correct requester key - use the from_dept as the key prefix
                 requester_key = f'{from_dept}_doc'
                 if requester_key not in users:
                     requester_key = 'emergency_doc'

@@ -352,7 +352,7 @@ def create_sample_consults(departments, users, patients):
         
         ('MRN007', 'emergency', 'medicine', 'URGENT', 'IN_PROGRESS',
          'DKA with altered mental status. Currently stabilizing in ER. Please assume care.',
-         3, 'med_doc'),
+         3, 'medicine_doc'),
         
         # Completed consults (for analytics)
         ('MRN002', 'medicine', 'cardio', 'ROUTINE', 'COMPLETED',
@@ -369,7 +369,7 @@ def create_sample_consults(departments, users, patients):
         
         ('MRN008', 'emergency', 'medicine', 'URGENT', 'COMPLETED',
          'Community acquired pneumonia with hypoxia. Stabilized on BiPAP. Please assume care.',
-         36, 'med_doc'),
+         36, 'medicine_doc'),
         
         # More pending for overdue demonstration
         ('MRN011', 'emergency', 'cardio', 'URGENT', 'PENDING',
@@ -390,7 +390,7 @@ def create_sample_consults(departments, users, patients):
             if not from_department or not to_department:
                 continue
             
-            # Get requester (use ER doctor for emergency, med doctor for medicine)
+            # Get the correct requester key - use the from_dept as the key prefix
             requester_key = f'{from_dept}_doc'
             if requester_key not in users:
                 requester_key = 'emergency_doc'
