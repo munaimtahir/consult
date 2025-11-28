@@ -15,6 +15,7 @@ class Department(models.Model):
     Attributes:
         name: The full name of the department.
         code: A short, unique code for the department.
+        parent: A self-referential FK for sub-department hierarchy.
         head: A foreign key to the `User` who is the head of this
               department.
         emergency_sla: The SLA for emergency consults, in minutes.
@@ -22,8 +23,28 @@ class Department(models.Model):
         routine_sla: The SLA for routine consults, in minutes.
     """
     
+    DEPARTMENT_TYPE_CHOICES = [
+        ('CLINICAL', 'Clinical'),
+        ('ADMINISTRATIVE', 'Administrative'),
+        ('SUPPORT', 'Support'),
+    ]
+    
     name = models.CharField(max_length=100, unique=True)
     code = models.CharField(max_length=10, unique=True, help_text='Short code (e.g., CARDIO)')
+    department_type = models.CharField(
+        max_length=20,
+        choices=DEPARTMENT_TYPE_CHOICES,
+        default='CLINICAL',
+        help_text='Type of department'
+    )
+    parent = models.ForeignKey(
+        'self',
+        null=True,
+        blank=True,
+        related_name='subdepartments',
+        on_delete=models.PROTECT,
+        help_text='Parent department for sub-department hierarchy'
+    )
     head = models.ForeignKey(
         'accounts.User',
         on_delete=models.SET_NULL,
@@ -76,3 +97,20 @@ class Department(models.Model):
             An integer representing the number of non-completed consults.
         """
         return self.incoming_consults.exclude(status='COMPLETED').count()
+    
+    @property
+    def is_subdepartment(self):
+        """Returns whether this department is a sub-department.
+
+        Returns:
+            True if this department has a parent, False otherwise.
+        """
+        return self.parent is not None
+    
+    def get_all_subdepartments(self):
+        """Returns all subdepartments (direct children) of this department.
+
+        Returns:
+            A QuerySet of Department objects.
+        """
+        return self.subdepartments.filter(is_active=True)
