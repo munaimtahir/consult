@@ -83,13 +83,13 @@ class EscalationService:
         Returns:
             Integer escalation level.
         """
+        minutes_overdue = (timezone.now() - consult.expected_response_time).total_seconds() / 60
+        
         if not policy.escalation_levels:
             # Default escalation: every 30 minutes overdue = 1 level
-            minutes_overdue = (timezone.now() - consult.expected_response_time).total_seconds() / 60
             return min(int(minutes_overdue / 30) + 1, 3)
 
         # Use configured escalation levels
-        minutes_overdue = (timezone.now() - consult.expected_response_time).total_seconds() / 60
         level = 0
         for threshold in policy.escalation_levels:
             if minutes_overdue >= threshold.get('minutes', 0):

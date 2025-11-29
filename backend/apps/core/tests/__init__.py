@@ -20,6 +20,18 @@ from apps.core.services.assignment_service import AssignmentService
 from apps.core.services.escalation_service import EscalationService
 
 
+def get_response_results(response):
+    """Extract results from a potentially paginated API response.
+    
+    Args:
+        response: DRF Response object
+        
+    Returns:
+        List of results, handling both paginated and non-paginated responses
+    """
+    return response.data.get('results', response.data)
+
+
 class AuditServiceTests(TestCase):
     """Tests for the AuditService."""
 
@@ -352,8 +364,7 @@ class FilterPresetTests(TestCase):
         response = self.client.get('/api/v1/filter-presets/')
         
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        # The response might be paginated, so check results key or the response itself
-        results = response.data.get('results', response.data)
+        results = get_response_results(response)
         self.assertEqual(len(results), 1)
 
     def test_only_own_presets_visible(self):
@@ -380,8 +391,7 @@ class FilterPresetTests(TestCase):
         self.client.force_authenticate(user=self.user)
         response = self.client.get('/api/v1/filter-presets/')
         
-        # The response might be paginated, so check results key or the response itself
-        results = response.data.get('results', response.data)
+        results = get_response_results(response)
         
         # Should only see own preset
         self.assertEqual(len(results), 1)

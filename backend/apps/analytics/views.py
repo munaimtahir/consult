@@ -10,11 +10,23 @@ from rest_framework import status
 from datetime import datetime, timedelta
 
 from apps.analytics.services import AnalyticsService
-from apps.analytics.serializers import (
-    DoctorPerformanceSerializer,
-    DepartmentStatsSerializer,
-    TimelineEventSerializer
-)
+
+
+def parse_date(date_string):
+    """Parse date string to date object with error handling.
+    
+    Args:
+        date_string: Date string in YYYY-MM-DD format
+        
+    Returns:
+        date object or None if parsing fails
+        
+    Raises:
+        ValueError: If the date format is invalid
+    """
+    if not date_string:
+        return None
+    return datetime.strptime(date_string, '%Y-%m-%d').date()
 
 
 class DoctorPerformanceView(APIView):
@@ -56,14 +68,15 @@ class DoctorPerformanceView(APIView):
         else:
             doctor = request.user
 
-        # Parse date range
-        start_date = request.query_params.get('start_date')
-        end_date = request.query_params.get('end_date')
-
-        if start_date:
-            start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
-        if end_date:
-            end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
+        # Parse date range with error handling
+        try:
+            start_date = parse_date(request.query_params.get('start_date'))
+            end_date = parse_date(request.query_params.get('end_date'))
+        except ValueError:
+            return Response(
+                {'error': 'Invalid date format. Use YYYY-MM-DD'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
         metrics = AnalyticsService.get_doctor_performance(doctor, start_date, end_date)
         return Response(metrics)
@@ -112,14 +125,15 @@ class DepartmentStatsView(APIView):
                     status=status.HTTP_400_BAD_REQUEST
                 )
 
-        # Parse date range
-        start_date = request.query_params.get('start_date')
-        end_date = request.query_params.get('end_date')
-
-        if start_date:
-            start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
-        if end_date:
-            end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
+        # Parse date range with error handling
+        try:
+            start_date = parse_date(request.query_params.get('start_date'))
+            end_date = parse_date(request.query_params.get('end_date'))
+        except ValueError:
+            return Response(
+                {'error': 'Invalid date format. Use YYYY-MM-DD'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
         stats = AnalyticsService.get_department_stats(department, start_date, end_date)
         return Response(stats)
@@ -149,14 +163,15 @@ class GlobalStatsView(APIView):
                 status=status.HTTP_403_FORBIDDEN
             )
 
-        # Parse date range
-        start_date = request.query_params.get('start_date')
-        end_date = request.query_params.get('end_date')
-
-        if start_date:
-            start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
-        if end_date:
-            end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
+        # Parse date range with error handling
+        try:
+            start_date = parse_date(request.query_params.get('start_date'))
+            end_date = parse_date(request.query_params.get('end_date'))
+        except ValueError:
+            return Response(
+                {'error': 'Invalid date format. Use YYYY-MM-DD'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
         stats = AnalyticsService.get_global_stats(start_date, end_date)
         return Response(stats)

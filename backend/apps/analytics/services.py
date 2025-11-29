@@ -4,7 +4,8 @@ Provides methods for calculating and aggregating analytics data.
 """
 
 from django.utils import timezone
-from django.db.models import Count, Avg, Q, F
+from django.db.models import Count, Avg, Q, F, ExpressionWrapper, DurationField
+from django.db.models.functions import Extract
 from datetime import timedelta
 
 from apps.analytics.models import DoctorPerformanceMetric, DepartmentDailyStats, ConsultTimeline
@@ -49,16 +50,18 @@ class AnalyticsService:
             completed_at__lte=F('expected_response_time')
         ).count()
 
-        # Calculate average response time
+        # Calculate average response time using database aggregation
         completed_consults = consults.filter(acknowledged_at__isnull=False)
-        if completed_consults.exists():
-            total_minutes = sum(
-                (c.acknowledged_at - c.created_at).total_seconds() / 60
-                for c in completed_consults
+        avg_response_result = completed_consults.annotate(
+            response_time=ExpressionWrapper(
+                F('acknowledged_at') - F('created_at'),
+                output_field=DurationField()
             )
-            avg_response = total_minutes / completed_consults.count()
-        else:
-            avg_response = 0
+        ).aggregate(avg_time=Avg('response_time'))
+        
+        avg_response = 0
+        if avg_response_result['avg_time']:
+            avg_response = avg_response_result['avg_time'].total_seconds() / 60
 
         # Get notes count
         notes_count = ConsultNote.objects.filter(
@@ -127,16 +130,18 @@ class AnalyticsService:
             completed_at__lte=F('expected_response_time')
         ).count()
 
-        # Average response time
+        # Average response time using database aggregation
         acked_consults = consults.filter(acknowledged_at__isnull=False)
-        if acked_consults.exists():
-            total_minutes = sum(
-                (c.acknowledged_at - c.created_at).total_seconds() / 60
-                for c in acked_consults
+        avg_response_result = acked_consults.annotate(
+            response_time=ExpressionWrapper(
+                F('acknowledged_at') - F('created_at'),
+                output_field=DurationField()
             )
-            avg_response = total_minutes / acked_consults.count()
-        else:
-            avg_response = 0
+        ).aggregate(avg_time=Avg('response_time'))
+        
+        avg_response = 0
+        if avg_response_result['avg_time']:
+            avg_response = avg_response_result['avg_time'].total_seconds() / 60
 
         # Urgency breakdown
         urgency_breakdown = {
