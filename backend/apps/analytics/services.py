@@ -5,7 +5,6 @@ Provides methods for calculating and aggregating analytics data.
 
 from django.utils import timezone
 from django.db.models import Count, Avg, Q, F, ExpressionWrapper, DurationField
-from django.db.models.functions import Extract
 from datetime import timedelta
 
 from apps.analytics.models import DoctorPerformanceMetric, DepartmentDailyStats, ConsultTimeline

@@ -16,10 +16,10 @@ def parse_date(date_string):
     """Parse date string to date object with error handling.
     
     Args:
-        date_string: Date string in YYYY-MM-DD format
+        date_string: Date string in YYYY-MM-DD format, or None/empty
         
     Returns:
-        date object or None if parsing fails
+        date object, or None if input is None/empty
         
     Raises:
         ValueError: If the date format is invalid
