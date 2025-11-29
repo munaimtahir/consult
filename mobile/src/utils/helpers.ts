@@ -6,12 +6,15 @@ import { Platform } from 'react-native';
 
 /**
  * Generate a unique device ID.
- * Uses a combination of timestamp and random values.
+ * Note: This uses a simple combination of timestamp and random values for development.
+ * For production, consider using a proper UUID library like 'react-native-uuid'.
  */
 export function generateDeviceId(): string {
+  // Use timestamp for uniqueness and multiple random parts to reduce collision probability
   const timestamp = Date.now().toString(36);
-  const randomPart = Math.random().toString(36).substring(2, 15);
-  return `${Platform.OS}-${timestamp}-${randomPart}`;
+  const random1 = Math.random().toString(36).substring(2, 10);
+  const random2 = Math.random().toString(36).substring(2, 10);
+  return `${Platform.OS}-${timestamp}-${random1}${random2}`;
 }
 
 /**

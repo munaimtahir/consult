@@ -20,13 +20,11 @@ export async function login(email: string, password: string): Promise<User> {
     password,
   });
   
-  const { access, refresh } = tokenResponse.data;
+  const { access } = tokenResponse.data;
+  // Note: refresh token handling can be added here when backend supports it
   
   // Store the access token
   await storage.setToken(access);
-  
-  // Optionally store refresh token if needed
-  // await storage.setRefreshToken(refresh);
   
   // Get user profile
   const user = await getCurrentUser();

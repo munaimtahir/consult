@@ -1,8 +1,13 @@
 /**
  * Firebase Cloud Messaging (FCM) service for push notifications.
  * 
- * TODO: This file requires @react-native-firebase/messaging to be installed.
- * For now, we provide a mock implementation that can be replaced when Firebase is configured.
+ * IMPORTANT: This is a MOCK implementation for development.
+ * For production, install @react-native-firebase/messaging and replace the mock functions.
+ * 
+ * TODO: To enable real push notifications:
+ * 1. Install Firebase: npm install @react-native-firebase/app @react-native-firebase/messaging
+ * 2. Configure Firebase in android/app/google-services.json
+ * 3. Replace mock functions with actual Firebase calls (see TODOs in each function)
  */
 
 import { Platform } from 'react-native';

@@ -9,6 +9,9 @@ import { logger } from '../services/logger';
 /**
  * Register a device for push notifications.
  * This should be called after login and whenever the FCM token refreshes.
+ * 
+ * NOTE: The backend device registration endpoint may not exist yet.
+ * This function handles the error gracefully and returns a mock response for development.
  */
 export async function registerDevice(
   deviceId: string,
@@ -23,8 +26,6 @@ export async function registerDevice(
     platform,
   };
   
-  // TODO: This endpoint may not exist yet in the backend.
-  // When the backend is updated, remove this warning.
   try {
     const response = await apiClient.post<DeviceRegistrationResponse>('/devices/register/', payload);
     
@@ -32,10 +33,11 @@ export async function registerDevice(
     
     return response.data;
   } catch (error) {
-    // Log but don't fail completely - the app should still work without push notifications
+    // Log the error but don't fail completely - the app should still work without push notifications
+    // This allows development to continue even if the backend endpoint doesn't exist yet
     logger.warn('Device registration failed. Push notifications may not work.', error);
     
-    // Return a mock response for development
+    // Return a mock response indicating registration was not successful
     return {
       id: 0,
       device_id: deviceId,
