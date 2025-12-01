@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { adminAPI } from '../../api';
 import DepartmentEditModal from './DepartmentEditModal';
@@ -120,6 +121,12 @@ export default function AdminDepartmentsPage() {
                 </span>
             </td>
             <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                <Link
+                    to={`/admin/departments/${dept.id}`}
+                    className="text-indigo-600 hover:text-indigo-900 mr-4"
+                >
+                    View
+                </Link>
                 <button
                     onClick={() => handleEditDepartment(dept)}
                     className="text-blue-600 hover:text-blue-900 mr-4"

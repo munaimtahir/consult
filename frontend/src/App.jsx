@@ -14,8 +14,11 @@ import NewConsultPage from './pages/NewConsultPage';
 import AdminHomePage from './pages/admin/AdminHomePage';
 import AdminUsersPage from './pages/admin/AdminUsersPage';
 import AdminDepartmentsPage from './pages/admin/AdminDepartmentsPage';
+import DepartmentDetailPage from './pages/admin/DepartmentDetailPage';
 import DepartmentDashboardPage from './pages/admin/DepartmentDashboardPage';
 import GlobalDashboardPage from './pages/admin/GlobalDashboardPage';
+import DoctorAnalyticsPage from './pages/admin/DoctorAnalyticsPage';
+import AdminLayout from './components/admin/AdminLayout';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -49,6 +52,32 @@ function App() {
                   <Layout>
                     <DashboardPage />
                   </Layout>
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/admin/analytics/doctors"
+              element={
+                <ProtectedRoute>
+                  <AdminRoute requiredPermission="can_view_global_dashboard">
+                    <AdminLayout>
+                      <DoctorAnalyticsPage />
+                    </AdminLayout>
+                  </AdminRoute>
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/admin/departments/:id"
+              element={
+                <ProtectedRoute>
+                  <AdminRoute requiredPermission="can_manage_departments">
+                    <AdminLayout>
+                      <DepartmentDetailPage />
+                    </AdminLayout>
+                  </AdminRoute>
                 </ProtectedRoute>
               }
             />
@@ -92,9 +121,9 @@ function App() {
               element={
                 <ProtectedRoute>
                   <AdminRoute>
-                    <Layout>
+                    <AdminLayout>
                       <AdminHomePage />
-                    </Layout>
+                    </AdminLayout>
                   </AdminRoute>
                 </ProtectedRoute>
               }
@@ -105,9 +134,9 @@ function App() {
               element={
                 <ProtectedRoute>
                   <AdminRoute requiredPermission="can_manage_users">
-                    <Layout>
+                    <AdminLayout>
                       <AdminUsersPage />
-                    </Layout>
+                    </AdminLayout>
                   </AdminRoute>
                 </ProtectedRoute>
               }
@@ -118,9 +147,9 @@ function App() {
               element={
                 <ProtectedRoute>
                   <AdminRoute requiredPermission="can_manage_departments">
-                    <Layout>
+                    <AdminLayout>
                       <AdminDepartmentsPage />
-                    </Layout>
+                    </AdminLayout>
                   </AdminRoute>
                 </ProtectedRoute>
               }
@@ -131,9 +160,9 @@ function App() {
               element={
                 <ProtectedRoute>
                   <AdminRoute requiredPermission="can_view_department_dashboard">
-                    <Layout>
+                    <AdminLayout>
                       <DepartmentDashboardPage />
-                    </Layout>
+                    </AdminLayout>
                   </AdminRoute>
                 </ProtectedRoute>
               }
@@ -144,9 +173,9 @@ function App() {
               element={
                 <ProtectedRoute>
                   <AdminRoute requiredPermission="can_view_global_dashboard">
-                    <Layout>
+                    <AdminLayout>
                       <GlobalDashboardPage />
-                    </Layout>
+                    </AdminLayout>
                   </AdminRoute>
                 </ProtectedRoute>
               }

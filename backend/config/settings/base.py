@@ -204,6 +204,12 @@ CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = TIME_ZONE
+CELERY_BEAT_SCHEDULE = {
+    'check-delayed-consults': {
+        'task': 'apps.consults.tasks.check_delayed_consults',
+        'schedule': timedelta(minutes=10),
+    },
+}
 
 # Django Channels
 CHANNEL_LAYERS = {

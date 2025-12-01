@@ -3,6 +3,7 @@ Department model for Hospital Consult System.
 """
 
 from django.db import models
+from django.conf import settings
 
 
 class Department(models.Model):
@@ -69,6 +70,23 @@ class Department(models.Model):
         default=1380,
         help_text='SLA for routine consults (minutes)'
     )
+
+    # Delay Policy
+    max_response_time = models.IntegerField(
+        default=30,
+        help_text='Maximum allowed time in minutes to acknowledge a consult'
+    )
+    delay_action = models.CharField(
+        max_length=20,
+        choices=[
+            ('NOTIFY_HOD', 'Notify HOD'),
+            ('ESCALATE', 'Escalate to Senior'),
+            ('AUTO_ASSIGN', 'Auto-assign'),
+            ('MARK_OVERDUE', 'Mark as Overdue'),
+        ],
+        default='MARK_OVERDUE',
+        help_text='Action to take when a consult is delayed'
+    )
     
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -114,3 +132,26 @@ class Department(models.Model):
             A QuerySet of Department objects.
         """
         return self.subdepartments.filter(is_active=True)
+
+
+class OnCall(models.Model):
+    """Represents the on-call schedule for a department."""
+    department = models.ForeignKey(
+        'departments.Department',
+        on_delete=models.CASCADE,
+        related_name='on_call_schedule'
+    )
+    doctor = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='on_call_duties'
+    )
+    date = models.DateField(db_index=True)
+
+    class Meta:
+        db_table = 'on_call_schedule'
+        unique_together = ('department', 'date')
+        ordering = ['date']
+
+    def __str__(self):
+        return f"On-call for {self.department.name} on {self.date}: {self.doctor.get_full_name()}"
