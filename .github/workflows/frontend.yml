@@ -34,15 +34,15 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
 
       - name: Install dependencies
-        # Try a clean install from lockfile; if it fails (lockfile out-of-sync), fall back to npm install
+        # Try a clean install from lockfile with legacy-peer-deps; if it fails, fall back to npm install
         run: |
           set -e
           echo "node $(node -v) | npm $(npm -v)"
-          if npm ci; then
+          if npm ci --legacy-peer-deps; then
             echo "npm ci succeeded"
           else
             echo "npm ci failed — falling back to npm install to proceed in CI"
-            npm install
+            npm install --legacy-peer-deps
           fi
 
       - name: Run linter
