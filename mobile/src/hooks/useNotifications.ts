@@ -37,6 +37,8 @@ export function useNotifications() {
 
   /**
    * Handle an incoming notification.
+   * Note: getConsultIdFromNotification is a stable module export that won't change at runtime,
+   * so it's safe to exclude from the dependency array.
    */
   const handleNotification = useCallback((payload: NotificationPayload) => {
     logger.info('Notification received in hook', payload);
