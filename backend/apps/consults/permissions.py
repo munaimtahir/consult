@@ -20,31 +20,28 @@ class IsReceptionist(permissions.BasePermission):
 
 class IsConsultParticipant(permissions.BasePermission):
     """
-    Allows access to:
-    1. The requester
-    2. The assigned doctor
-    3. Users in the target department
-    4. Users in the requesting department (read-only)
+    Allows access only to users who are part of the consult's workflow
+    (creating or receiving department) or are administrators.
     """
+    message = "This consult does not belong to your department."
     
+    def has_permission(self, request, view):
+        return True
+
     def has_object_permission(self, request, view, obj):
         user = request.user
         
-        # Requester has full access (subject to other constraints)
-        if obj.requester == user:
+        # Admins and SuperAdmins have global access
+        if user.is_superuser or user.role in ['ADMIN', 'SUPER_ADMIN'] or user.can_manage_consults_globally:
             return True
             
-        # Assigned doctor has full access
-        if obj.assigned_to == user:
+        # Users in the creating department have access
+        if user.department and user.department == obj.requesting_department:
             return True
             
-        # Target department members have access
-        if obj.target_department == user.department:
+        # Users in the receiving department have access
+        if user.department and user.department == obj.target_department:
             return True
-            
-        # Requesting department members have read-only access
-        if obj.requesting_department == user.department:
-            return request.method in permissions.SAFE_METHODS
             
         return False
 

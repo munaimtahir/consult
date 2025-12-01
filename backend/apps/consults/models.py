@@ -32,11 +32,12 @@ class ConsultRequest(models.Model):
     """
     
     STATUS_CHOICES = [
-        ('PENDING', 'Pending'),
+        ('SUBMITTED', 'Submitted'),
         ('ACKNOWLEDGED', 'Acknowledged'),
         ('IN_PROGRESS', 'In Progress'),
+        ('MORE_INFO_REQUIRED', 'More Information Required'),
         ('COMPLETED', 'Completed'),
-        ('CANCELLED', 'Cancelled'),
+        ('CLOSED', 'Closed'),
     ]
     
     URGENCY_CHOICES = [
@@ -81,7 +82,7 @@ class ConsultRequest(models.Model):
     status = models.CharField(
         max_length=20,
         choices=STATUS_CHOICES,
-        default='PENDING'
+        default='SUBMITTED'
     )
     urgency = models.CharField(
         max_length=20,
@@ -119,6 +120,16 @@ class ConsultRequest(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     acknowledged_at = models.DateTimeField(null=True, blank=True)
     completed_at = models.DateTimeField(null=True, blank=True)
+
+    # Audit fields
+    acknowledged_by = models.ForeignKey(
+        'accounts.User',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='acknowledged_consults'
+    )
+    last_action_summary = models.TextField(blank=True)
     
     # SLA tracking
     expected_response_time = models.DateTimeField(
@@ -250,11 +261,12 @@ class ConsultNote(models.Model):
     """
     
     NOTE_TYPE_CHOICES = [
-        ('PROGRESS', 'Progress Note'),
-        ('RECOMMENDATION', 'Recommendation'),
-        ('ASSESSMENT', 'Assessment'),
-        ('PLAN', 'Plan'),
-        ('FINAL', 'Final Note'),
+        ('PROGRESS_UPDATE', 'Progress Update'),
+        ('PLAN_MANAGEMENT', 'Plan / Management'),
+        ('REQUEST_MORE_INFO', 'Request More Information'),
+        ('ASSIGNED_TO', 'Assigned To'),
+        ('FOLLOW_UP_NEEDED', 'Follow-up Needed'),
+        ('CLOSE_CONSULT', 'Close Consult'),
     ]
     
     consult = models.ForeignKey(
@@ -270,9 +282,17 @@ class ConsultNote(models.Model):
     note_type = models.CharField(
         max_length=20,
         choices=NOTE_TYPE_CHOICES,
-        default='PROGRESS'
+        default='PROGRESS_UPDATE'
     )
     content = models.TextField()
+    assigned_to = models.ForeignKey(
+        'accounts.User',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='assignment_notes',
+        help_text='User this note is assigning the consult to'
+    )
     
     # Recommendations
     recommendations = models.TextField(
@@ -310,9 +330,8 @@ class ConsultNote(models.Model):
     def save(self, *args, **kwargs):
         """Overrides the default save method to add custom logic.
 
-        If the note is marked as final (`is_final` is True), this method
-        will update the associated `ConsultRequest` to 'COMPLETED' and set
-        its completion timestamp.
+        If the note is of a certain type, this method will update the
+        associated `ConsultRequest`'s status and other fields accordingly.
 
         Args:
             *args: Variable length argument list.
@@ -320,8 +339,16 @@ class ConsultNote(models.Model):
         """
         super().save(*args, **kwargs)
         
-        # If this is a final note, mark the consult as completed
-        if self.is_final and self.consult.status != 'COMPLETED':
-            self.consult.status = 'COMPLETED'
-            self.consult.completed_at = timezone.now()
-            self.consult.save()
+        consult = self.consult
+
+        if self.note_type == 'CLOSE_CONSULT' and consult.status != 'CLOSED':
+            consult.status = 'CLOSED'
+            consult.completed_at = timezone.now()
+        elif self.note_type == 'REQUEST_MORE_INFO':
+            consult.status = 'MORE_INFO_REQUIRED'
+        elif self.note_type == 'ASSIGNED_TO' and self.assigned_to:
+            consult.assigned_to = self.assigned_to
+            consult.status = 'IN_PROGRESS'
+
+        consult.last_action_summary = f"{self.get_note_type_display()} by {self.author.get_full_name()}"
+        consult.save()

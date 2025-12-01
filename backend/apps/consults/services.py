@@ -6,6 +6,8 @@ Business logic for consult workflow.
 from django.utils import timezone
 from .models import ConsultRequest, ConsultNote
 from apps.notifications.services import NotificationService
+from apps.departments.models import OnCall
+from apps.accounts.models import User
 
 class ConsultService:
     """Encapsulates the business logic for the consult workflow.
@@ -21,6 +23,9 @@ class ConsultService:
     def create_consult(requester, patient, target_department, urgency, reason_for_consult, **kwargs):
         """Creates a new consult request and sends notifications.
 
+        If a doctor is on-call for the target department, it auto-assigns
+        the consult to them.
+
         Args:
             requester: The user initiating the request.
             patient: The patient for whom the consult is requested.
@@ -32,17 +37,47 @@ class ConsultService:
         Returns:
             The newly created `ConsultRequest` instance.
         """
-        consult = ConsultRequest.objects.create(
+        consult = ConsultRequest(
             patient=patient,
             requester=requester,
+            requesting_department=requester.department,
             target_department=target_department,
             urgency=urgency,
             reason_for_consult=reason_for_consult,
             **kwargs
         )
-        
-        # Send real-time notification to target department
-        NotificationService.notify_new_consult(consult)
+
+        # Check for on-call doctor
+        today = timezone.now().date()
+        on_call_entry = OnCall.objects.filter(department=target_department, date=today).first()
+
+        if on_call_entry and on_call_entry.doctor:
+            consult.assigned_to = on_call_entry.doctor
+            consult.status = 'IN_PROGRESS'
+            consult.acknowledged_at = timezone.now()
+            consult.acknowledged_by = on_call_entry.doctor
+            consult.last_action_summary = f"Auto-assigned to on-call doctor: {on_call_entry.doctor.get_full_name()}"
+            consult.save()
+            NotificationService.notify_consult_assigned(consult, on_call_entry.doctor)
+        else:
+            # If no on-call doctor, try to assign to the most junior doctor
+            junior_doctor = User.objects.filter(
+                department=target_department,
+                is_active=True
+            ).order_by('-hierarchy_number').first()
+
+            if junior_doctor:
+                consult.assigned_to = junior_doctor
+                consult.status = 'IN_PROGRESS'
+                consult.acknowledged_at = timezone.now()
+                consult.acknowledged_by = junior_doctor
+                consult.last_action_summary = f"Auto-assigned by hierarchy to: {junior_doctor.get_full_name()}"
+                consult.save()
+                NotificationService.notify_consult_assigned(consult, junior_doctor)
+            else:
+                # Fallback: No on-call, no junior doctor found. Create unassigned consult.
+                consult.save()
+                NotificationService.notify_new_consult(consult)
         
         return consult
     
@@ -60,12 +95,14 @@ class ConsultService:
         consult.assigned_to = doctor
         
         # Update status based on current state
-        if consult.status == 'PENDING':
+        if consult.status == 'SUBMITTED':
             consult.status = 'ACKNOWLEDGED'
             consult.acknowledged_at = timezone.now()
-        elif consult.status == 'ACKNOWLEDGED':
+            consult.acknowledged_by = doctor  # Or should be the assigner? Let's say the first action taker.
+        else:
             consult.status = 'IN_PROGRESS'
             
+        consult.last_action_summary = f"Assigned to {doctor.get_full_name()}"
         consult.save()
         
         NotificationService.notify_consult_assigned(consult, doctor)
@@ -85,8 +122,12 @@ class ConsultService:
         """
         consult.status = 'ACKNOWLEDGED'
         consult.acknowledged_at = timezone.now()
+        consult.acknowledged_by = user
+        consult.last_action_summary = f"Acknowledged by {user.get_full_name()}"
         consult.save()
         
+        NotificationService.notify_consult_acknowledged(consult)
+
         return consult
     
     @staticmethod
@@ -113,15 +154,9 @@ class ConsultService:
             **kwargs
         )
         
-        # Update first_response_at if this is the first note (not tracked in model yet, but logic is here)
-        # Also update status to IN_PROGRESS if it was ACKNOWLEDGED
-        if consult.status == 'ACKNOWLEDGED':
-            consult.status = 'IN_PROGRESS'
-            consult.save()
-            
-        # If this is a final note, complete the consult
-        if note.is_final:
-            ConsultService.complete_consult(consult)
+        # The ConsultNote's save() method now handles status changes.
+        # This service method is now responsible for creating the note
+        # and triggering side effects like notifications.
         
         NotificationService.notify_note_added(consult, note)
         

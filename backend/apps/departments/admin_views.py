@@ -12,6 +12,7 @@ from .models import Department
 from .serializers import (
     AdminDepartmentSerializer,
     DepartmentListSerializer,
+    DepartmentMemberSerializer,
 )
 from apps.accounts.permissions import CanManageDepartments
 from apps.accounts.serializers import UserListSerializer
@@ -152,3 +153,15 @@ class AdminDepartmentViewSet(viewsets.ModelViewSet):
             result.append(dept_data)
         
         return Response(result)
+
+    @action(detail=True, methods=['get'])
+    def overview(self, request, pk=None):
+        """Get an overview of the department's members and their consult stats."""
+        department = self.get_object()
+        users = department.users.annotate(
+            active_consults=Count('assigned_consults', filter=Q(assigned_consults__status__in=['SUBMITTED', 'IN_PROGRESS'])),
+            completed_consults=Count('assigned_consults', filter=Q(assigned_consults__status='COMPLETED'))
+        ).order_by('hierarchy_number')
+
+        serializer = DepartmentMemberSerializer(users, many=True)
+        return Response(serializer.data)
