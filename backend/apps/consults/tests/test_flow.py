@@ -85,38 +85,25 @@ class ConsultFlowTests(TestCase):
         cardio_token = response.data['access']
         self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {cardio_token}')
         
-        # 4. Acknowledge Consult
-        response = self.client.post(f'/api/v1/consults/requests/{consult_id}/acknowledge/')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['status'], 'ACKNOWLEDGED')
-        
-        # 5. Assign to Self (or another doc)
-        response = self.client.post(f'/api/v1/consults/requests/{consult_id}/assign/', {
-            'assigned_to': self.doctor_cardio.id
-        })
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['assigned_to']['id'], self.doctor_cardio.id)
-        
-        # 6. Add Progress Note
+        # 4. Add Progress Note (Consult is auto-assigned)
         note_data = {
             'content': 'Patient examined. ECG normal.',
-            'note_type': 'PROGRESS'
+            'note_type': 'PROGRESS_UPDATE'
         }
         response = self.client.post(f'/api/v1/consults/requests/{consult_id}/add_note/', note_data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         
-        # 7. Add Final Note (Complete Consult)
+        # 7. Add Final Note (Close Consult)
         final_note_data = {
             'content': 'Discharge. No cardiac issue.',
-            'note_type': 'FINAL',
-            'is_final': True
+            'note_type': 'CLOSE_CONSULT',
         }
         response = self.client.post(f'/api/v1/consults/requests/{consult_id}/add_note/', final_note_data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         
-        # Verify Consult is Completed
+        # Verify Consult is Closed
         response = self.client.get(f'/api/v1/consults/requests/{consult_id}/')
-        self.assertEqual(response.data['status'], 'COMPLETED')
+        self.assertEqual(response.data['status'], 'CLOSED')
         self.assertIsNotNone(response.data['completed_at'])
 
     def test_permissions(self):

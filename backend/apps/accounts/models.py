@@ -61,6 +61,7 @@ class User(AbstractUser):
         ('DEPARTMENT_USER', 'Department User'),
         ('HOD', 'Head of Department'),
         ('ADMIN', 'Administrator'),
+        ('SUPER_ADMIN', 'Super Administrator'),
     ]
     
     DESIGNATION_CHOICES = [
@@ -97,6 +98,10 @@ class User(AbstractUser):
         default=1,
         help_text='Auto-calculated from designation for escalation hierarchy'
     )
+    hierarchy_number = models.IntegerField(
+        default=99,
+        help_text='A number to define the user position in the department hierarchy'
+    )
     phone_number = models.CharField(max_length=20, blank=True)
     profile_photo = models.URLField(blank=True, help_text='Photo from Google OAuth')
     is_on_call = models.BooleanField(default=False)
@@ -118,9 +123,13 @@ class User(AbstractUser):
         default=False,
         help_text='Can view global dashboards across all departments'
     )
+    can_manage_consults_in_department = models.BooleanField(
+        default=False,
+        help_text='Can reassign and manage consults within their own department'
+    )
     can_manage_consults_globally = models.BooleanField(
         default=False,
-        help_text='Can reassign and manage consults across all departments'
+        help_text='Can reassign and manage consults across all departments (SuperAdmin only)'
     )
     can_manage_permissions = models.BooleanField(
         default=False,
@@ -244,6 +253,7 @@ class User(AbstractUser):
             self.can_manage_departments or
             self.can_view_department_dashboard or
             self.can_view_global_dashboard or
+            self.can_manage_consults_in_department or
             self.can_manage_consults_globally or
             self.can_manage_permissions
         )
@@ -274,6 +284,7 @@ class User(AbstractUser):
             'can_manage_departments': self.can_manage_departments or self.is_superuser,
             'can_view_department_dashboard': self.can_view_department_dashboard or self.is_superuser,
             'can_view_global_dashboard': self.can_view_global_dashboard or self.is_superuser,
+            'can_manage_consults_in_department': self.can_manage_consults_in_department or self.is_superuser,
             'can_manage_consults_globally': self.can_manage_consults_globally or self.is_superuser,
             'can_manage_permissions': self.can_manage_permissions or self.is_superuser,
         }

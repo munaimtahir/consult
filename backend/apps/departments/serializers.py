@@ -4,6 +4,26 @@ Serializers for Departments app.
 
 from rest_framework import serializers
 from .models import Department
+from apps.accounts.models import User
+
+
+class DepartmentMemberSerializer(serializers.ModelSerializer):
+    """Serializer for department members in the overview table."""
+
+    role = serializers.CharField(source='get_role_display')
+    active_consults = serializers.IntegerField(read_only=True)
+    completed_consults = serializers.IntegerField(read_only=True)
+
+    class Meta:
+        model = User
+        fields = [
+            'id',
+            'full_name',
+            'role',
+            'hierarchy_number',
+            'active_consults',
+            'completed_consults'
+        ]
 
 
 class ParentDepartmentSerializer(serializers.ModelSerializer):
