@@ -39,7 +39,6 @@ export const ConsultDetailScreen = () => {
     fetchConsult,
     acknowledge,
     complete,
-    clearError,
   } = useConsultDetail(consultId);
 
   /**

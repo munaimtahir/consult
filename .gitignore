@@ -54,7 +54,6 @@ build/
 *.env
 
 # IDEs
-.vscode/
 .idea/
 *.swp
 *.swo
@@ -92,3 +91,18 @@ Thumbs.db
 tmp/
 temp/
 *.tmp
+
+# React Native / Mobile
+mobile/android/app/build/
+mobile/android/build/
+mobile/android/.gradle/
+mobile/android/local.properties
+mobile/android/captures/
+mobile/android/app/.cxx/
+mobile/ios/build/
+mobile/ios/Pods/
+mobile/.bundle/
+mobile/.metro/
+
+# Keep the keystore file in git for this project (normally you would exclude it)
+# !mobile/android/app/consult-release-key.keystore

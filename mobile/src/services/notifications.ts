@@ -200,46 +200,10 @@ function setupNotificationOpenedHandler(): void {
   logger.debug('Notification opened handler set up (mock)');
 }
 
-/**
- * Handle an incoming notification.
- */
-function handleNotification(payload: NotificationPayload): void {
-  logger.info('Notification received', payload);
-  
-  // Notify all registered handlers
-  notificationHandlers.forEach(handler => {
-    try {
-      handler(payload);
-    } catch (error) {
-      logger.error('Error in notification handler', error);
-    }
-  });
-}
-
-/**
- * Handle a notification that was opened/tapped.
- */
-function handleNotificationOpened(payload: NotificationPayload): void {
-  logger.info('Notification opened', payload);
-  
-  // Extract consult ID if present
-  const consultId = payload.data?.consult_id;
-  
-  if (consultId) {
-    // Navigate to consult detail
-    // This should be handled by the navigation service or a global event
-    logger.info('Should navigate to consult', { consultId });
-  }
-  
-  // Notify all registered handlers
-  notificationHandlers.forEach(handler => {
-    try {
-      handler(payload);
-    } catch (error) {
-      logger.error('Error in notification handler', error);
-    }
-  });
-}
+// NOTE: The following functions (_handleNotification and _handleNotificationOpened) 
+// were removed as they are scaffolding for future FCM integration.
+// They will be implemented when @react-native-firebase/messaging is installed.
+// See the TODO comments above for the actual implementation pattern.
 
 /**
  * Register a handler for incoming notifications.

@@ -26,6 +26,7 @@ urlpatterns = [
     path('consults/', include('apps.consults.urls')),
     path('analytics/', include('apps.analytics.urls')),
     path('admin/', include('apps.core.admin_urls')),
+    path('devices/', include('apps.notifications.urls')),
     path('audit-logs/', AuditLogView.as_view(), name='audit-logs'),
     # Include router URLs
     path('', include(router.urls)),

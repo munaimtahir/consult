@@ -54,10 +54,13 @@ export const MyConsultsScreen = () => {
 
   /**
    * Fetch consults on mount and when filter changes.
+   * Note: fetchConsults is intentionally excluded from deps to prevent infinite loops
+   * since it changes with pagination state.
    */
   useEffect(() => {
     const status = selectedFilter === 'ALL' ? undefined : selectedFilter;
     fetchConsults({ status }, true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedFilter]);
 
   /**

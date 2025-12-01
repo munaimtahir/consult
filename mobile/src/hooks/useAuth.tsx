@@ -5,7 +5,6 @@
 import React, { useState, useEffect, useCallback, createContext, useContext, ReactNode } from 'react';
 import { User } from '../api/types';
 import * as authApi from '../api/auth';
-import { storage } from '../services/storage';
 import { logger } from '../services/logger';
 
 /**

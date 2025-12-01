@@ -18,7 +18,23 @@ This is the React Native + TypeScript mobile app for the Hospital Consult System
 mobile/
 ├── package.json              # Dependencies and scripts
 ├── tsconfig.json             # TypeScript configuration
+├── app.json                  # App name and display settings
+├── index.js                  # Entry point
+├── babel.config.js           # Babel configuration
+├── metro.config.js           # Metro bundler configuration
+├── build-debug.sh            # Debug APK build script
+├── build-release.sh          # Release APK/AAB build script
 ├── MOBILE_DEV.md             # This file
+├── android/                  # Android native project
+│   ├── app/
+│   │   ├── build.gradle      # App-level Gradle config
+│   │   ├── consult-release-key.keystore  # Release signing key
+│   │   └── src/main/         # Android source and resources
+│   ├── build.gradle          # Project-level Gradle config
+│   ├── gradle.properties     # Gradle settings and signing config
+│   └── gradlew               # Gradle wrapper
+├── .vscode/
+│   └── tasks.json            # VS Code build tasks
 └── src/
     ├── App.tsx               # Root component with providers
     ├── api/                  # API layer
@@ -113,6 +129,56 @@ npm run type-check
 npm run lint
 ```
 
+## Building APKs
+
+### Debug Build
+
+Build a debug APK for testing:
+
+```bash
+npm run build:debug
+```
+
+Output: `android/app/build/outputs/apk/debug/app-debug.apk`
+
+### Release Build
+
+Build a signed release APK and Android App Bundle:
+
+```bash
+npm run build:release
+```
+
+Output:
+- APK: `android/app/build/outputs/apk/release/app-release.apk`
+- AAB: `android/app/build/outputs/bundle/release/app-release.aab`
+
+### VS Code One-Click Build
+
+1. Open Command Palette (Ctrl+Shift+P)
+2. Select "Tasks: Run Task"
+3. Choose "Build Debug APK" or "Build Release APK"
+
+### Production Keystore Setup
+
+For production releases, generate a new keystore:
+
+```bash
+keytool -genkeypair -v -keystore production-key.keystore \
+  -alias productionKey -keyalg RSA -keysize 2048 -validity 10000 \
+  -storepass YOUR_SECURE_PASSWORD -keypass YOUR_SECURE_PASSWORD
+```
+
+Update `android/gradle.properties`:
+```properties
+CONSULT_UPLOAD_STORE_FILE=production-key.keystore
+CONSULT_UPLOAD_KEY_ALIAS=productionKey
+CONSULT_UPLOAD_STORE_PASSWORD=YOUR_SECURE_PASSWORD
+CONSULT_UPLOAD_KEY_PASSWORD=YOUR_SECURE_PASSWORD
+```
+
+**⚠️ SECURITY**: Never commit production passwords to version control. Use environment variables or a secure vault for CI/CD.
+
 ## Features
 
 ### Authentication
@@ -144,11 +210,21 @@ npm run lint
 - Permission summary display
 - Logout functionality
 
-### Push Notifications (Planned)
+### Push Notifications (Scaffolded)
 
-- FCM integration for Android
-- Navigate to consult detail from notification tap
-- Foreground and background notification handling
+The notification infrastructure is in place with mock implementations:
+- FCM token management ready
+- Device registration API integrated
+- Navigation from notification tap configured
+
+To enable real push notifications:
+1. Set up a Firebase project
+2. Add `google-services.json` to `android/app/`
+3. Install Firebase packages:
+   ```bash
+   npm install @react-native-firebase/app @react-native-firebase/messaging
+   ```
+4. Update `services/notifications.ts` to use real Firebase calls
 
 ## API Integration
 
@@ -167,6 +243,8 @@ The app connects to the Django backend at:
 - `POST /consults/requests/:id/complete/` - Complete consult
 - `POST /consults/requests/:id/add_note/` - Add note
 - `GET /admin/dashboard/department/` - Department dashboard
+- `POST /devices/register/` - Register device for push notifications
+- `PATCH /devices/update-token/` - Update FCM token
 
 ## Environment Configuration
 
@@ -175,8 +253,8 @@ Edit `src/config/env.ts` to configure API URLs:
 ```typescript
 export const ENV = {
   API_BASE_URL: __DEV__
-    ? 'https://dev-consult.pmc.edu.pk/api/v1'
-    : 'https://consult.pmc.edu.pk/api/v1',
+    ? 'https://dev-consult.pmc.edu.pk/api/v1'  // Your dev server
+    : 'https://consult.pmc.edu.pk/api/v1',     // Your prod server
   // ... other config
 };
 ```
@@ -214,6 +292,8 @@ The app uses a consistent design system:
 1. **Metro bundler issues**: Clear cache with `npm start -- --reset-cache`
 2. **Android build fails**: Run `cd android && ./gradlew clean`
 3. **Type errors**: Run `npm run type-check` to identify issues
+4. **Gradle sync fails**: Ensure JAVA_HOME points to JDK 17
+5. **Network errors**: Check that API_BASE_URL in env.ts is correct
 
 ### Debugging
 
