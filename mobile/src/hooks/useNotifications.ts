@@ -36,6 +36,21 @@ export function useNotifications() {
   const [state, setState] = useState<NotificationState>(initialState);
 
   /**
+   * Handle an incoming notification.
+   */
+  const handleNotification = useCallback((payload: NotificationPayload) => {
+    logger.info('Notification received in hook', payload);
+    
+    const consultId = getConsultIdFromNotification(payload);
+    
+    setState(prev => ({
+      ...prev,
+      lastNotification: payload,
+      pendingConsultId: consultId,
+    }));
+  }, []);
+
+  /**
    * Initialize notifications on mount.
    */
   useEffect(() => {
@@ -66,22 +81,7 @@ export function useNotifications() {
         unsubscribe();
       }
     };
-  }, []);
-
-  /**
-   * Handle an incoming notification.
-   */
-  const handleNotification = useCallback((payload: NotificationPayload) => {
-    logger.info('Notification received in hook', payload);
-    
-    const consultId = getConsultIdFromNotification(payload);
-    
-    setState(prev => ({
-      ...prev,
-      lastNotification: payload,
-      pendingConsultId: consultId,
-    }));
-  }, []);
+  }, [handleNotification]);
 
   /**
    * Clear the pending consult ID (after navigation).

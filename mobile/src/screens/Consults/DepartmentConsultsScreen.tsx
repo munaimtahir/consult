@@ -60,6 +60,7 @@ export const DepartmentConsultsScreen = () => {
   useEffect(() => {
     const status = selectedFilter === 'ALL' ? undefined : selectedFilter;
     fetchConsults({ status }, true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedFilter]);
 
   /**

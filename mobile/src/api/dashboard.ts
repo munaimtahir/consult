@@ -3,7 +3,7 @@
  */
 
 import apiClient from './client';
-import { DepartmentDashboardResponse, DashboardSummary } from './types';
+import { DepartmentDashboardResponse } from './types';
 import { logger } from '../services/logger';
 
 /**

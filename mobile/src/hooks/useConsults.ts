@@ -8,7 +8,6 @@ import {
   ConsultDetail,
   ConsultNote,
   AddNoteRequest,
-  PaginatedResponse,
 } from '../api/types';
 import * as consultsApi from '../api/consults';
 import { ConsultListParams } from '../api/consults';

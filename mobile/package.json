@@ -1,6 +1,6 @@
 {
   "name": "consult-mobile",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "start": "react-native start",
@@ -9,7 +9,9 @@
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "type-check": "tsc --noEmit",
     "clean": "cd android && ./gradlew clean && cd ..",
-    "test": "jest"
+    "test": "jest",
+    "build:debug": "sh ./build-debug.sh",
+    "build:release": "sh ./build-release.sh"
   },
   "dependencies": {
     "react": "18.2.0",

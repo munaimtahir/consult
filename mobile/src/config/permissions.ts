@@ -2,7 +2,7 @@
  * Permission helper functions for UI-level permission checks.
  */
 
-import { User, UserPermissions } from '../api/types';
+import { User } from '../api/types';
 import { USER_ROLES } from './constants';
 
 /**

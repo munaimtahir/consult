@@ -202,8 +202,11 @@ function setupNotificationOpenedHandler(): void {
 
 /**
  * Handle an incoming notification.
+ * NOTE: This function will be used when FCM is fully integrated.
+ * @internal
  */
-function handleNotification(payload: NotificationPayload): void {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function _handleNotification(payload: NotificationPayload): void {
   logger.info('Notification received', payload);
   
   // Notify all registered handlers
@@ -218,8 +221,11 @@ function handleNotification(payload: NotificationPayload): void {
 
 /**
  * Handle a notification that was opened/tapped.
+ * NOTE: This function will be used when FCM is fully integrated.
+ * @internal
  */
-function handleNotificationOpened(payload: NotificationPayload): void {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function _handleNotificationOpened(payload: NotificationPayload): void {
   logger.info('Notification opened', payload);
   
   // Extract consult ID if present
