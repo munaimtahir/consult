@@ -1,6 +1,6 @@
 import { useSearchParams } from 'react-router-dom';
 import { useEffect } from 'react';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../hooks/useAuth';
 import { useConsults } from '../hooks/useConsults';
 import ConsultFilter from '../components/ConsultFilter';
 import ConsultList from '../components/ConsultList';

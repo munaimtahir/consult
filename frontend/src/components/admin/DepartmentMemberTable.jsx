@@ -1,12 +1,11 @@
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { api } from '../../api';
+import { adminAPI } from '../../api';
 
 const updateHierarchy = async (userId, hierarchyNumber) => {
-    const { data } = await api.patch(`/admin/users/${userId}/`, {
+    return await adminAPI.updateUser(userId, {
         hierarchy_number: hierarchyNumber,
     });
-    return data;
 };
 
 export function DepartmentMemberTable({ members }) {
