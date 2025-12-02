@@ -3,23 +3,37 @@ import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { consultsAPI, departmentsAPI } from '../api';
 import { useAuth } from '../hooks/useAuth';
-import PatientSearch from '../components/PatientSearch';
-import PatientCreateModal from '../components/PatientCreateModal';
 
 const NewConsultPage = () => {
     const navigate = useNavigate();
     const { user } = useAuth();
-    const [selectedPatient, setSelectedPatient] = useState(null);
-    const [isPatientModalOpen, setIsPatientModalOpen] = useState(false);
     const [formData, setFormData] = useState({
+        patient_name: '',
+        patient_location: '',
+        patient_age: '',
+        primary_diagnosis: '',
         target_department: '',
         urgency: 'ROUTINE',
         reason_for_consult: '',
         clinical_question: '',
         relevant_history: '',
         current_medications: '',
-        vital_signs: '',
-        lab_results: '',
+        vital_signs: {
+            hr: '',
+            bp: '',
+            rr: '',
+            temp: '',
+            rpo2: '',
+            other: '',
+        },
+        investigations: {
+            cbc: '',
+            cmp: '',
+            chest_xray: '',
+            ecg: '',
+            other: '',
+        },
+        investigations_other: '',
     });
     const [error, setError] = useState('');
 
@@ -40,8 +54,8 @@ const NewConsultPage = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        if (!selectedPatient) {
-            setError('Please select a patient');
+        if (!formData.patient_name) {
+            setError('Please enter patient name');
             return;
         }
         if (!formData.target_department) {
@@ -49,13 +63,33 @@ const NewConsultPage = () => {
             return;
         }
 
-        // Ensure requesting department is sent if needed, or backend handles it.
-        // Based on serializer, we might need to send it if it's not read-only for creation.
-        // But usually backend sets it from user. Let's try sending it if user has one.
+        // Convert vitals object to string for backend
+        const vitalSignsString = Object.entries(formData.vital_signs)
+            .filter(([_, value]) => value)
+            .map(([key, value]) => `${key.toUpperCase()}: ${value}`)
+            .join(', ') || '';
+
+        // Convert investigations object to string for backend
+        const investigationsString = Object.entries(formData.investigations)
+            .filter(([_, value]) => value)
+            .map(([key, value]) => `${key.replace(/_/g, ' ').toUpperCase()}: ${value}`)
+            .concat(formData.investigations_other ? [`Other: ${formData.investigations_other}`] : [])
+            .join(', ') || '';
+
         const payload = {
-            ...formData,
-            patient: selectedPatient.id,
-            requesting_department: user?.department?.id || user?.department, // Handle both object or ID
+            patient_name: formData.patient_name,
+            patient_location: formData.patient_location,
+            patient_age: formData.patient_age,
+            primary_diagnosis: formData.primary_diagnosis,
+            target_department: formData.target_department,
+            urgency: formData.urgency,
+            reason_for_consult: formData.reason_for_consult,
+            clinical_question: formData.clinical_question,
+            relevant_history: formData.relevant_history,
+            current_medications: formData.current_medications,
+            vital_signs: vitalSignsString,
+            lab_results: investigationsString,
+            requesting_department: user?.department?.id || user?.department,
         };
 
         createConsultMutation.mutate(payload);
@@ -64,6 +98,26 @@ const NewConsultPage = () => {
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData((prev) => ({ ...prev, [name]: value }));
+    };
+
+    const handleVitalChange = (field, value) => {
+        setFormData((prev) => ({
+            ...prev,
+            vital_signs: {
+                ...prev.vital_signs,
+                [field]: value,
+            },
+        }));
+    };
+
+    const handleInvestigationChange = (field, value) => {
+        setFormData((prev) => ({
+            ...prev,
+            investigations: {
+                ...prev.investigations,
+                [field]: value,
+            },
+        }));
     };
 
     return (
@@ -85,24 +139,61 @@ const NewConsultPage = () => {
                     )}
 
                     <form onSubmit={handleSubmit} className="space-y-6">
-                        {/* Patient Selection */}
-                        <div>
-                            <div className="flex justify-between items-center mb-1">
+                        {/* Patient Information */}
+                        <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2">
+                            <div>
                                 <label className="block text-sm font-medium text-gray-700">
-                                    Patient
+                                    Patient Name
                                 </label>
-                                <button
-                                    type="button"
-                                    onClick={() => setIsPatientModalOpen(true)}
-                                    className="text-sm text-indigo-600 hover:text-indigo-500"
-                                >
-                                    + Create New Patient
-                                </button>
+                                <input
+                                    type="text"
+                                    name="patient_name"
+                                    required
+                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border p-2"
+                                    value={formData.patient_name}
+                                    onChange={handleChange}
+                                    placeholder="Enter patient name"
+                                />
                             </div>
-                            <PatientSearch
-                                selectedPatient={selectedPatient}
-                                onSelect={setSelectedPatient}
-                            />
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">
+                                    Patient Location
+                                </label>
+                                <input
+                                    type="text"
+                                    name="patient_location"
+                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border p-2"
+                                    value={formData.patient_location}
+                                    onChange={handleChange}
+                                    placeholder="Enter patient location"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">
+                                    Patient Age
+                                </label>
+                                <input
+                                    type="text"
+                                    name="patient_age"
+                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border p-2"
+                                    value={formData.patient_age}
+                                    onChange={handleChange}
+                                    placeholder="Enter patient age"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">
+                                    Primary Diagnosis
+                                </label>
+                                <input
+                                    type="text"
+                                    name="primary_diagnosis"
+                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border p-2"
+                                    value={formData.primary_diagnosis}
+                                    onChange={handleChange}
+                                    placeholder="Enter primary diagnosis"
+                                />
+                            </div>
                         </div>
 
                         {/* Target Department */}
@@ -206,28 +297,183 @@ const NewConsultPage = () => {
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700">
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
                                     Vital Signs
                                 </label>
-                                <textarea
-                                    name="vital_signs"
-                                    rows={3}
-                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border p-2"
-                                    value={formData.vital_signs}
-                                    onChange={handleChange}
-                                />
+                                <div className="mt-1 overflow-hidden shadow ring-1 ring-black ring-opacity-5 rounded-md">
+                                    <table className="min-w-full divide-y divide-gray-300">
+                                        <thead className="bg-gray-50">
+                                            <tr>
+                                                <th className="py-2 px-3 text-left text-xs font-medium text-gray-700">Parameter</th>
+                                                <th className="py-2 px-3 text-left text-xs font-medium text-gray-700">Value</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-gray-200 bg-white">
+                                            <tr>
+                                                <td className="py-2 px-3 text-sm text-gray-700">HR</td>
+                                                <td className="py-2 px-3">
+                                                    <input
+                                                        type="text"
+                                                        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border p-1"
+                                                        value={formData.vital_signs.hr}
+                                                        onChange={(e) => handleVitalChange('hr', e.target.value)}
+                                                        placeholder="Heart Rate"
+                                                    />
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td className="py-2 px-3 text-sm text-gray-700">BP</td>
+                                                <td className="py-2 px-3">
+                                                    <input
+                                                        type="text"
+                                                        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border p-1"
+                                                        value={formData.vital_signs.bp}
+                                                        onChange={(e) => handleVitalChange('bp', e.target.value)}
+                                                        placeholder="Blood Pressure"
+                                                    />
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td className="py-2 px-3 text-sm text-gray-700">RR</td>
+                                                <td className="py-2 px-3">
+                                                    <input
+                                                        type="text"
+                                                        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border p-1"
+                                                        value={formData.vital_signs.rr}
+                                                        onChange={(e) => handleVitalChange('rr', e.target.value)}
+                                                        placeholder="Respiratory Rate"
+                                                    />
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td className="py-2 px-3 text-sm text-gray-700">TEMP</td>
+                                                <td className="py-2 px-3">
+                                                    <input
+                                                        type="text"
+                                                        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border p-1"
+                                                        value={formData.vital_signs.temp}
+                                                        onChange={(e) => handleVitalChange('temp', e.target.value)}
+                                                        placeholder="Temperature"
+                                                    />
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td className="py-2 px-3 text-sm text-gray-700">RPO2</td>
+                                                <td className="py-2 px-3">
+                                                    <input
+                                                        type="text"
+                                                        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border p-1"
+                                                        value={formData.vital_signs.rpo2}
+                                                        onChange={(e) => handleVitalChange('rpo2', e.target.value)}
+                                                        placeholder="O2 Saturation"
+                                                    />
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td className="py-2 px-3 text-sm text-gray-700">Other</td>
+                                                <td className="py-2 px-3">
+                                                    <input
+                                                        type="text"
+                                                        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border p-1"
+                                                        value={formData.vital_signs.other}
+                                                        onChange={(e) => handleVitalChange('other', e.target.value)}
+                                                        placeholder="Other significant vitals"
+                                                    />
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700">
-                                    Lab Results
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Investigations
                                 </label>
-                                <textarea
-                                    name="lab_results"
-                                    rows={3}
-                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border p-2"
-                                    value={formData.lab_results}
-                                    onChange={handleChange}
-                                />
+                                <div className="mt-1 overflow-hidden shadow ring-1 ring-black ring-opacity-5 rounded-md">
+                                    <table className="min-w-full divide-y divide-gray-300">
+                                        <thead className="bg-gray-50">
+                                            <tr>
+                                                <th className="py-2 px-3 text-left text-xs font-medium text-gray-700">Investigation</th>
+                                                <th className="py-2 px-3 text-left text-xs font-medium text-gray-700">Result</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-gray-200 bg-white">
+                                            <tr>
+                                                <td className="py-2 px-3 text-sm text-gray-700">CBC</td>
+                                                <td className="py-2 px-3">
+                                                    <input
+                                                        type="text"
+                                                        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border p-1"
+                                                        value={formData.investigations.cbc}
+                                                        onChange={(e) => handleInvestigationChange('cbc', e.target.value)}
+                                                        placeholder="Complete Blood Count"
+                                                    />
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td className="py-2 px-3 text-sm text-gray-700">CMP</td>
+                                                <td className="py-2 px-3">
+                                                    <input
+                                                        type="text"
+                                                        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border p-1"
+                                                        value={formData.investigations.cmp}
+                                                        onChange={(e) => handleInvestigationChange('cmp', e.target.value)}
+                                                        placeholder="Comprehensive Metabolic Panel"
+                                                    />
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td className="py-2 px-3 text-sm text-gray-700">Chest X-Ray</td>
+                                                <td className="py-2 px-3">
+                                                    <input
+                                                        type="text"
+                                                        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border p-1"
+                                                        value={formData.investigations.chest_xray}
+                                                        onChange={(e) => handleInvestigationChange('chest_xray', e.target.value)}
+                                                        placeholder="Chest X-Ray findings"
+                                                    />
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td className="py-2 px-3 text-sm text-gray-700">ECG</td>
+                                                <td className="py-2 px-3">
+                                                    <input
+                                                        type="text"
+                                                        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border p-1"
+                                                        value={formData.investigations.ecg}
+                                                        onChange={(e) => handleInvestigationChange('ecg', e.target.value)}
+                                                        placeholder="ECG findings"
+                                                    />
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td className="py-2 px-3 text-sm text-gray-700">Other</td>
+                                                <td className="py-2 px-3">
+                                                    <input
+                                                        type="text"
+                                                        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border p-1"
+                                                        value={formData.investigations.other}
+                                                        onChange={(e) => handleInvestigationChange('other', e.target.value)}
+                                                        placeholder="Other investigations"
+                                                    />
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div className="mt-2">
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        Other Significant Investigations
+                                    </label>
+                                    <textarea
+                                        name="investigations_other"
+                                        rows={2}
+                                        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border p-2"
+                                        value={formData.investigations_other}
+                                        onChange={handleChange}
+                                        placeholder="Any other significant investigations or findings"
+                                    />
+                                </div>
                             </div>
                         </div>
 
@@ -250,15 +496,6 @@ const NewConsultPage = () => {
                     </form>
                 </div>
             </div>
-
-            <PatientCreateModal
-                isOpen={isPatientModalOpen}
-                onClose={() => setIsPatientModalOpen(false)}
-                onPatientCreated={(patient) => {
-                    setSelectedPatient(patient);
-                    setIsPatientModalOpen(false);
-                }}
-            />
         </div>
     );
 };
