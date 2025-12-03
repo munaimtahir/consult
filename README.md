@@ -159,14 +159,19 @@ The codebase is thoroughly documented with docstrings (Python) and JSDoc comment
 
 ### Key Documents
 
-- **[DEMO_SCRIPT.md](DEMO_SCRIPT.md)**: Step-by-step demo presentation guide
-- **[PROJECT_SUMMARY.md](PROJECT_SUMMARY.md)**: High-level project overview
-- **[CURRENT_STATUS.md](CURRENT_STATUS.md)**: Latest development progress
-- **[ADMIN_PANEL.md](ADMIN_PANEL.md)**: Admin panel features and usage
-- **[VISION.md](./VISION.md)**: Project vision and goals
-- **[WORKFLOW.md](./WORKFLOW.md)**: Consult workflow documentation
-- **[DATA_MODEL.md](./DATA_MODEL.md)**: Database schema
-- **[TECHNICAL_PLAN.md](./TECHNICAL_PLAN.md)**: Complete technical architecture
+All detailed documentation has been organized in the [docs/](docs/) directory:
+
+- **[DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md)**: Step-by-step demo presentation guide
+- **[PROJECT_SUMMARY.md](docs/PROJECT_SUMMARY.md)**: High-level project overview
+- **[CURRENT_STATUS.md](docs/CURRENT_STATUS.md)**: Latest development progress
+- **[ADMIN_PANEL.md](docs/ADMIN_PANEL.md)**: Admin panel features and usage
+- **[VISION.md](docs/VISION.md)**: Project vision and goals
+- **[WORKFLOW.md](docs/WORKFLOW.md)**: Consult workflow documentation
+- **[DATA_MODEL.md](docs/DATA_MODEL.md)**: Database schema
+- **[TECHNICAL_PLAN.md](docs/TECHNICAL_PLAN.md)**: Complete technical architecture
+- **[ARCHITECTURE.md](docs/ARCHITECTURE.md)**: System architecture overview
+- **[DEPLOYMENT.md](docs/DEPLOYMENT.md)**: Deployment instructions and guidelines
+- **[GOOGLE_WORKSPACE_SETUP.md](docs/GOOGLE_WORKSPACE_SETUP.md)**: Google SSO integration setup
 
 ## 🧪 Testing
 
