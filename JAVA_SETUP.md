@@ -2,6 +2,33 @@
 
 This project requires JDK 17 or higher for the Java Language Server and Android development.
 
+## Quick Start
+
+1. **Install JDK 17:**
+   ```bash
+   sudo apt update
+   sudo apt install -y openjdk-17-jdk
+   ```
+
+2. **Set JAVA_HOME** (add to `~/.bashrc` or `~/.zshrc`):
+   ```bash
+   export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+   export PATH=$JAVA_HOME/bin:$PATH
+   source ~/.bashrc  # or source ~/.zshrc
+   ```
+
+3. **Verify installation:**
+   ```bash
+   ./setup-java.sh  # Run the helper script
+   java -version     # Should show Java 17+
+   ```
+
+4. **Restart VS Code/Cursor** for changes to take effect.
+
+---
+
+## Detailed Instructions
+
 ## Installation Steps
 
 ### 1. Install JDK 17
