@@ -51,15 +51,15 @@ class EmailService:
                     logger.warning(f"User with email {recipient_email} not found, skipping email")
                     continue
                 
-                # Generate reply token if not provided
-                if reply_token is None:
-                    import uuid
-                    reply_token = uuid.uuid4()
+                # Generate unique reply token for each recipient
+                # Each recipient must have a unique token for email reply handling
+                import uuid
+                recipient_reply_token = reply_token if reply_token else uuid.uuid4()
                 
                 # Add reply token to context for email template
                 context_with_token = context.copy()
-                context_with_token['reply_token'] = reply_token
-                context_with_token['reply_email'] = f"reply+{reply_token}@{settings.EMAIL_DOMAIN}" if hasattr(settings, 'EMAIL_DOMAIN') else f"reply+{reply_token}@pmc.edu.pk"
+                context_with_token['reply_token'] = recipient_reply_token
+                context_with_token['reply_email'] = f"reply+{recipient_reply_token}@{settings.EMAIL_DOMAIN}" if hasattr(settings, 'EMAIL_DOMAIN') else f"reply+{recipient_reply_token}@pmc.edu.pk"
                 
                 # Render template with token
                 html_message_with_token = render_to_string(template_name, context_with_token)
@@ -82,7 +82,7 @@ class EmailService:
                     recipient=recipient_user,
                     subject=subject,
                     sent_successfully=True,
-                    reply_token=reply_token
+                    reply_token=recipient_reply_token
                 )
                 notifications_created.append(notification)
                 
@@ -92,7 +92,10 @@ class EmailService:
                 # Create failed notification record
                 try:
                     from apps.accounts.models import User
+                    import uuid
                     recipient_user = User.objects.get(email=recipient_email)
+                    # Generate unique token for failed notification too
+                    failed_reply_token = reply_token if reply_token else uuid.uuid4()
                     notification = EmailNotification.objects.create(
                         notification_type=notification_type or 'CONSULT_GENERATED',
                         consult=consult,
@@ -100,7 +103,7 @@ class EmailService:
                         subject=subject,
                         sent_successfully=False,
                         error_message=str(e),
-                        reply_token=reply_token if reply_token else None
+                        reply_token=failed_reply_token
                     )
                     notifications_created.append(notification)
                 except Exception:
