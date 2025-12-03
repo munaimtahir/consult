@@ -1,230 +1,107 @@
 """
-Core Serializers
-Serializers for core models.
+Core serializers for system-wide settings.
 """
 
 from rest_framework import serializers
-from apps.core.models import (
-    AuditLog,
-    UnauthorizedAccessLog,
-    FilterPreset,
-    OnCallSchedule,
-    AssignmentPolicy,
-    DelayedConsultPolicy
-)
+from .models import EmailNotificationSettings, SMTPConfiguration
+from apps.departments.serializers import DepartmentSerializer
 
 
-class AuditLogSerializer(serializers.ModelSerializer):
-    """Serializer for AuditLog model."""
-    
-    actor_name = serializers.SerializerMethodField()
-    action_display = serializers.CharField(source='get_action_display', read_only=True)
-    timestamp_human = serializers.SerializerMethodField()
+class EmailNotificationSettingsSerializer(serializers.ModelSerializer):
+    """Serializer for email notification settings."""
+    department = DepartmentSerializer(read_only=True)
+    department_id = serializers.IntegerField(write_only=True, required=False)
     
     class Meta:
-        model = AuditLog
+        model = EmailNotificationSettings
         fields = [
             'id',
-            'action',
-            'action_display',
-            'actor',
-            'actor_name',
-            'consult',
-            'target_user',
             'department',
-            'details',
-            'ip_address',
-            'timestamp',
-            'timestamp_human'
+            'department_id',
+            'notify_on_consult_generated',
+            'notify_on_consult_acknowledged',
+            'notify_on_note_added',
+            'notify_on_consult_closed',
+            'notify_on_sla_breach',
+            'notify_on_reassignment',
+            'send_to_hod',
+            'send_to_assigned_doctor',
+            'send_to_requester',
+            'additional_recipients',
+            'created_at',
+            'updated_at',
         ]
-        read_only_fields = fields
-
-    def get_actor_name(self, obj):
-        """Returns the actor's full name."""
-        return obj.actor.get_full_name() if obj.actor else 'System'
-
-    def get_timestamp_human(self, obj):
-        """Returns a human-friendly timestamp."""
-        from django.utils import timezone
-        
-        now = timezone.now()
-        diff = now - obj.timestamp
-
-        if diff.total_seconds() < 60:
-            return 'just now'
-        elif diff.total_seconds() < 3600:
-            minutes = int(diff.total_seconds() / 60)
-            return f'{minutes} minute{"s" if minutes != 1 else ""} ago'
-        elif diff.total_seconds() < 86400:
-            hours = int(diff.total_seconds() / 3600)
-            return f'{hours} hour{"s" if hours != 1 else ""} ago'
-        elif diff.days == 1:
-            return 'yesterday'
-        elif diff.days < 7:
-            return f'{diff.days} days ago'
-        else:
-            return obj.timestamp.strftime('%b %d, %Y at %I:%M %p')
+        read_only_fields = ['created_at', 'updated_at']
 
 
-class UnauthorizedAccessLogSerializer(serializers.ModelSerializer):
-    """Serializer for UnauthorizedAccessLog model."""
-    
-    user_name = serializers.SerializerMethodField()
-    resource_type_display = serializers.CharField(source='get_resource_type_display', read_only=True)
+class SMTPConfigurationSerializer(serializers.ModelSerializer):
+    """Serializer for SMTP configuration."""
+    created_by_name = serializers.CharField(source='created_by.get_full_name', read_only=True)
+    # Don't expose password in list view
+    password = serializers.CharField(write_only=True, required=False, allow_blank=True)
     
     class Meta:
-        model = UnauthorizedAccessLog
-        fields = [
-            'id',
-            'user',
-            'user_name',
-            'resource_type',
-            'resource_type_display',
-            'resource_id',
-            'action_attempted',
-            'ip_address',
-            'timestamp'
-        ]
-        read_only_fields = fields
-
-    def get_user_name(self, obj):
-        """Returns the user's full name."""
-        return obj.user.get_full_name() if obj.user else 'Unknown'
-
-
-class FilterPresetSerializer(serializers.ModelSerializer):
-    """Serializer for FilterPreset model."""
-    
-    class Meta:
-        model = FilterPreset
+        model = SMTPConfiguration
         fields = [
             'id',
             'name',
-            'filters',
-            'is_default',
-            'created_at',
-            'updated_at'
-        ]
-        read_only_fields = ['id', 'created_at', 'updated_at']
-
-    def validate_filters(self, value):
-        """Validates the filters JSON structure."""
-        if not isinstance(value, dict):
-            raise serializers.ValidationError('Filters must be a JSON object')
-        
-        # Validate allowed filter keys
-        allowed_keys = {
-            'status', 'urgency', 'is_overdue', 'view',
-            'target_department', 'requesting_department',
-            'assigned_to', 'requester', 'date_range'
-        }
-        
-        for key in value.keys():
-            if key not in allowed_keys:
-                raise serializers.ValidationError(f'Invalid filter key: {key}')
-        
-        return value
-
-
-class OnCallScheduleSerializer(serializers.ModelSerializer):
-    """Serializer for OnCallSchedule model."""
-    
-    user_name = serializers.SerializerMethodField()
-    department_name = serializers.CharField(source='department.name', read_only=True)
-    
-    class Meta:
-        model = OnCallSchedule
-        fields = [
-            'id',
-            'department',
-            'department_name',
-            'user',
-            'user_name',
-            'start_time',
-            'end_time',
+            'host',
+            'port',
+            'use_tls',
+            'username',
+            'password',
+            'from_email',
+            'from_name',
+            'reply_to_email',
             'is_active',
+            'is_test_mode',
             'created_at',
-            'updated_at'
+            'updated_at',
+            'created_by',
+            'created_by_name',
         ]
-        read_only_fields = ['id', 'created_at', 'updated_at']
-
-    def get_user_name(self, obj):
-        """Returns the user's full name."""
-        return obj.user.get_full_name()
-
+        read_only_fields = ['created_at', 'updated_at', 'created_by']
+    
     def validate(self, data):
-        """Validates the schedule times."""
-        if data.get('start_time') and data.get('end_time'):
-            if data['start_time'] >= data['end_time']:
-                raise serializers.ValidationError(
-                    'End time must be after start time'
-                )
+        """Validate that password is provided when creating new config."""
+        if self.instance is None and not data.get('password'):
+            raise serializers.ValidationError({'password': 'Password is required when creating a new configuration'})
         return data
-
-
-class AssignmentPolicySerializer(serializers.ModelSerializer):
-    """Serializer for AssignmentPolicy model."""
     
-    department_name = serializers.CharField(source='department.name', read_only=True)
-    assignment_mode_display = serializers.CharField(
-        source='get_assignment_mode_display',
-        read_only=True
-    )
+    def create(self, validated_data):
+        """Create SMTP configuration with current user as creator."""
+        validated_data['created_by'] = self.context['request'].user
+        # If password is not provided in update, keep existing password
+        if 'password' in validated_data and not validated_data['password']:
+            validated_data.pop('password')
+        return super().create(validated_data)
     
-    class Meta:
-        model = AssignmentPolicy
-        fields = [
-            'id',
-            'department',
-            'department_name',
-            'urgency',
-            'assignment_mode',
-            'assignment_mode_display',
-            'min_seniority',
-            'escalation_minutes',
-            'notify_hod',
-            'is_active',
-            'created_at',
-            'updated_at'
-        ]
-        read_only_fields = ['id', 'created_at', 'updated_at']
+    def update(self, instance, validated_data):
+        """Update SMTP configuration, preserving password if not provided."""
+        # If password is not provided, don't update it
+        if 'password' in validated_data and not validated_data['password']:
+            validated_data.pop('password')
+        return super().update(instance, validated_data)
 
 
-class DelayedConsultPolicySerializer(serializers.ModelSerializer):
-    """Serializer for DelayedConsultPolicy model."""
-    
-    department_name = serializers.CharField(source='department.name', read_only=True)
+class SMTPConfigurationListSerializer(serializers.ModelSerializer):
+    """Serializer for SMTP configuration list (without password)."""
+    created_by_name = serializers.CharField(source='created_by.get_full_name', read_only=True)
     
     class Meta:
-        model = DelayedConsultPolicy
+        model = SMTPConfiguration
         fields = [
             'id',
-            'department',
-            'department_name',
-            'warning_threshold_percent',
-            'escalation_levels',
-            'auto_escalate',
-            'notify_requester',
-            'notify_hod',
+            'name',
+            'host',
+            'port',
+            'use_tls',
+            'username',
+            'from_email',
+            'from_name',
             'is_active',
+            'is_test_mode',
             'created_at',
-            'updated_at'
+            'updated_at',
+            'created_by_name',
         ]
-        read_only_fields = ['id', 'created_at', 'updated_at']
-
-    def validate_escalation_levels(self, value):
-        """Validates the escalation levels structure."""
-        if not isinstance(value, list):
-            raise serializers.ValidationError('Escalation levels must be a list')
-        
-        for item in value:
-            if not isinstance(item, dict):
-                raise serializers.ValidationError(
-                    'Each escalation level must be an object'
-                )
-            if 'minutes' not in item or 'level' not in item:
-                raise serializers.ValidationError(
-                    'Each escalation level must have minutes and level'
-                )
-        
-        return value

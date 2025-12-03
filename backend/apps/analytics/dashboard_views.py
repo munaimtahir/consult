@@ -357,6 +357,7 @@ class ConsultReassignView(views.APIView):
         target_department_id = request.data.get('target_department')
         previous_assignee = consult.assigned_to
         
+        # Handle assignment first
         if assigned_to_id:
             try:
                 new_assignee = User.objects.get(id=assigned_to_id)
@@ -367,12 +368,15 @@ class ConsultReassignView(views.APIView):
                     status=status.HTTP_404_NOT_FOUND
                 )
         
+        # Handle department change
         if target_department_id:
             try:
                 new_dept = Department.objects.get(id=target_department_id)
                 consult.target_department = new_dept
-                # Clear assignment when changing department
-                consult.assigned_to = None
+                # Only clear assignment when changing department if no new assignment was provided
+                # If both assigned_to_id and target_department_id are provided, keep the new assignment
+                if not assigned_to_id:
+                    consult.assigned_to = None
             except Department.DoesNotExist:
                 return Response(
                     {'error': 'Department not found'},
