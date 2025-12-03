@@ -1,0 +1,26 @@
+{% extends "emails/base.html" %}
+
+{% block title %}Consult Reassigned{% endblock %}
+
+{% block content %}
+<h3>Consult Reassigned</h3>
+
+{% if new_assignee %}
+<p>The consult for <strong>{{ patient.name }}</strong> has been reassigned to <strong>{{ new_assignee.get_full_name }}</strong>.</p>
+{% else %}
+<p>The consult for <strong>{{ patient.name }}</strong> has been reassigned.</p>
+{% endif %}
+
+<p><strong>Patient:</strong> {{ patient.name }} (MRN: {{ patient.mrn }})</p>
+<p><strong>Consult ID:</strong> #{{ consult.id }}</p>
+<p><strong>Urgency:</strong> <span class="urgency-{{ consult.urgency|lower }}">{{ consult.urgency }}</span></p>
+{% if previous_assignee %}
+<p><strong>Previous Assignee:</strong> {{ previous_assignee.get_full_name }}</p>
+{% endif %}
+{% if new_assignee %}
+<p><strong>New Assignee:</strong> {{ new_assignee.get_full_name }}</p>
+{% endif %}
+
+<a href="{{ url }}" class="button">View Consult</a>
+{% endblock %}
+

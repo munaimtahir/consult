@@ -11,6 +11,7 @@ from .views import (
     OnCallScheduleViewSet,
     AssignmentPolicyViewSet
 )
+from apps.core.views.email_reply_views import process_email_reply
 
 # Create router for viewsets
 router = DefaultRouter()
@@ -28,6 +29,7 @@ urlpatterns = [
     path('admin/', include('apps.core.admin_urls')),
     path('devices/', include('apps.notifications.urls')),
     path('audit-logs/', AuditLogView.as_view(), name='audit-logs'),
+    path('email-reply/', process_email_reply, name='email-reply'),
     # Include router URLs
     path('', include(router.urls)),
 ]

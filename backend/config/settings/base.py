@@ -194,6 +194,7 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='consult@pmc.edu.pk')
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
+EMAIL_DOMAIN = config('EMAIL_DOMAIN', default='pmc.edu.pk')
 DEFAULT_FROM_EMAIL = f'PMC Consult System <{EMAIL_HOST_USER}>'
 SERVER_EMAIL = EMAIL_HOST_USER
 
@@ -208,6 +209,10 @@ CELERY_BEAT_SCHEDULE = {
     'check-delayed-consults': {
         'task': 'apps.consults.tasks.check_delayed_consults',
         'schedule': timedelta(minutes=10),
+    },
+    'check-sla-breaches': {
+        'task': 'apps.consults.tasks.check_sla_breaches',
+        'schedule': timedelta(minutes=15),
     },
 }
 
