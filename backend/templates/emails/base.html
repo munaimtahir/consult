@@ -55,7 +55,13 @@
             {% block content %}{% endblock %}
         </div>
         <div class="footer">
+            {% if reply_email %}
+            <p><strong>Quick Reply:</strong> Reply to this email with "acknowledged" to acknowledge this consult without opening the app.</p>
+            <p style="font-size: 10px; color: #9ca3af;">Reply to: {{ reply_email }}</p>
+            {% else %}
             <p>This is an automated message. Please do not reply directly to this email.</p>
+            {% endif %}
+            <p style="font-size: 10px; color: #9ca3af;">This is an automated message from PMC Consult System.</p>
         </div>
     </div>
 </body>

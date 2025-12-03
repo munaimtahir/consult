@@ -1,0 +1,17 @@
+{% extends "emails/base.html" %}
+
+{% block title %}Consult Acknowledged{% endblock %}
+
+{% block content %}
+<h3>Consult Acknowledged</h3>
+
+<p>Your consult request has been acknowledged by <strong>{{ acknowledged_by.get_full_name }}</strong>.</p>
+
+<p><strong>Patient:</strong> {{ patient.name }} (MRN: {{ patient.mrn }})</p>
+<p><strong>Target Department:</strong> {{ target_department.name }}</p>
+<p><strong>Acknowledged At:</strong> {{ acknowledged_at|date:"M d, Y H:i" }}</p>
+<p><strong>Status:</strong> {{ consult.status }}</p>
+
+<a href="{{ url }}" class="button">View Consult</a>
+{% endblock %}
+

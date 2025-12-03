@@ -355,6 +355,7 @@ class ConsultReassignView(views.APIView):
         # Get reassignment data
         assigned_to_id = request.data.get('assigned_to')
         target_department_id = request.data.get('target_department')
+        previous_assignee = consult.assigned_to
         
         if assigned_to_id:
             try:
@@ -379,6 +380,10 @@ class ConsultReassignView(views.APIView):
                 )
         
         consult.save()
+        
+        # Send reassignment notification
+        from apps.notifications.services import NotificationService
+        NotificationService.notify_reassignment(consult, previous_assignee)
         
         # Return updated consult info
         return Response({

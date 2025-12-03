@@ -1,0 +1,24 @@
+{% extends "emails/base.html" %}
+
+{% block title %}SLA Breach Alert{% endblock %}
+
+{% block content %}
+<h3 style="color: #dc2626;">⚠️ SLA Time Breach Alert</h3>
+
+<p><strong>URGENT:</strong> The expected response time for this consult has been exceeded.</p>
+
+<p><strong>Patient:</strong> {{ patient.name }} (MRN: {{ patient.mrn }})</p>
+<p><strong>Consult ID:</strong> #{{ consult.id }}</p>
+<p><strong>Urgency:</strong> <span class="urgency-{{ consult.urgency|lower }}">{{ consult.urgency }}</span></p>
+<p><strong>Expected Response Time:</strong> {{ expected_response_time|date:"M d, Y H:i" }}</p>
+{% if time_overdue %}
+<p><strong>Time Overdue:</strong> {{ time_overdue }}</p>
+{% endif %}
+
+<p style="background-color: #fef2f2; padding: 15px; border-left: 4px solid #dc2626; margin: 15px 0;">
+    <strong>Action Required:</strong> Please review and respond to this consult immediately.
+</p>
+
+<a href="{{ url }}" class="button" style="background-color: #dc2626;">View Consult</a>
+{% endblock %}
+
