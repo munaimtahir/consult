@@ -81,6 +81,8 @@ consult/
 - Node.js 18+
 - PostgreSQL 14+ (for production)
 - Redis (for WebSockets)
+- **JDK 17+** (for Android mobile development and VS Code Java Language Server)
+  - See [JAVA_SETUP.md](./JAVA_SETUP.md) for installation and configuration instructions
 
 ### Quick Start with Docker
 
