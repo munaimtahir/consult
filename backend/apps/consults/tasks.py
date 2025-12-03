@@ -45,3 +45,31 @@ def check_delayed_consults():
                 if junior_doctor:
                     ConsultService.assign_consult(consult, junior_doctor)
             # MARK_OVERDUE is handled by setting is_overdue = True
+
+@shared_task
+def check_sla_breaches():
+    """
+    Checks for consults that have breached their SLA and sends notifications.
+    This task should run periodically (e.g., every 15 minutes).
+    """
+    now = timezone.now()
+    
+    # Find consults that have breached SLA but haven't been notified yet
+    # We check for consults that are overdue and haven't been completed/closed
+    breached_consults = ConsultRequest.objects.filter(
+        is_overdue=True,
+        expected_response_time__lt=now,
+        status__in=['SUBMITTED', 'ACKNOWLEDGED', 'IN_PROGRESS', 'MORE_INFO_REQUIRED']
+    )
+    
+    for consult in breached_consults:
+        # Check if we've already sent an SLA breach notification recently (within last hour)
+        from apps.notifications.models import EmailNotification
+        recent_notification = EmailNotification.objects.filter(
+            consult=consult,
+            notification_type='SLA_BREACH',
+            sent_at__gte=now - timedelta(hours=1)
+        ).exists()
+        
+        if not recent_notification:
+            NotificationService.notify_sla_breach(consult)

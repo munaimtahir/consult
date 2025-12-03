@@ -341,6 +341,8 @@ class ConsultNote(models.Model):
         
         consult = self.consult
 
+        was_closed = consult.status == 'CLOSED'
+        
         if self.note_type == 'CLOSE_CONSULT' and consult.status != 'CLOSED':
             consult.status = 'CLOSED'
             consult.completed_at = timezone.now()
@@ -352,3 +354,8 @@ class ConsultNote(models.Model):
 
         consult.last_action_summary = f"{self.get_note_type_display()} by {self.author.get_full_name()}"
         consult.save()
+        
+        # Send notification if consult was just closed
+        if consult.status == 'CLOSED' and not was_closed:
+            from apps.notifications.services import NotificationService
+            NotificationService.notify_consult_closed(consult)

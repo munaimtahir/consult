@@ -1,0 +1,51 @@
+{% extends "emails/base.html" %}
+
+{% block title %}Analytics Report{% endblock %}
+
+{% block content %}
+<h3>{{ report_type }} Analytics Report</h3>
+
+<p>Dear {{ recipient.get_full_name }},</p>
+
+<p>Your {{ report_type|lower }} analytics report for the Consult System is ready.</p>
+
+{% if report_data %}
+<div style="background-color: #f9fafb; padding: 20px; border-radius: 5px; margin: 15px 0;">
+    <h4>Summary</h4>
+    
+    {% if report_data.total_consults %}
+    <p><strong>Total Consults:</strong> {{ report_data.total_consults }}</p>
+    {% endif %}
+    
+    {% if report_data.completed_consults %}
+    <p><strong>Completed:</strong> {{ report_data.completed_consults }}</p>
+    {% endif %}
+    
+    {% if report_data.pending_consults %}
+    <p><strong>Pending:</strong> {{ report_data.pending_consults }}</p>
+    {% endif %}
+    
+    {% if report_data.overdue_consults %}
+    <p><strong>Overdue:</strong> {{ report_data.overdue_consults }}</p>
+    {% endif %}
+    
+    {% if report_data.avg_response_time %}
+    <p><strong>Average Response Time:</strong> {{ report_data.avg_response_time }}</p>
+    {% endif %}
+    
+    {% if report_data.department_stats %}
+    <h4 style="margin-top: 20px;">Department Statistics</h4>
+    <ul>
+        {% for dept_stat in report_data.department_stats %}
+        <li>{{ dept_stat.name }}: {{ dept_stat.count }} consults</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+</div>
+{% endif %}
+
+<p><strong>Report Generated:</strong> {{ generated_at|date:"M d, Y H:i" }}</p>
+
+<a href="{{ url }}" class="button">View Full Analytics</a>
+{% endblock %}
+

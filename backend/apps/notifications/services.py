@@ -87,6 +87,28 @@ class NotificationService:
         )
     
     @staticmethod
+    def notify_consult_acknowledged(consult):
+        """Sends notifications when a consult is acknowledged.
+
+        Args:
+            consult: The `ConsultRequest` instance that was acknowledged.
+        """
+        # Send email
+        EmailService.send_consult_acknowledged_notification(consult)
+        
+        # Real-time notification to requester
+        NotificationService._send_ws_message(
+            f'user_{consult.requester.id}',
+            'CONSULT_ACKNOWLEDGED',
+            {
+                'id': consult.id,
+                'patient_name': consult.patient.name,
+                'acknowledged_by': consult.acknowledged_by.get_full_name() if consult.acknowledged_by else 'Unknown',
+                'message': f"Your consult for {consult.patient.name} has been acknowledged"
+            }
+        )
+    
+    @staticmethod
     def notify_note_added(consult, note):
         """Sends notifications when a new note is added to a consult.
 
@@ -97,6 +119,9 @@ class NotificationService:
             consult: The `ConsultRequest` the note was added to.
             note: The `ConsultNote` instance that was just created.
         """
+        # Send email
+        EmailService.send_note_added_notification(consult, note)
+        
         # Notify assigned doctor if note is not by them
         if consult.assigned_to and consult.assigned_to != note.author:
             NotificationService._send_ws_message(
@@ -143,6 +168,27 @@ class NotificationService:
                 'id': consult.id,
                 'patient_name': consult.patient.name,
                 'message': f"Consult for {consult.patient.name} has been completed"
+            }
+        )
+    
+    @staticmethod
+    def notify_consult_closed(consult):
+        """Sends notifications when a consult is closed.
+
+        Args:
+            consult: The `ConsultRequest` instance that was closed.
+        """
+        # Send email
+        EmailService.send_consult_closed_notification(consult)
+        
+        # Real-time notification to requester
+        NotificationService._send_ws_message(
+            f'user_{consult.requester.id}',
+            'CONSULT_CLOSED',
+            {
+                'id': consult.id,
+                'patient_name': consult.patient.name,
+                'message': f"Consult for {consult.patient.name} has been closed"
             }
         )
     
@@ -276,6 +322,92 @@ class NotificationService:
                 'message': f"Warning: Consult #{consult.id} is approaching deadline"
             }
         )
+    
+    @staticmethod
+    def notify_sla_breach(consult):
+        """Sends notifications when SLA time is breached.
+
+        Args:
+            consult: The ConsultRequest instance.
+        """
+        # Send email
+        EmailService.send_sla_breach_notification(consult)
+        
+        # Real-time notifications
+        if consult.assigned_to:
+            NotificationService._send_ws_message(
+                f'user_{consult.assigned_to.id}',
+                'SLA_BREACH',
+                {
+                    'id': consult.id,
+                    'patient_name': consult.patient.name,
+                    'urgency': consult.urgency,
+                    'urgency_color': get_urgency_color(consult.urgency),
+                    'message': f"URGENT: SLA breached for consult #{consult.id} - {consult.patient.name}"
+                }
+            )
+        
+        # Notify HOD
+        if consult.target_department.head:
+            NotificationService._send_ws_message(
+                f'user_{consult.target_department.head.id}',
+                'SLA_BREACH',
+                {
+                    'id': consult.id,
+                    'patient_name': consult.patient.name,
+                    'urgency': consult.urgency,
+                    'urgency_color': get_urgency_color(consult.urgency),
+                    'message': f"URGENT: SLA breached for consult #{consult.id}"
+                }
+            )
+        
+        # Notify requester
+        NotificationService._send_ws_message(
+            f'user_{consult.requester.id}',
+            'SLA_BREACH',
+            {
+                'id': consult.id,
+                'patient_name': consult.patient.name,
+                'message': f"Your consult for {consult.patient.name} has exceeded the expected response time"
+            }
+        )
+    
+    @staticmethod
+    def notify_reassignment(consult, previous_assignee=None):
+        """Sends notifications when a consult is reassigned.
+
+        Args:
+            consult: The ConsultRequest instance.
+            previous_assignee: The User who was previously assigned (if any).
+        """
+        # Send email
+        EmailService.send_reassignment_notification(consult, previous_assignee)
+        
+        # Real-time notification to new assignee
+        if consult.assigned_to:
+            NotificationService._send_ws_message(
+                f'user_{consult.assigned_to.id}',
+                'CONSULT_REASSIGNED',
+                {
+                    'id': consult.id,
+                    'patient_name': consult.patient.name,
+                    'urgency': consult.urgency,
+                    'urgency_color': get_urgency_color(consult.urgency),
+                    'message': f"Consult for {consult.patient.name} has been reassigned to you"
+                }
+            )
+        
+        # Notify previous assignee if different
+        if previous_assignee and previous_assignee != consult.assigned_to:
+            NotificationService._send_ws_message(
+                f'user_{previous_assignee.id}',
+                'CONSULT_REASSIGNED_FROM_YOU',
+                {
+                    'id': consult.id,
+                    'patient_name': consult.patient.name,
+                    'message': f"Consult for {consult.patient.name} has been reassigned"
+                }
+            )
 
     @staticmethod
     def notify_auto_assignment(consult, doctor, assignment_mode):
