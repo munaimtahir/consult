@@ -65,13 +65,13 @@ const NewConsultPage = () => {
 
         // Convert vitals object to string for backend
         const vitalSignsString = Object.entries(formData.vital_signs)
-            .filter(([_, value]) => value)
+            .filter(([, value]) => value)
             .map(([key, value]) => `${key.toUpperCase()}: ${value}`)
             .join(', ') || '';
 
         // Convert investigations object to string for backend
         const investigationsString = Object.entries(formData.investigations)
-            .filter(([_, value]) => value)
+            .filter(([, value]) => value)
             .map(([key, value]) => `${key.replace(/_/g, ' ').toUpperCase()}: ${value}`)
             .concat(formData.investigations_other ? [`Other: ${formData.investigations_other}`] : [])
             .join(', ') || '';

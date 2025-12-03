@@ -15,7 +15,11 @@ SECRET_KEY = config('SECRET_KEY', default='django-insecure-change-this-in-produc
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=True, cast=bool)
 
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1').split(',')
+# SECURITY WARNING: Default allows all hosts for development flexibility
+# In production, set ALLOWED_HOSTS environment variable to specific domains
+# e.g., ALLOWED_HOSTS=consult.pmc.edu.pk,api.pmc.edu.pk
+allowed_hosts_env = config('ALLOWED_HOSTS', default='*')
+ALLOWED_HOSTS = ['*'] if allowed_hosts_env == '*' else allowed_hosts_env.split(',')
 
 # Application definition
 INSTALLED_APPS = [
@@ -180,10 +184,14 @@ SIMPLE_JWT = {
 }
 
 # CORS Configuration
-CORS_ALLOWED_ORIGINS = config(
-    'CORS_ALLOWED_ORIGINS',
-    default='http://localhost:3000'
-).split(',')
+# SECURITY WARNING: Default allows all origins for development flexibility
+# In production, set CORS_ALLOWED_ORIGINS environment variable to specific domains
+# e.g., CORS_ALLOWED_ORIGINS=https://consult.pmc.edu.pk,https://app.pmc.edu.pk
+cors_origins = config('CORS_ALLOWED_ORIGINS', default='*')
+if cors_origins == '*':
+    CORS_ALLOW_ALL_ORIGINS = True
+else:
+    CORS_ALLOWED_ORIGINS = cors_origins.split(',')
 
 CORS_ALLOW_CREDENTIALS = True
 

@@ -161,14 +161,19 @@ The codebase is thoroughly documented with docstrings (Python) and JSDoc comment
 
 ### Key Documents
 
-- **[DEMO_SCRIPT.md](DEMO_SCRIPT.md)**: Step-by-step demo presentation guide
-- **[PROJECT_SUMMARY.md](PROJECT_SUMMARY.md)**: High-level project overview
-- **[CURRENT_STATUS.md](CURRENT_STATUS.md)**: Latest development progress
-- **[ADMIN_PANEL.md](ADMIN_PANEL.md)**: Admin panel features and usage
-- **[VISION.md](./VISION.md)**: Project vision and goals
-- **[WORKFLOW.md](./WORKFLOW.md)**: Consult workflow documentation
-- **[DATA_MODEL.md](./DATA_MODEL.md)**: Database schema
-- **[TECHNICAL_PLAN.md](./TECHNICAL_PLAN.md)**: Complete technical architecture
+All detailed documentation has been organized in the [docs/](docs/) directory:
+
+- **[DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md)**: Step-by-step demo presentation guide
+- **[PROJECT_SUMMARY.md](docs/PROJECT_SUMMARY.md)**: High-level project overview
+- **[CURRENT_STATUS.md](docs/CURRENT_STATUS.md)**: Latest development progress
+- **[ADMIN_PANEL.md](docs/ADMIN_PANEL.md)**: Admin panel features and usage
+- **[VISION.md](docs/VISION.md)**: Project vision and goals
+- **[WORKFLOW.md](docs/WORKFLOW.md)**: Consult workflow documentation
+- **[DATA_MODEL.md](docs/DATA_MODEL.md)**: Database schema
+- **[TECHNICAL_PLAN.md](docs/TECHNICAL_PLAN.md)**: Complete technical architecture
+- **[ARCHITECTURE.md](docs/ARCHITECTURE.md)**: System architecture overview
+- **[DEPLOYMENT.md](docs/DEPLOYMENT.md)**: Deployment instructions and guidelines
+- **[GOOGLE_WORKSPACE_SETUP.md](docs/GOOGLE_WORKSPACE_SETUP.md)**: Google SSO integration setup
 
 ## 🧪 Testing
 
@@ -213,14 +218,18 @@ docker-compose restart
 |----------|-------------|---------|
 | `SECRET_KEY` | Django secret key | (required in production) |
 | `DEBUG` | Enable debug mode | `True` |
-| `ALLOWED_HOSTS` | Comma-separated allowed hosts | `localhost,127.0.0.1` |
+| `ALLOWED_HOSTS` | Comma-separated allowed hosts | `*` (all hosts) |
+| `CORS_ALLOWED_ORIGINS` | Comma-separated CORS origins | `*` (all origins) |
 | `DATABASE` | Database type | `postgres` |
 | `DB_NAME` | Database name | `consult_db` |
 | `DB_USER` | Database user | `consult_user` |
 | `DB_PASSWORD` | Database password | (required) |
 | `DB_HOST` | Database host | `localhost` |
 | `REDIS_URL` | Redis URL for channels | `redis://localhost:6379/0` |
-| `CORS_ALLOWED_ORIGINS` | CORS origins | `http://localhost:3000` |
+
+**⚠️ Security Note**: The default configuration allows access from any host/origin for development flexibility. For production deployments, it's recommended to set specific domains:
+- `ALLOWED_HOSTS=consult.pmc.edu.pk,api.pmc.edu.pk`
+- `CORS_ALLOWED_ORIGINS=https://consult.pmc.edu.pk,https://app.pmc.edu.pk`
 
 #### Frontend (.env)
 
