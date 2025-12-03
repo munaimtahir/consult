@@ -62,14 +62,13 @@ def check_sla_breaches():
         status__in=['SUBMITTED', 'ACKNOWLEDGED', 'IN_PROGRESS', 'MORE_INFO_REQUIRED']
     )
     
+    from apps.notifications.models import EmailNotification
+    notified_consult_ids = set(EmailNotification.objects.filter(
+        consult__in=breached_consults,
+        notification_type='SLA_BREACH',
+        sent_at__gte=now - timedelta(hours=1)
+    ).values_list('consult_id', flat=True))
+
     for consult in breached_consults:
-        # Check if we've already sent an SLA breach notification recently (within last hour)
-        from apps.notifications.models import EmailNotification
-        recent_notification = EmailNotification.objects.filter(
-            consult=consult,
-            notification_type='SLA_BREACH',
-            sent_at__gte=now - timedelta(hours=1)
-        ).exists()
-        
-        if not recent_notification:
+        if consult.id not in notified_consult_ids:
             NotificationService.notify_sla_breach(consult)
