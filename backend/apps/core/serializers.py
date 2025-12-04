@@ -3,7 +3,14 @@ Core serializers for system-wide settings.
 """
 
 from rest_framework import serializers
-from .models import EmailNotificationSettings, SMTPConfiguration
+from .models import (
+    EmailNotificationSettings, 
+    SMTPConfiguration,
+    FilterPreset,
+    AuditLog,
+    OnCallSchedule,
+    AssignmentPolicy
+)
 from apps.departments.serializers import DepartmentSerializer
 
 
@@ -105,3 +112,90 @@ class SMTPConfigurationListSerializer(serializers.ModelSerializer):
             'updated_at',
             'created_by_name',
         ]
+
+
+class FilterPresetSerializer(serializers.ModelSerializer):
+    """Serializer for filter presets."""
+    
+    class Meta:
+        model = FilterPreset
+        fields = [
+            'id',
+            'name',
+            'filters',
+            'is_default',
+            'created_at',
+            'updated_at',
+            'user',
+        ]
+        read_only_fields = ['created_at', 'updated_at', 'user']
+
+
+class AuditLogSerializer(serializers.ModelSerializer):
+    """Serializer for audit logs."""
+    actor_name = serializers.CharField(source='actor.get_full_name', read_only=True)
+    actor_email = serializers.CharField(source='actor.email', read_only=True)
+    
+    class Meta:
+        model = AuditLog
+        fields = [
+            'id',
+            'action',
+            'details',
+            'ip_address',
+            'user_agent',
+            'timestamp',
+            'actor',
+            'actor_name',
+            'actor_email',
+            'consult',
+            'department',
+            'target_user',
+        ]
+        read_only_fields = ['timestamp']
+
+
+class OnCallScheduleSerializer(serializers.ModelSerializer):
+    """Serializer for on-call schedules."""
+    user_name = serializers.CharField(source='user.get_full_name', read_only=True)
+    user_email = serializers.CharField(source='user.email', read_only=True)
+    department_name = serializers.CharField(source='department.name', read_only=True)
+    
+    class Meta:
+        model = OnCallSchedule
+        fields = [
+            'id',
+            'start_time',
+            'end_time',
+            'is_active',
+            'created_at',
+            'updated_at',
+            'department',
+            'department_name',
+            'user',
+            'user_name',
+            'user_email',
+        ]
+        read_only_fields = ['created_at', 'updated_at']
+
+
+class AssignmentPolicySerializer(serializers.ModelSerializer):
+    """Serializer for assignment policies."""
+    department_name = serializers.CharField(source='department.name', read_only=True)
+    
+    class Meta:
+        model = AssignmentPolicy
+        fields = [
+            'id',
+            'urgency',
+            'assignment_mode',
+            'min_seniority',
+            'escalation_minutes',
+            'notify_hod',
+            'is_active',
+            'created_at',
+            'updated_at',
+            'department',
+            'department_name',
+        ]
+        read_only_fields = ['created_at', 'updated_at']
