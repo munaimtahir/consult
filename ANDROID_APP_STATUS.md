@@ -240,3 +240,4 @@ The Android application has a **solid foundation** with all major screens and fe
 5. iOS support not started
 6. No automated tests yet
 
+

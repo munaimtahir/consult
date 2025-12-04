@@ -177,3 +177,4 @@ class SMTPConfigurationViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_404_NOT_FOUND
             )
 
+

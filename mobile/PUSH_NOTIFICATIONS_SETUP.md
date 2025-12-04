@@ -318,3 +318,4 @@ The notification service will extract `consult_id` from the data payload to navi
 - [Firebase Cloud Messaging Documentation](https://firebase.google.com/docs/cloud-messaging)
 - [React Native Firebase Messaging Module](https://rnfirebase.io/messaging/usage)
 
+
