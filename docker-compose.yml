@@ -30,7 +30,7 @@ services:
     environment:
       - DEBUG=0
       - SECRET_KEY=change_me_in_prod
-      - ALLOWED_HOSTS=localhost,127.0.0.1,backend,18.220.252.164
+      - ALLOWED_HOSTS=localhost,127.0.0.1,backend,34.93.19.177
       - DATABASE=postgres
       - DB_NAME=consult_db
       - DB_USER=consult_user
@@ -40,8 +40,8 @@ services:
       - REDIS_URL=redis://redis:6379/0
       - REDIS_HOST=redis
       - REDIS_PORT=6379
-      - CORS_ALLOWED_ORIGINS=http://18.220.252.164,http://localhost:3000,http://localhost
-      - CSRF_TRUSTED_ORIGINS=http://18.220.252.164,http://localhost:3000,http://localhost
+      - CORS_ALLOWED_ORIGINS=http://34.93.19.177,http://localhost:3000,http://localhost
+      - CSRF_TRUSTED_ORIGINS=http://34.93.19.177,http://localhost:3000,http://localhost
     depends_on:
       - db
       - redis
@@ -52,8 +52,8 @@ services:
     build:
       context: ./frontend
       args:
-        - VITE_API_URL=http://18.220.252.164/api/v1
-        - VITE_WS_URL=ws://18.220.252.164/ws
+        - VITE_API_URL=http://34.93.19.177/api/v1
+        - VITE_WS_URL=ws://34.93.19.177/ws
     # Remove port mapping to avoid conflicts - nginx will proxy
     expose:
       - "80"
