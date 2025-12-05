@@ -25,6 +25,11 @@ This project requires JDK 17 or higher for the Java Language Server and Android 
 
 4. **Restart VS Code/Cursor** for changes to take effect.
 
+### Workspace Defaults
+
+- The repo's `.vscode/settings.json` now pins `java.jdt.ls.java.home` and the Gradle tooling to `/usr/lib/jvm/java-21-openjdk-amd64`, which exists in the Cursor/Linux containers.
+- On macOS or Windows, override that value locally (either by editing your global Cursor `settings.json` at `%APPDATA%/Cursor/User/settings.json` or by updating the workspace copy) so it points to your installed JDK directory.
+
 ---
 
 ## Detailed Instructions
