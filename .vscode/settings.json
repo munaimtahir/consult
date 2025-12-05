@@ -1,17 +1,17 @@
 {
   // Java Language Server Configuration
-  // Set this to your JDK 17+ installation path if JAVA_HOME is not set
-  // Example: "/usr/lib/jvm/java-17-openjdk-amd64"
-  "java.jdt.ls.java.home": "${env:JAVA_HOME}",
-  
+  // We avoid forcing a hard-coded JAVA_HOME here because Cursor warns when the
+  // resolved folder is missing. The language server will auto-detect a JDK from
+  // your PATH. If detection fails on your machine, set java.jdt.ls.java.home in
+  // your personal Cursor/User settings to the exact JDK path (e.g.
+  // "C:\\\\Program Files\\\\Java\\\\jdk-17" on Windows or "/usr/lib/jvm/java-17-openjdk-amd64" on Linux).
+
   // Java Configuration
   "java.configuration.runtimes": [],
   "java.compile.nullAnalysis.mode": "automatic",
-  
+
   // Java Extension Settings
   "java.configuration.updateBuildConfiguration": "automatic",
   "java.import.gradle.enabled": true,
   "java.import.gradle.wrapper.enabled": true
 }
-
-
