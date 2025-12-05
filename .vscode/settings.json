@@ -2,7 +2,7 @@
   // Java Language Server Configuration
   // Set this to your JDK 17+ installation path if JAVA_HOME is not set
   // Example: "/usr/lib/jvm/java-17-openjdk-amd64"
-  "java.jdt.ls.java.home": "${env:JAVA_HOME}",
+  "java.jdt.ls.java.home": "/usr/lib/jvm/java-1.21.0-openjdk-amd64",
   
   // Java Configuration
   "java.configuration.runtimes": [],
