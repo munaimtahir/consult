@@ -7,21 +7,11 @@ if [ "$DATABASE" = "postgres" ]
 then
     echo "Waiting for postgres..."
 
-    # Wait up to 60 seconds for postgres to be ready
-    max_attempts=600
-    attempt=0
-    while [ $attempt -lt $max_attempts ]; do
-      if nc -z $DB_HOST $DB_PORT 2>/dev/null; then
-        echo "PostgreSQL started at $DB_HOST:$DB_PORT"
-        break
-      fi
-      attempt=$((attempt + 1))
+    while ! nc -z $DB_HOST $DB_PORT; do
       sleep 0.1
     done
-    
-    if [ $attempt -eq $max_attempts ]; then
-      echo "Warning: PostgreSQL may not be ready, but continuing..."
-    fi
+
+    echo "PostgreSQL started"
 fi
 
 # Apply database migrations
