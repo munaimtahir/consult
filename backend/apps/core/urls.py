@@ -4,7 +4,7 @@ Core URL configuration.
 
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import (
+from .core_views import (
     HealthCheckView,
     APIRootView,
     FilterPresetViewSet,
