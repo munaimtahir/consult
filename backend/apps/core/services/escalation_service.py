@@ -7,7 +7,7 @@ from datetime import timedelta
 from django.utils import timezone
 from django.db.models import Q
 
-from apps.core.models import DelayedConsultPolicy
+# DelayedConsultPolicy model was removed - escalation policies are now handled differently
 from apps.accounts.models import User
 from apps.consults.models import ConsultRequest
 
@@ -62,15 +62,11 @@ class EscalationService:
             department: The Department instance.
 
         Returns:
-            DelayedConsultPolicy instance or None.
+            None (DelayedConsultPolicy model was removed).
         """
-        try:
-            return DelayedConsultPolicy.objects.get(
-                department=department,
-                is_active=True
-            )
-        except DelayedConsultPolicy.DoesNotExist:
-            return None
+        # DelayedConsultPolicy model was removed - return None for now
+        # Escalation policies are now handled through AssignmentPolicy model
+        return None
 
     @staticmethod
     def _calculate_escalation_level(consult, policy):
@@ -78,23 +74,15 @@ class EscalationService:
 
         Args:
             consult: The ConsultRequest.
-            policy: The DelayedConsultPolicy.
+            policy: The policy (can be None).
 
         Returns:
             Integer escalation level.
         """
         minutes_overdue = (timezone.now() - consult.expected_response_time).total_seconds() / 60
         
-        if not policy.escalation_levels:
-            # Default escalation: every 30 minutes overdue = 1 level
-            return min(int(minutes_overdue / 30) + 1, 3)
-
-        # Use configured escalation levels
-        level = 0
-        for threshold in policy.escalation_levels:
-            if minutes_overdue >= threshold.get('minutes', 0):
-                level = threshold.get('level', level + 1)
-        return level
+        # Default escalation: every 30 minutes overdue = 1 level
+        return min(int(minutes_overdue / 30) + 1, 3)
 
     @staticmethod
     def _perform_escalation(consult, new_level, policy, request=None):
@@ -103,7 +91,7 @@ class EscalationService:
         Args:
             consult: The ConsultRequest.
             new_level: The new escalation level.
-            policy: The DelayedConsultPolicy.
+            policy: The policy (can be None).
             request: Optional HTTP request for audit logging.
 
         Returns:

@@ -95,40 +95,29 @@ Port 80 (Nginx Reverse Proxy)
 
 ## Adding New Apps
 
-To add a new app, follow these steps:
+### Quick Method (Recommended)
 
-1. **Add service to docker-compose.yml**
-   ```yaml
-   app2_backend:
-     build: ./app2/backend
-     expose:
-       - "8000"
-     networks:
-       - consult_network
-     healthcheck:
-       test: ["CMD", "curl", "-f", "http://localhost:8000/health/"]
-       interval: 30s
-       timeout: 10s
-       retries: 3
-   ```
+Use the automated script:
 
-2. **Add Nginx location blocks**
-   ```nginx
-   location /app2/ {
-       proxy_pass http://app2_backend:8000;
-       # ... proxy headers
-   }
-   ```
+```bash
+./scripts/add-app.sh <app_name> <app_path> [backend_port] [frontend_port]
+```
 
-3. **Update environment variables**
-   - Add app-specific variables to docker-compose.yml
-   - Update .env.example if needed
+**Example:**
+```bash
+./scripts/add-app.sh app2 /app2 8000 80
+```
 
-4. **Test and deploy**
-   ```bash
-   docker compose up -d app2_backend
-   docker compose restart nginx-proxy
-   ```
+Then create your app directories and code, build, and deploy.
+
+### Manual Method
+
+See [MULTI_APP_DEPLOYMENT_GUIDE.md](./MULTI_APP_DEPLOYMENT_GUIDE.md) for detailed manual instructions.
+
+**Templates available:**
+- `templates/docker-compose-app-template.yml` - Docker Compose service template
+- `templates/nginx-app-template.conf` - Nginx configuration template
+- `templates/env-app-template.example` - Environment variables template
 
 ## Health Checks
 
