@@ -1,7 +1,6 @@
 version: '3.8'
 
 services:
-  # Shared Database (can be used by multiple apps)
   db:
     image: postgres:13-alpine
     volumes:
@@ -10,54 +9,19 @@ services:
       - POSTGRES_DB=consult_db
       - POSTGRES_USER=consult_user
       - POSTGRES_PASSWORD=consult_password
-    networks:
-      - consult_network
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U consult_user -d consult_db"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
-    restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          cpus: '1.0'
-          memory: 1G
-        reservations:
-          cpus: '0.5'
-          memory: 512M
+    ports:
+      - "5432:5432"
+    network_mode: host
 
-  # Shared Redis (can be used by multiple apps)
   redis:
     image: redis:7-alpine
-    command: redis-server --appendonly yes
-    volumes:
-      - redis_data:/data
-    networks:
-      - consult_network
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 3s
-      retries: 5
-    restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
-          memory: 512M
-        reservations:
-          cpus: '0.25'
-          memory: 256M
+    ports:
+      - "6379:6379"
+    network_mode: host
 
-  # Consult App - Backend Service
   backend:
     build: ./backend
     command: uvicorn config.asgi:application --host 0.0.0.0 --port 8000
-    # Remove port mapping to avoid conflicts - nginx will proxy
-    expose:
-      - "8000"
     volumes:
       - ./backend:/app
       - static_volume:/app/staticfiles
@@ -65,165 +29,51 @@ services:
     environment:
       - DEBUG=0
       - SECRET_KEY=change_me_in_prod
-      - ALLOWED_HOSTS=localhost,127.0.0.1,backend,34.93.19.177
+      - ALLOWED_HOSTS=localhost,127.0.0.1,backend,3.233.180.130,18.220.252.164,34.93.19.177
       - DATABASE=postgres
       - DB_NAME=consult_db
       - DB_USER=consult_user
       - DB_PASSWORD=consult_password
-      - DB_HOST=db
+      - DB_HOST=localhost
       - DB_PORT=5432
-      - REDIS_URL=redis://redis:6379/0
-      - REDIS_HOST=redis
+      - REDIS_URL=redis://localhost:6379/0
+      - REDIS_HOST=localhost
       - REDIS_PORT=6379
-      - CORS_ALLOWED_ORIGINS=http://34.93.19.177,http://localhost:3000,http://localhost
-      - CSRF_TRUSTED_ORIGINS=http://34.93.19.177,http://localhost:3000,http://localhost
+      - CORS_ALLOWED_ORIGINS=http://3.233.180.130,http://18.220.252.164,http://34.93.19.177,http://localhost:3000,http://localhost
+      - CSRF_TRUSTED_ORIGINS=http://3.233.180.130,http://18.220.252.164,http://34.93.19.177,http://localhost:3000,http://localhost
     depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    networks:
-      - consult_network
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/health/"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
-    restart: unless-stopped
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
-    deploy:
-      resources:
-        limits:
-          cpus: '2.0'
-          memory: 2G
-        reservations:
-          cpus: '1.0'
-          memory: 1G
+      - db
+      - redis
+    network_mode: host
 
-  # Consult App - Frontend Service
   frontend:
     build:
       context: ./frontend
       args:
-        - VITE_API_URL=http://34.93.19.177/api/v1
-        - VITE_WS_URL=ws://34.93.19.177/ws
-    # Remove port mapping to avoid conflicts - nginx will proxy
-    expose:
-      - "80"
+        - VITE_API_URL=http://3.233.180.130/api/v1
+        - VITE_WS_URL=ws://3.233.180.130/ws
+    ports:
+      - "3000:80"
     depends_on:
-      backend:
-        condition: service_healthy
-    networks:
-      - consult_network
-    healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
-    restart: unless-stopped
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
-    deploy:
-      resources:
-        limits:
-          cpus: '1.0'
-          memory: 512M
-        reservations:
-          cpus: '0.5'
-          memory: 256M
+      - backend
 
-  # Nginx Reverse Proxy (handles all apps)
   nginx-proxy:
     image: nginx:alpine
     ports:
       - "80:80"
-      # Reserve ports for other apps if needed (commented out)
-      # - "8080:8080"  # Example: for another app
-      # - "8081:8081"  # Example: for another app
     volumes:
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
-      - ./nginx/error-pages:/etc/nginx/error-pages:ro
       - static_volume:/app/staticfiles
       - media_volume:/app/media
-      - nginx_logs:/var/log/nginx
     depends_on:
-      backend:
-        condition: service_healthy
-      frontend:
-        condition: service_healthy
-    networks:
-      - consult_network
-    healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-    restart: unless-stopped
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
-          memory: 256M
-        reservations:
-          cpus: '0.25'
-          memory: 128M
-
-  # Template for adding new apps - uncomment and modify as needed
-  # app2_backend:
-  #   build: ./app2/backend
-  #   expose:
-  #     - "8000"
-  #   environment:
-  #     - APP_NAME=app2
-  #     - DB_HOST=db
-  #     - REDIS_HOST=redis
-  #   depends_on:
-  #     db:
-  #       condition: service_healthy
-  #     redis:
-  #       condition: service_healthy
-  #   networks:
-  #     - consult_network
-  #   healthcheck:
-  #     test: ["CMD", "curl", "-f", "http://localhost:8000/health/"]
-  #     interval: 30s
-  #     timeout: 10s
-  #     retries: 3
-  #   restart: unless-stopped
-  #   deploy:
-  #     resources:
-  #       limits:
-  #         cpus: '1.0'
-  #         memory: 1G
-  #       reservations:
-  #         cpus: '0.5'
-  #         memory: 512M
+      - backend
+      - frontend
+    network_mode: host
 
 volumes:
   postgres_data:
-    driver: local
-  redis_data:
-    driver: local
   static_volume:
-    driver: local
   media_volume:
-    driver: local
-  nginx_logs:
-    driver: local
 
 
 networks:
