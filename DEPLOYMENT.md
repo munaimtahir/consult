@@ -29,8 +29,8 @@ This guide provides simple steps to deploy the Hospital Consult System on a Linu
 
 ## Accessing the Application
 
--   **Frontend:** Open your web browser and navigate to `http://18.220.252.164`.
--   **Backend API:** The API is accessible at `http://18.220.252.164/api/v1/`.
+-   **Frontend:** Open your web browser and navigate to `http://34.93.19.177`.
+-   **Backend API:** The API is accessible at `http://34.93.19.177/api/v1/`.
 
 ## Default Login Credentials
 
@@ -100,7 +100,7 @@ This guide provides instructions for deploying the application on a Linux VPS wi
     ```
 3.  **Create a production build:**
     ```bash
-    VITE_API_URL=http://18.220.252.164/api/v1 VITE_WS_URL=ws://18.220.252.164/ws npm run build
+    VITE_API_URL=http://34.93.19.177/api/v1 VITE_WS_URL=ws://34.93.19.177/ws npm run build
     ```
 4.  The static files will be generated in the `frontend/dist` directory.
 
