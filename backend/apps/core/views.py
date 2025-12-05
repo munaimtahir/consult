@@ -6,8 +6,10 @@ API endpoints for core functionality including filter presets.
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import viewsets, status
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.exceptions import PermissionDenied
+from django.db import connection
+from django.core.cache import cache
 
 from apps.core.models import FilterPreset, AuditLog, OnCallSchedule, AssignmentPolicy
 from apps.core.serializers import (
@@ -16,6 +18,52 @@ from apps.core.serializers import (
     OnCallScheduleSerializer,
     AssignmentPolicySerializer
 )
+
+
+class HealthCheckView(APIView):
+    """Health check endpoint for monitoring and load balancers.
+    
+    This endpoint checks the health of the application by verifying:
+    - Database connectivity
+    - Cache (Redis) connectivity
+    - Basic application functionality
+    """
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        """Returns health status of the application.
+        
+        Returns:
+            Response with status 'healthy' if all checks pass,
+            or 'unhealthy' with error details if any check fails.
+        """
+        health_status = {
+            "status": "healthy",
+            "checks": {}
+        }
+        
+        # Check database connectivity
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute("SELECT 1")
+                health_status["checks"]["database"] = "ok"
+        except Exception as e:
+            health_status["status"] = "unhealthy"
+            health_status["checks"]["database"] = f"error: {str(e)}"
+        
+        # Check cache (Redis) connectivity
+        try:
+            cache.set("health_check", "ok", 10)
+            cache.get("health_check")
+            health_status["checks"]["cache"] = "ok"
+        except Exception as e:
+            health_status["status"] = "unhealthy"
+            health_status["checks"]["cache"] = f"error: {str(e)}"
+        
+        # Return appropriate status code
+        status_code = status.HTTP_200_OK if health_status["status"] == "healthy" else status.HTTP_503_SERVICE_UNAVAILABLE
+        
+        return Response(health_status, status=status_code)
 
 
 class APIRootView(APIView):
