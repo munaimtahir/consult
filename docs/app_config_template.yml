@@ -1,0 +1,140 @@
+# Template for adding a new app to docker-compose.yml
+# Copy this template and modify for your app
+
+# App Name: [APP_NAME]
+# Path: /[app_path]/
+# Description: [Brief description of the app]
+
+# [APP_NAME] - Backend Service
+[app_name]_backend:
+  build: ./[app_path]/backend
+  expose:
+    - "8000"  # Change port if needed
+  environment:
+    # App identification
+    - APP_NAME=[app_name]
+    - APP_PATH=/[app_path]/
+    
+    # Database configuration (choose one)
+    # Option 1: Shared database
+    - DB_HOST=db
+    - DB_NAME=[app_name]_db
+    - DB_USER=consult_user
+    - DB_PASSWORD=consult_password
+    - DB_PORT=5432
+    # Option 2: Separate database (uncomment and add db service)
+    # - DB_HOST=[app_name]_db
+    # - DB_NAME=[app_name]_db
+    # - DB_USER=[app_name]_user
+    # - DB_PASSWORD=[app_name]_password
+    
+    # Redis configuration
+    - REDIS_HOST=redis
+    - REDIS_URL=redis://redis:6379/[db_number]  # Use different DB number (0-15)
+    
+    # Django/Django REST Framework settings
+    - DEBUG=0
+    - SECRET_KEY=[generate_secret_key]
+    - ALLOWED_HOSTS=localhost,127.0.0.1,[app_name]_backend,34.93.19.177
+    - CORS_ALLOWED_ORIGINS=http://34.93.19.177
+    - CSRF_TRUSTED_ORIGINS=http://34.93.19.177
+    
+    # Add app-specific environment variables here
+    # - CUSTOM_VAR=value
+    
+  depends_on:
+    db:
+      condition: service_healthy
+    redis:
+      condition: service_healthy
+    # Add other dependencies here
+    # - other_service:
+    #     condition: service_healthy
+    
+  networks:
+    - consult_network
+    
+  healthcheck:
+    test: ["CMD", "curl", "-f", "http://localhost:8000/health/"]
+    # Alternative for apps without curl:
+    # test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8000/health/"]
+    interval: 30s
+    timeout: 10s
+    retries: 3
+    start_period: 40s
+    
+  restart: unless-stopped
+  
+  logging:
+    driver: "json-file"
+    options:
+      max-size: "10m"
+      max-file: "3"
+      
+  deploy:
+    resources:
+      limits:
+        cpus: '1.0'      # Adjust based on needs
+        memory: 1G       # Adjust based on needs
+      reservations:
+        cpus: '0.5'
+        memory: 512M
+
+# [APP_NAME] - Frontend Service (if applicable)
+[app_name]_frontend:
+  build:
+    context: ./[app_path]/frontend
+    args:
+      - VITE_API_URL=http://34.93.19.177/[app_path]/api/v1
+      # Add other build args as needed
+      
+  expose:
+    - "80"  # Change port if needed
+    
+  depends_on:
+    [app_name]_backend:
+      condition: service_healthy
+      
+  networks:
+    - consult_network
+    
+  healthcheck:
+    test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/"]
+    interval: 30s
+    timeout: 10s
+    retries: 3
+    start_period: 30s
+    
+  restart: unless-stopped
+  
+  deploy:
+    resources:
+      limits:
+        cpus: '0.5'
+        memory: 512M
+      reservations:
+        cpus: '0.25'
+        memory: 256M
+
+# If using separate database, add this:
+# [app_name]_db:
+#   image: postgres:13-alpine
+#   volumes:
+#     - [app_name]_db_data:/var/lib/postgresql/data
+#   environment:
+#     - POSTGRES_DB=[app_name]_db
+#     - POSTGRES_USER=[app_name]_user
+#     - POSTGRES_PASSWORD=[app_name]_password
+#   networks:
+#     - consult_network
+#   healthcheck:
+#     test: ["CMD-SHELL", "pg_isready -U [app_name]_user -d [app_name]_db"]
+#     interval: 10s
+#     timeout: 5s
+#     retries: 5
+#   restart: unless-stopped
+
+# Don't forget to add volume if using separate database:
+# volumes:
+#   [app_name]_db_data:
+#     driver: local
