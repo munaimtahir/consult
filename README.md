@@ -192,6 +192,36 @@ npm run build
 
 ## 🚢 Deployment
 
+### Multi-App Deployment Configuration
+
+This project is configured for **multi-app deployment**, allowing multiple applications to run on the same server using path-based routing through Nginx. See [MULTI_APP_DEPLOYMENT_PLAN.md](./MULTI_APP_DEPLOYMENT_PLAN.md) for the complete plan.
+
+**Key Features:**
+- ✅ Path-based routing for multiple apps
+- ✅ Health checks for all services
+- ✅ Resource limits and isolation
+- ✅ Easy to add new apps
+- ✅ Centralized Nginx reverse proxy
+
+**Quick Commands:**
+```bash
+# List all apps
+bash scripts/manage-apps.sh list
+
+# Check health of all apps
+bash scripts/manage-apps.sh health
+
+# Start/stop specific app
+bash scripts/manage-apps.sh start backend
+bash scripts/manage-apps.sh stop frontend
+
+# View logs
+bash scripts/manage-apps.sh logs backend
+```
+
+**Adding a New App:**
+See [docs/ADD_NEW_APP_GUIDE.md](./docs/ADD_NEW_APP_GUIDE.md) for detailed instructions.
+
 ### Docker Deployment (Recommended)
 
 ```bash
