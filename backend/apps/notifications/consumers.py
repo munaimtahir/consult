@@ -22,8 +22,9 @@ class NotificationConsumer(AsyncWebsocketConsumer):
         """
         self.user = self.scope['user']
         
-        if not self.user.is_authenticated:
-            await self.close()
+        # Check if user is authenticated (not AnonymousUser)
+        if not self.user or not self.user.is_authenticated:
+            await self.close(code=4001)  # Unauthorized
             return
             
         # Create a unique group for the user
@@ -38,7 +39,7 @@ class NotificationConsumer(AsyncWebsocketConsumer):
         await self.accept()
         
         # Also join department group if user belongs to one
-        if self.user.department_id:
+        if hasattr(self.user, 'department_id') and self.user.department_id:
             self.dept_group_name = f'dept_{self.user.department_id}'
             await self.channel_layer.group_add(
                 self.dept_group_name,
