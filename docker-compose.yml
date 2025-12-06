@@ -61,6 +61,8 @@ services:
     image: nginx:alpine
     # Using host networking - ports are directly exposed on host
     # Port 80 is available on host without mapping
+    # WARNING: Host networking bypasses Docker's network isolation (security concern)
+    # See DEPLOYMENT_COMPLETE.md for security implications and recommendations
     volumes:
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
       - static_volume:/app/staticfiles
