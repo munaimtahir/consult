@@ -2,7 +2,7 @@
 
 ## Server Information
 
-**Server IP Address:** `3.233.180.130`
+**Server IP Address:** `34.93.19.177`
 
 ## Service Status
 
@@ -26,9 +26,9 @@ All services are deployed and running:
 ### External Access (from internet)
 **Note:** External access requires firewall/security group configuration in your cloud provider's console.
 
-- **Frontend**: http://3.233.180.130/
-- **Backend API**: http://3.233.180.130/api/v1/
-- **Admin Panel**: http://3.233.180.130/admin/
+- **Frontend**: http://34.93.19.177/
+- **Backend API**: http://34.93.19.177/api/v1/
+- **Admin Panel**: http://34.93.19.177/admin/
 
 ## Firewall Configuration Required
 
