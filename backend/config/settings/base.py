@@ -218,6 +218,10 @@ CELERY_BEAT_SCHEDULE = {
         'task': 'apps.consults.tasks.check_sla_breaches',
         'schedule': timedelta(minutes=15),
     },
+    'update-overdue-status': {
+        'task': 'apps.core.services.escalation_service.update_overdue_status_task',
+        'schedule': timedelta(minutes=5),
+    },
 }
 
 # Django Channels

@@ -91,8 +91,8 @@ class DepartmentDashboardView(views.APIView):
         today = timezone.now().date()
         
         summary = {
-            'total_active': received_qs.exclude(status__in=['COMPLETED', 'CANCELLED']).count(),
-            'pending': received_qs.filter(status='PENDING').count(),
+            'total_active': received_qs.exclude(status__in=['COMPLETED', 'CANCELLED', 'CLOSED']).count(),
+            'pending': received_qs.filter(status='SUBMITTED').count(),
             'acknowledged': received_qs.filter(status='ACKNOWLEDGED').count(),
             'in_progress': received_qs.filter(status='IN_PROGRESS').count(),
             'completed_today': received_qs.filter(
@@ -101,8 +101,8 @@ class DepartmentDashboardView(views.APIView):
             ).count(),
             'overdue': received_qs.filter(
                 is_overdue=True
-            ).exclude(status__in=['COMPLETED', 'CANCELLED']).count(),
-            'sent_active': sent_qs.exclude(status__in=['COMPLETED', 'CANCELLED']).count(),
+            ).exclude(status__in=['COMPLETED', 'CANCELLED', 'CLOSED']).count(),
+            'sent_active': sent_qs.exclude(status__in=['COMPLETED', 'CANCELLED', 'CLOSED']).count(),
         }
         
         # Build consult list data
@@ -210,12 +210,12 @@ class GlobalDashboardView(views.APIView):
         today = timezone.now().date()
         
         global_kpis = {
-            'total_open': qs.exclude(status__in=['COMPLETED', 'CANCELLED']).count(),
+            'total_open': qs.exclude(status__in=['COMPLETED', 'CANCELLED', 'CLOSED']).count(),
             'total_today': qs.filter(created_at__date=today).count(),
             'overdue_count': qs.filter(
                 is_overdue=True
-            ).exclude(status__in=['COMPLETED', 'CANCELLED']).count(),
-            'pending_count': qs.filter(status='PENDING').count(),
+            ).exclude(status__in=['COMPLETED', 'CANCELLED', 'CLOSED']).count(),
+            'pending_count': qs.filter(status='SUBMITTED').count(),
             'in_progress_count': qs.filter(status='IN_PROGRESS').count(),
             'completed_today': qs.filter(
                 status='COMPLETED',
@@ -304,14 +304,14 @@ class GlobalDashboardView(views.APIView):
                 'department_id': dept.id,
                 'department_name': dept.name,
                 'open_received_count': dept_received.exclude(
-                    status__in=['COMPLETED', 'CANCELLED']
+                    status__in=['COMPLETED', 'CANCELLED', 'CLOSED']
                 ).count(),
                 'open_sent_count': dept_sent.exclude(
-                    status__in=['COMPLETED', 'CANCELLED']
+                    status__in=['COMPLETED', 'CANCELLED', 'CLOSED']
                 ).count(),
                 'overdue_count': dept_received.filter(
                     is_overdue=True
-                ).exclude(status__in=['COMPLETED', 'CANCELLED']).count(),
+                ).exclude(status__in=['COMPLETED', 'CANCELLED', 'CLOSED']).count(),
                 'average_ack_time_minutes': avg_ack_time,
                 'average_completion_time_minutes': avg_completion_time,
             })
