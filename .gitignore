@@ -111,5 +111,10 @@ mobile/.metro/
 test-results/
 playwright-report/
 
-# Tokens and temporary credentials (should not be committed)
-access_token.txt
+# Security: Exclude token and credential files
+*_token.txt
+*_token.json
+*.key
+*.pem
+secrets/
+credentials/
