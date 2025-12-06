@@ -190,7 +190,7 @@ class EscalationService:
         """
         queryset = ConsultRequest.objects.filter(
             is_overdue=True,
-            status__in=['PENDING', 'ACKNOWLEDGED', 'IN_PROGRESS']
+            status__in=['SUBMITTED', 'PENDING', 'ACKNOWLEDGED', 'IN_PROGRESS']
         ).select_related(
             'patient',
             'requester',
@@ -219,7 +219,7 @@ class EscalationService:
         
         queryset = ConsultRequest.objects.filter(
             is_overdue=False,
-            status__in=['PENDING', 'ACKNOWLEDGED', 'IN_PROGRESS'],
+            status__in=['SUBMITTED', 'PENDING', 'ACKNOWLEDGED', 'IN_PROGRESS'],
             expected_response_time__lte=threshold_time,
             expected_response_time__gt=timezone.now()
         ).select_related(
@@ -246,7 +246,7 @@ class EscalationService:
         """
         now = timezone.now()
         updated = ConsultRequest.objects.filter(
-            status__in=['PENDING', 'ACKNOWLEDGED', 'IN_PROGRESS'],
+            status__in=['SUBMITTED', 'PENDING', 'ACKNOWLEDGED', 'IN_PROGRESS'],
             is_overdue=False,
             expected_response_time__lt=now
         ).update(is_overdue=True)
