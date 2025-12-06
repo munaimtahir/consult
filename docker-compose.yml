@@ -29,7 +29,7 @@ services:
     environment:
       - DEBUG=0
       - SECRET_KEY=change_me_in_prod
-      - ALLOWED_HOSTS=localhost,127.0.0.1,backend,3.233.180.130,18.220.252.164,34.93.19.177
+      - ALLOWED_HOSTS=localhost,127.0.0.1,backend,34.93.19.177
       - DATABASE=postgres
       - DB_NAME=consult_db
       - DB_USER=consult_user
@@ -39,8 +39,8 @@ services:
       - REDIS_URL=redis://localhost:6379/0
       - REDIS_HOST=localhost
       - REDIS_PORT=6379
-      - CORS_ALLOWED_ORIGINS=http://3.233.180.130,http://18.220.252.164,http://34.93.19.177,http://localhost:3000,http://localhost
-      - CSRF_TRUSTED_ORIGINS=http://3.233.180.130,http://18.220.252.164,http://34.93.19.177,http://localhost:3000,http://localhost
+      - CORS_ALLOWED_ORIGINS=http://34.93.19.177,http://localhost:3000,http://localhost
+      - CSRF_TRUSTED_ORIGINS=http://34.93.19.177,http://localhost:3000,http://localhost
     depends_on:
       - db
       - redis
@@ -50,8 +50,8 @@ services:
     build:
       context: ./frontend
       args:
-        - VITE_API_URL=http://3.233.180.130/api/v1
-        - VITE_WS_URL=ws://3.233.180.130/ws
+        - VITE_API_URL=http://34.93.19.177/api/v1
+        - VITE_WS_URL=ws://34.93.19.177/ws
     ports:
       - "3000:80"
     depends_on:

@@ -1,12 +1,12 @@
 #!/bin/bash
 # Deployment script for Hospital Consult System
-# Server IP: 3.233.180.130
+# Server IP: 34.93.19.177
 
 set -e
 
 echo "========================================="
 echo "Hospital Consult System - Deployment"
-echo "Server IP: 3.233.180.130"
+echo "Server IP: 34.93.19.177"
 echo "========================================="
 
 # Check if Docker is running
@@ -40,9 +40,9 @@ echo ""
 echo "========================================="
 echo "Deployment Complete!"
 echo "========================================="
-echo "Frontend: http://3.233.180.130"
-echo "Backend API: http://3.233.180.130/api/v1/"
-echo "Admin Panel: http://3.233.180.130/admin/"
+echo "Frontend: http://34.93.19.177"
+echo "Backend API: http://34.93.19.177/api/v1/"
+echo "Admin Panel: http://34.93.19.177/admin/"
 echo ""
 echo "To view logs: sudo docker compose logs -f"
 echo "To stop: sudo docker compose down"
