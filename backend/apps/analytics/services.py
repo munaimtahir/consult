@@ -89,7 +89,7 @@ class AnalyticsService:
             'escalations_received': escalations,
             'active_consults': ConsultRequest.objects.filter(
                 assigned_to=doctor,
-                status__in=['PENDING', 'ACKNOWLEDGED', 'IN_PROGRESS']
+                status__in=['SUBMITTED', 'ACKNOWLEDGED', 'IN_PROGRESS', 'MORE_INFO_REQUIRED']
             ).count()
         }
 
@@ -118,9 +118,9 @@ class AnalyticsService:
 
         total_received = consults.count()
         completed = consults.filter(status='COMPLETED').count()
-        pending = consults.filter(status__in=['PENDING', 'ACKNOWLEDGED']).count()
+        pending = consults.filter(status__in=['SUBMITTED', 'ACKNOWLEDGED']).count()
         in_progress = consults.filter(status='IN_PROGRESS').count()
-        overdue = consults.filter(is_overdue=True).exclude(status='COMPLETED').count()
+        overdue = consults.filter(is_overdue=True).exclude(status__in=['COMPLETED', 'CANCELLED', 'CLOSED']).count()
         escalated = consults.filter(escalation_level__gt=0).count()
 
         # SLA compliance
@@ -189,8 +189,8 @@ class AnalyticsService:
 
         total = consults.count()
         completed = consults.filter(status='COMPLETED').count()
-        active = consults.exclude(status__in=['COMPLETED', 'CANCELLED']).count()
-        overdue = consults.filter(is_overdue=True).exclude(status='COMPLETED').count()
+        active = consults.exclude(status__in=['COMPLETED', 'CANCELLED', 'CLOSED']).count()
+        overdue = consults.filter(is_overdue=True).exclude(status__in=['COMPLETED', 'CANCELLED', 'CLOSED']).count()
 
         # SLA compliance
         completed_consults = consults.filter(status='COMPLETED', completed_at__isnull=False)

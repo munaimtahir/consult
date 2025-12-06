@@ -9,20 +9,19 @@ services:
       - POSTGRES_DB=consult_db
       - POSTGRES_USER=consult_user
       - POSTGRES_PASSWORD=consult_password
-    networks:
-      - consult_network
+    ports:
+      - "5432:5432"
+    network_mode: host
 
   redis:
     image: redis:7-alpine
-    networks:
-      - consult_network
+    ports:
+      - "6379:6379"
+    network_mode: host
 
   backend:
     build: ./backend
     command: uvicorn config.asgi:application --host 0.0.0.0 --port 8000
-    # Remove port mapping to avoid conflicts - nginx will proxy
-    expose:
-      - "8000"
     volumes:
       - ./backend:/app
       - static_volume:/app/staticfiles
@@ -30,37 +29,33 @@ services:
     environment:
       - DEBUG=0
       - SECRET_KEY=change_me_in_prod
-      - ALLOWED_HOSTS=localhost,127.0.0.1,backend,18.220.252.164
+      - ALLOWED_HOSTS=localhost,127.0.0.1,backend,34.93.19.177
       - DATABASE=postgres
       - DB_NAME=consult_db
       - DB_USER=consult_user
       - DB_PASSWORD=consult_password
-      - DB_HOST=db
+      - DB_HOST=localhost
       - DB_PORT=5432
-      - REDIS_URL=redis://redis:6379/0
-      - REDIS_HOST=redis
+      - REDIS_URL=redis://localhost:6379/0
+      - REDIS_HOST=localhost
       - REDIS_PORT=6379
-      - CORS_ALLOWED_ORIGINS=http://18.220.252.164,http://localhost:3000,http://localhost
-      - CSRF_TRUSTED_ORIGINS=http://18.220.252.164,http://localhost:3000,http://localhost
+      - CORS_ALLOWED_ORIGINS=http://34.93.19.177,http://localhost:3000,http://localhost
+      - CSRF_TRUSTED_ORIGINS=http://34.93.19.177,http://localhost:3000,http://localhost
     depends_on:
       - db
       - redis
-    networks:
-      - consult_network
+    network_mode: host
 
   frontend:
     build:
       context: ./frontend
       args:
-        - VITE_API_URL=http://18.220.252.164/api/v1
-        - VITE_WS_URL=ws://18.220.252.164/ws
-    # Remove port mapping to avoid conflicts - nginx will proxy
-    expose:
-      - "80"
+        - VITE_API_URL=http://34.93.19.177/api/v1
+        - VITE_WS_URL=ws://34.93.19.177/ws
+    ports:
+      - "3000:80"
     depends_on:
       - backend
-    networks:
-      - consult_network
 
   nginx-proxy:
     image: nginx:alpine
@@ -76,8 +71,7 @@ services:
     depends_on:
       - backend
       - frontend
-    networks:
-      - consult_network
+    network_mode: host
 
 volumes:
   postgres_data:

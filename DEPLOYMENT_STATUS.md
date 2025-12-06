@@ -2,7 +2,8 @@
 
 ## Server Configuration
 
-**Server IP:** `18.220.252.164`
+**Public IP:** `34.93.19.177`  
+**Private IP:** `18.220.252.164` (internal use only)
 
 ## Configuration Updates Completed
 
@@ -14,12 +15,12 @@
 - ✅ Static and media file serving configured
 
 ### 2. Docker Compose Configuration (`docker-compose.yml`)
-- ✅ Updated `ALLOWED_HOSTS` with server IP: `18.220.252.164`
-- ✅ Updated `CORS_ALLOWED_ORIGINS` with server IP
-- ✅ Updated `CSRF_TRUSTED_ORIGINS` with server IP
+- ✅ Updated `ALLOWED_HOSTS` with public IP: `34.93.19.177`
+- ✅ Updated `CORS_ALLOWED_ORIGINS` with public IP
+- ✅ Updated `CSRF_TRUSTED_ORIGINS` with public IP
 - ✅ Updated frontend build args:
-  - `VITE_API_URL=http://18.220.252.164/api/v1`
-  - `VITE_WS_URL=ws://18.220.252.164/ws`
+  - `VITE_API_URL=http://34.93.19.177/api/v1`
+  - `VITE_WS_URL=ws://34.93.19.177/ws`
 - ✅ Removed direct port mappings to avoid conflicts
 - ✅ Services use `expose` instead of `ports` for internal communication
 
@@ -76,10 +77,10 @@ sudo docker compose logs -f
 
 ## Access URLs
 
-- **Frontend**: http://18.220.252.164
-- **Backend API**: http://18.220.252.164/api/v1/
-- **Admin Panel**: http://18.220.252.164/admin/
-- **WebSocket**: ws://18.220.252.164/ws
+- **Frontend**: http://34.93.19.177
+- **Backend API**: http://34.93.19.177/api/v1/
+- **Admin Panel**: http://34.93.19.177/admin/
+- **WebSocket**: ws://34.93.19.177/ws
 
 ## Default Login Credentials
 
@@ -136,7 +137,8 @@ sudo docker compose up -d
 
 ## Notes
 
-- The server IP `18.220.252.164` has been updated in all configuration files
+- The public IP `34.93.19.177` is configured in all runtime configuration files
+- Documentation has been updated to reflect the correct public IP address
 - CORS is configured to allow requests from the server IP
 - All services communicate through Docker's internal network
 - Nginx acts as the reverse proxy for all external traffic

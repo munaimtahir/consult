@@ -13,10 +13,16 @@ from apps.analytics.dashboard_views import (
     ConsultReassignView,
     ConsultForceCloseView,
 )
+from apps.core.admin_views import (
+    EmailNotificationSettingsViewSet,
+    SMTPConfigurationViewSet,
+)
 
 router = DefaultRouter()
 router.register(r'users', AdminUserViewSet, basename='admin-user')
 router.register(r'departments', AdminDepartmentViewSet, basename='admin-department')
+router.register(r'email-notification-settings', EmailNotificationSettingsViewSet, basename='email-notification-settings')
+router.register(r'smtp-configurations', SMTPConfigurationViewSet, basename='smtp-configurations')
 
 urlpatterns = [
     path('', include(router.urls)),

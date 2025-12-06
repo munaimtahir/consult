@@ -118,7 +118,9 @@ class AuditServiceTests(TestCase):
         )
         
         self.assertIsNotNone(log.id)
-        self.assertEqual(log.resource_type, 'CONSULT')
+        self.assertEqual(log.action, 'UNAUTHORIZED_ACCESS')
+        self.assertIn('resource_type', log.details)
+        self.assertEqual(log.details['resource_type'], 'CONSULT')
 
 
 class AssignmentServiceTests(TestCase):
