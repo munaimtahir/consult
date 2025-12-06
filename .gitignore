@@ -106,3 +106,11 @@ mobile/.metro/
 
 # Keep the keystore file in git for this project (normally you would exclude it)
 # !mobile/android/app/consult-release-key.keystore
+
+# Security: Exclude token and credential files
+*_token.txt
+*_token.json
+*.key
+*.pem
+secrets/
+credentials/

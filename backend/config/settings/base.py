@@ -9,6 +9,10 @@ from decouple import config
 # Build paths inside the project
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
+# Ensure log directory exists for file handlers
+LOG_DIR = BASE_DIR / 'logs'
+LOG_DIR.mkdir(parents=True, exist_ok=True)
+
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = config('SECRET_KEY', default='django-insecure-change-this-in-production')
 
@@ -214,6 +218,10 @@ CELERY_BEAT_SCHEDULE = {
         'task': 'apps.consults.tasks.check_sla_breaches',
         'schedule': timedelta(minutes=15),
     },
+    'update-overdue-status': {
+        'task': 'apps.core.services.escalation_service.update_overdue_status_task',
+        'schedule': timedelta(minutes=5),
+    },
 }
 
 # Django Channels
@@ -243,7 +251,7 @@ LOGGING = {
         },
         'file': {
             'class': 'logging.FileHandler',
-            'filename': BASE_DIR / 'logs' / 'django.log',
+            'filename': LOG_DIR / 'django.log',
             'formatter': 'verbose',
         },
     },

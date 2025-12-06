@@ -4,7 +4,8 @@ Core URL configuration.
 
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import (
+from .core_views import (
+    HealthCheckView,
     APIRootView,
     FilterPresetViewSet,
     AuditLogView,
@@ -20,6 +21,7 @@ router.register(r'on-call-schedules', OnCallScheduleViewSet, basename='on-call-s
 router.register(r'assignment-policies', AssignmentPolicyViewSet, basename='assignment-policy')
 
 urlpatterns = [
+    path('health/', HealthCheckView.as_view(), name='health-check'),
     path('', APIRootView.as_view(), name='api-root'),
     path('auth/', include('apps.accounts.urls')),
     path('departments/', include('apps.departments.urls')),
