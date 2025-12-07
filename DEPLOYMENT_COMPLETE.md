@@ -58,12 +58,27 @@ gcloud compute firewall-rules create allow-https \
 
 ## Default Login Credentials
 
-| Role             | Email                    | Password        |
-| ---------------- | ------------------------ | --------------- |
-| **Superuser**    | `admin@pmc.edu.pk`       | `adminpassword123` |
-| **System Admin** | `sysadmin@pmc.edu.pk`    | `password123`   |
-| **HOD (Cardiology)**|`cardio.hod@pmc.edu.pk` | `password123`   |
-| **Doctor (Cardiology)** | `cardio.doc@pmc.edu.pk`  | `password123`   |
+**IMPORTANT SECURITY NOTE**: Default credentials should be changed immediately after first login.
+
+The system comes with pre-configured test users. Default credentials are generated during deployment and should be:
+1. Changed immediately after first login for production use
+2. Never committed to version control
+3. Stored securely using a password manager or secrets management system
+
+To view or reset credentials, use the backend's Django admin panel or management commands:
+```bash
+# Create a new superuser with secure password
+sudo docker compose exec backend python manage.py createsuperuser
+
+# Reset an existing user's password
+sudo docker compose exec backend python manage.py changepassword <email>
+```
+
+Default test user roles available:
+- Superuser (email: `admin@pmc.edu.pk`)
+- System Admin (email: `sysadmin@pmc.edu.pk`)
+- HOD - Cardiology (email: `cardio.hod@pmc.edu.pk`)
+- Doctor - Cardiology (email: `cardio.doc@pmc.edu.pk`)
 
 ## Service Management
 
@@ -127,6 +142,22 @@ Port 80 (nginx-proxy - host network)
 - **Backend, Database, Redis**: Using host networking mode
 - **Frontend**: Using bridge network, exposed on port 3000
 - **Nginx Proxy**: Using host networking mode, listening on port 80
+
+### ⚠️ Security Note: Host Networking Mode
+
+This deployment uses Docker's `network_mode: host` for several services to resolve networking issues. 
+
+**Important Security Considerations:**
+- **Reduced Isolation**: Host networking bypasses Docker's network isolation, exposing container ports directly on the host's network interface
+- **Port Conflicts**: Services using host networking may conflict with other applications on the same ports
+- **Production Considerations**: For production deployments, consider:
+  - Using Docker's bridge networking with proper service discovery
+  - Implementing additional firewall rules to restrict access to sensitive ports
+  - Using a VPN or private network for database and Redis access
+  - Configuring security groups/firewalls to only expose necessary ports (80, 443) to the internet
+
+**Why Host Networking Was Used:**
+This configuration was implemented to resolve Docker networking issues encountered during deployment. For better security, migrate to bridge networking when possible.
 
 ## Troubleshooting
 
