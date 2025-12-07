@@ -115,7 +115,7 @@ The repository demonstrates strong foundational architecture with modern technol
 
 5. **Incomplete Implementations** (`backend/apps/core/services/`)
    - Multiple `pass` statements in `email_service.py` and `escalation_service.py`
-   - Error handling blocks with only `pass` statement
+   - Error handling blocks with only `pass` statements
    - **Risk**: Silent failures, incomplete functionality
 
 6. **Missing TODO Implementation** (`backend/apps/analytics/admin.py`)
@@ -213,7 +213,7 @@ The repository demonstrates strong foundational architecture with modern technol
 ### Documentation Inconsistencies
 
 8. **Architecture Mismatch**
-   - `ARCHITECTURE.md` mentions Node.js/Express/TypeScript
+   - `ARCHITECTURE.md` mentions Node.js/Express.js/TypeScript
    - Actual implementation uses Django/Python
    - **Status**: Outdated documentation, potential confusion
 
@@ -337,9 +337,9 @@ The repository demonstrates strong foundational architecture with modern technol
 **Dockerfile Correctness:**
 
 **Backend Dockerfile:**
-- ✅ Multi-stage build not used (could optimize)
+- ⚠️ Multi-stage build not used (could optimize)
 - ✅ Production dependencies only
-- ✅ Non-root user (should verify)
+- ⚠️ Non-root user (should verify)
 - ✅ Entrypoint script for migrations
 - **File**: `/backend/Dockerfile`
 
