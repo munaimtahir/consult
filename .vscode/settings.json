@@ -1,4 +1,37 @@
 {
-    "java.configuration.updateBuildConfiguration": "automatic",
-    "java.compile.nullAnalysis.mode": "automatic"
+  // Java Configuration for VS Code/Cursor
+  // This project requires JDK 17 or higher for Android development
+  
+  // Configure JDK runtimes - update the path after installing JDK
+  // Common Windows JDK installation paths:
+  // - C:\Program Files\Java\jdk-17
+  // - C:\Program Files\Eclipse Adoptium\jdk-17.0.x-hotspot
+  // - C:\Program Files\Microsoft\jdk-17.0.x
+  "java.configuration.runtimes": [
+    {
+      "name": "JavaSE-17",
+      "path": "C:\\Program Files\\Java\\jdk-17",
+      "default": true
+    },
+    {
+      "name": "JavaSE-21",
+      "path": "C:\\Program Files\\Java\\jdk-21"
+    }
+  ],
+  
+  // Alternative: If you prefer to set a single JDK path directly
+  // Uncomment and update the path below after installing JDK:
+  // "java.jdt.ls.java.home": "C:\\Program Files\\Java\\jdk-17",
+  
+  // Java Language Server settings
+  "java.compile.nullAnalysis.mode": "automatic",
+  
+  // Gradle settings
+  "java.configuration.updateBuildConfiguration": "automatic",
+  
+  // Note: After installing JDK, update the paths above to match your installation
+  // You can find your JDK path by checking:
+  // - C:\Program Files\Java\
+  // - C:\Program Files\Eclipse Adoptium\
+  // - C:\Program Files\Microsoft\
 }
