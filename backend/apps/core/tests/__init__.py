@@ -283,7 +283,7 @@ class EscalationServiceTests(TestCase):
             target_department=self.dept,
             urgency='ROUTINE',
             reason_for_consult='Test',
-            status='PENDING'
+            status='SUBMITTED'
         )
         # Update the expected_response_time to the past to make it overdue
         # Use update() to avoid triggering save() which recalculates is_overdue
