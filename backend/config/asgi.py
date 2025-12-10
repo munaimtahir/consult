@@ -13,13 +13,16 @@ from django.core.asgi import get_asgi_application
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.production")
 
+# Initialize Django before importing middleware that uses Django models
+django_asgi_app = get_asgi_application()
+
 from channels.routing import ProtocolTypeRouter, URLRouter
 from channels.security.websocket import AllowedHostsOriginValidator
 from apps.notifications.middleware import JWTAuthMiddleware
 import apps.notifications.routing
 
 application = ProtocolTypeRouter({
-    "http": get_asgi_application(),
+    "http": django_asgi_app,
     "websocket": AllowedHostsOriginValidator(
         JWTAuthMiddleware(
             URLRouter(

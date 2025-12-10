@@ -122,7 +122,7 @@ export default function AdminDepartmentsPage() {
             </td>
             <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                 <Link
-                    to={`/admin/departments/${dept.id}`}
+                    to={`/adminpanel/departments/${dept.id}`}
                     className="text-indigo-600 hover:text-indigo-900 mr-4"
                 >
                     View

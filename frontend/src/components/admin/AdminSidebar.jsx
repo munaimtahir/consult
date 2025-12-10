@@ -13,7 +13,7 @@ const AdminSidebar = () => {
                 <ul>
                     <li>
                         <NavLink
-                            to="/admin"
+                            to="/adminpanel"
                             end
                             className={({ isActive }) =>
                                 `block px-4 py-2 ${isActive ? 'bg-blue-100 text-blue-600' : ''}`
@@ -25,7 +25,7 @@ const AdminSidebar = () => {
                     {user.permissions.can_manage_users && (
                         <li>
                             <NavLink
-                                to="/admin/users"
+                                to="/adminpanel/users"
                                 className={({ isActive }) =>
                                     `block px-4 py-2 ${isActive ? 'bg-blue-100 text-blue-600' : ''}`
                                 }
@@ -37,7 +37,7 @@ const AdminSidebar = () => {
                     {user.permissions.can_manage_departments && (
                         <li>
                             <NavLink
-                                to="/admin/departments"
+                                to="/adminpanel/departments"
                                 className={({ isActive }) =>
                                     `block px-4 py-2 ${isActive ? 'bg-blue-100 text-blue-600' : ''}`
                                 }
@@ -49,7 +49,7 @@ const AdminSidebar = () => {
                     {user.permissions.can_view_global_dashboard && (
                         <li>
                             <NavLink
-                                to="/admin/analytics/doctors"
+                                to="/adminpanel/analytics/doctors"
                                 className={({ isActive }) =>
                                     `block px-4 py-2 ${isActive ? 'bg-blue-100 text-blue-600' : ''}`
                                 }

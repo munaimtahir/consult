@@ -57,7 +57,7 @@ function App() {
             />
 
             <Route
-              path="/admin/analytics/doctors"
+              path="/adminpanel/analytics/doctors"
               element={
                 <ProtectedRoute>
                   <AdminRoute requiredPermission="can_view_global_dashboard">
@@ -70,7 +70,7 @@ function App() {
             />
 
             <Route
-              path="/admin/departments/:id"
+              path="/adminpanel/departments/:id"
               element={
                 <ProtectedRoute>
                   <AdminRoute requiredPermission="can_manage_departments">
@@ -117,7 +117,7 @@ function App() {
 
             {/* Admin Routes */}
             <Route
-              path="/admin"
+              path="/adminpanel"
               element={
                 <ProtectedRoute>
                   <AdminRoute>
@@ -130,7 +130,7 @@ function App() {
             />
 
             <Route
-              path="/admin/users"
+              path="/adminpanel/users"
               element={
                 <ProtectedRoute>
                   <AdminRoute requiredPermission="can_manage_users">
@@ -143,7 +143,7 @@ function App() {
             />
 
             <Route
-              path="/admin/departments"
+              path="/adminpanel/departments"
               element={
                 <ProtectedRoute>
                   <AdminRoute requiredPermission="can_manage_departments">
@@ -156,7 +156,7 @@ function App() {
             />
 
             <Route
-              path="/admin/dashboards/department"
+              path="/adminpanel/dashboards/department"
               element={
                 <ProtectedRoute>
                   <AdminRoute requiredPermission="can_view_department_dashboard">
@@ -169,7 +169,7 @@ function App() {
             />
 
             <Route
-              path="/admin/dashboards/global"
+              path="/adminpanel/dashboards/global"
               element={
                 <ProtectedRoute>
                   <AdminRoute requiredPermission="can_view_global_dashboard">
