@@ -9,6 +9,7 @@ from rest_framework.permissions import IsAuthenticated
 from django.utils import timezone
 from django.db.models import Q, Count, Prefetch
 
+from apps.accounts.models import User
 from .models import ConsultRequest, ConsultNote
 from .serializers import (
     ConsultRequestListSerializer,
@@ -16,8 +17,7 @@ from .serializers import (
     ConsultRequestCreateSerializer,
     ConsultNoteSerializer
 )
-
-
+from .services import ConsultService
 from .permissions import IsConsultParticipant, CanAssignConsult
 
 class ConsultRequestViewSet(viewsets.ModelViewSet):
@@ -125,25 +125,9 @@ class ConsultRequestViewSet(viewsets.ModelViewSet):
         Args:
             serializer: The serializer instance.
         """
-        from .services import ConsultService
-        
-        # We need to extract data from serializer to pass to service
-        # But serializer.save() does a lot of work. 
-        # For now, let's let serializer save, but we might want to move creation logic to service fully later.
-        # Actually, to strictly follow service pattern:
-        # serializer.save(requester=self.request.user)
-        # ConsultService.notify_new_consult(serializer.instance)
-        
-        # Better approach:
-        # 1. Validate data
-        # 2. Call service
-        
-        # However, since we are using ModelViewSet, perform_create is called after validation.
-        # Let's override create instead? Or just hook into perform_create.
-        
-        # Let's stick to the current pattern but use service for notifications/side effects
-        instance = serializer.save(requester=self.request.user)
         from apps.notifications.services import NotificationService
+        
+        instance = serializer.save(requester=self.request.user)
         NotificationService.notify_new_consult(instance)
     
     @action(detail=True, methods=['post'])
@@ -162,7 +146,6 @@ class ConsultRequestViewSet(viewsets.ModelViewSet):
             error response.
         """
         consult = self.get_object()
-        from .services import ConsultService
         
         # Check permissions
         if request.user.department != consult.target_department:
@@ -199,7 +182,6 @@ class ConsultRequestViewSet(viewsets.ModelViewSet):
             error response.
         """
         consult = self.get_object()
-        from .services import ConsultService
         
         # Check permissions - only HOD or admins can assign
         if not request.user.can_assign_consults:
@@ -222,7 +204,6 @@ class ConsultRequestViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        from apps.accounts.models import User
         try:
             assigned_user = User.objects.get(id=assigned_to_id)
         except User.DoesNotExist:
@@ -259,7 +240,6 @@ class ConsultRequestViewSet(viewsets.ModelViewSet):
             error response.
         """
         consult = self.get_object()
-        from .services import ConsultService
         
         # Check permissions - only HOD or delegated receivers can acknowledge & assign
         if not request.user.can_manage_consults:
@@ -289,7 +269,6 @@ class ConsultRequestViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        from apps.accounts.models import User
         try:
             assigned_user = User.objects.get(id=assigned_to_id)
         except User.DoesNotExist:
@@ -328,7 +307,6 @@ class ConsultRequestViewSet(viewsets.ModelViewSet):
             an error response.
         """
         consult = self.get_object()
-        from .services import ConsultService
         
         # Check permissions - must be assigned or in target department
         if (request.user != consult.assigned_to and 
@@ -372,7 +350,6 @@ class ConsultRequestViewSet(viewsets.ModelViewSet):
             error response.
         """
         consult = self.get_object()
-        from .services import ConsultService
         
         # Check permissions
         if (request.user != consult.assigned_to and 
@@ -403,7 +380,6 @@ class ConsultRequestViewSet(viewsets.ModelViewSet):
             error response.
         """
         consult = self.get_object()
-        from .services import ConsultService
         
         # Check permissions - only requester or admins can cancel
         if request.user != consult.requester and not request.user.is_admin_user:

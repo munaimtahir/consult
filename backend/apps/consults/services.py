@@ -4,6 +4,7 @@ Business logic for consult workflow.
 """
 
 from django.utils import timezone
+from django.db import transaction
 from .models import ConsultRequest, ConsultNote
 from apps.notifications.services import NotificationService
 from apps.departments.models import OnCall
@@ -151,10 +152,12 @@ class ConsultService:
         return consult
     
     @staticmethod
+    @transaction.atomic
     def acknowledge_and_assign_consult(consult, acknowledger, assigned_to_user):
         """Acknowledges and assigns a consult in one atomic action.
 
         This is the new workflow where acknowledgement and assignment must happen together.
+        Uses @transaction.atomic to ensure both operations succeed or fail together.
         
         Args:
             consult: The `ConsultRequest` to be acknowledged and assigned.
