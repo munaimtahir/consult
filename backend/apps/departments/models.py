@@ -54,6 +54,14 @@ class Department(models.Model):
         related_name='headed_departments',
         limit_choices_to={'role': 'HOD'}
     )
+    delegated_receiver = models.ForeignKey(
+        'accounts.User',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='delegated_departments',
+        help_text='Senior doctor delegated to receive and assign consults'
+    )
     contact_number = models.CharField(max_length=20, blank=True)
     is_active = models.BooleanField(default=True)
     

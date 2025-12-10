@@ -52,10 +52,16 @@ class ConsultService:
         on_call_entry = OnCall.objects.filter(department=target_department, date=today).first()
 
         if on_call_entry and on_call_entry.doctor:
+            now = timezone.now()
             consult.assigned_to = on_call_entry.doctor
+            consult.assigned_by = on_call_entry.doctor  # Auto-assigned to self
+            consult.assigned_at = now
+            consult.assignment_type = 'auto'
             consult.status = 'IN_PROGRESS'
-            consult.acknowledged_at = timezone.now()
+            consult.acknowledged_at = now
             consult.acknowledged_by = on_call_entry.doctor
+            consult.received_by = on_call_entry.doctor
+            consult.received_at = now
             consult.last_action_summary = f"Auto-assigned to on-call doctor: {on_call_entry.doctor.get_full_name()}"
             consult.save()
             NotificationService.notify_consult_assigned(consult, on_call_entry.doctor)
@@ -67,10 +73,16 @@ class ConsultService:
             ).order_by('-hierarchy_number').first()
 
             if junior_doctor:
+                now = timezone.now()
                 consult.assigned_to = junior_doctor
+                consult.assigned_by = junior_doctor  # Auto-assigned to self
+                consult.assigned_at = now
+                consult.assignment_type = 'auto'
                 consult.status = 'IN_PROGRESS'
-                consult.acknowledged_at = timezone.now()
+                consult.acknowledged_at = now
                 consult.acknowledged_by = junior_doctor
+                consult.received_by = junior_doctor
+                consult.received_at = now
                 consult.last_action_summary = f"Auto-assigned by hierarchy to: {junior_doctor.get_full_name()}"
                 consult.save()
                 NotificationService.notify_consult_assigned(consult, junior_doctor)
@@ -82,23 +94,31 @@ class ConsultService:
         return consult
     
     @staticmethod
-    def assign_consult(consult, doctor):
+    def assign_consult(consult, doctor, assigner=None):
         """Assigns a consult to a doctor and updates its status.
 
         Args:
             consult: The `ConsultRequest` to be assigned.
             doctor: The `User` to whom the consult is being assigned.
+            assigner: The user performing the assignment (optional).
 
         Returns:
             The updated `ConsultRequest` instance.
         """
+        now = timezone.now()
         consult.assigned_to = doctor
+        consult.assigned_by = assigner
+        consult.assigned_at = now
+        consult.assignment_type = 'manual'
         
         # Update status based on current state
         if consult.status == 'SUBMITTED':
             consult.status = 'ACKNOWLEDGED'
-            consult.acknowledged_at = timezone.now()
-            consult.acknowledged_by = doctor  # Or should be the assigner? Let's say the first action taker.
+            consult.acknowledged_at = now
+            consult.acknowledged_by = assigner or doctor
+            # Also set new received fields
+            consult.received_by = assigner or doctor
+            consult.received_at = now
         else:
             consult.status = 'IN_PROGRESS'
             
@@ -128,6 +148,47 @@ class ConsultService:
         
         NotificationService.notify_consult_acknowledged(consult)
 
+        return consult
+    
+    @staticmethod
+    def acknowledge_and_assign_consult(consult, acknowledger, assigned_to_user):
+        """Acknowledges and assigns a consult in one atomic action.
+
+        This is the new workflow where acknowledgement and assignment must happen together.
+        
+        Args:
+            consult: The `ConsultRequest` to be acknowledged and assigned.
+            acknowledger: The user acknowledging the consult (HOD or delegated receiver).
+            assigned_to_user: The user to whom the consult is being assigned.
+
+        Returns:
+            The updated `ConsultRequest` instance.
+        """
+        now = timezone.now()
+        
+        # Set receipt/acknowledgement fields
+        consult.received_by = acknowledger
+        consult.received_at = now
+        
+        # Also set deprecated acknowledged_by for backward compatibility
+        consult.acknowledged_by = acknowledger
+        consult.acknowledged_at = now
+        
+        # Set assignment fields
+        consult.assigned_to = assigned_to_user
+        consult.assigned_by = acknowledger
+        consult.assigned_at = now
+        consult.assignment_type = 'manual'
+        
+        # Update status to IN_PROGRESS
+        consult.status = 'IN_PROGRESS'
+        
+        consult.last_action_summary = f"Acknowledged and assigned to {assigned_to_user.get_full_name()} by {acknowledger.get_full_name()}"
+        consult.save()
+        
+        # Send notifications
+        NotificationService.notify_consult_assigned(consult, assigned_to_user)
+        
         return consult
     
     @staticmethod

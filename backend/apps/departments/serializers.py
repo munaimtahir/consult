@@ -43,6 +43,7 @@ class DepartmentSerializer(serializers.ModelSerializer):
     """
     
     head_name = serializers.CharField(source='head.get_full_name', read_only=True)
+    delegated_receiver_name = serializers.CharField(source='delegated_receiver.get_full_name', read_only=True)
     user_count = serializers.IntegerField(read_only=True)
     active_consults_count = serializers.IntegerField(read_only=True)
     parent_info = ParentDepartmentSerializer(source='parent', read_only=True)
@@ -62,6 +63,8 @@ class DepartmentSerializer(serializers.ModelSerializer):
             'subdepartments_count',
             'head',
             'head_name',
+            'delegated_receiver',
+            'delegated_receiver_name',
             'contact_number',
             'is_active',
             'emergency_sla',
@@ -113,6 +116,7 @@ class AdminDepartmentSerializer(serializers.ModelSerializer):
     
     head_name = serializers.CharField(source='head.get_full_name', read_only=True)
     head_email = serializers.CharField(source='head.email', read_only=True)
+    delegated_receiver_name = serializers.CharField(source='delegated_receiver.get_full_name', read_only=True)
     parent_info = ParentDepartmentSerializer(source='parent', read_only=True)
     is_subdepartment = serializers.BooleanField(read_only=True)
     user_count = serializers.IntegerField(read_only=True)
@@ -133,6 +137,8 @@ class AdminDepartmentSerializer(serializers.ModelSerializer):
             'head',
             'head_name',
             'head_email',
+            'delegated_receiver',
+            'delegated_receiver_name',
             'contact_number',
             'is_active',
             'emergency_sla',
