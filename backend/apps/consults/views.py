@@ -254,10 +254,10 @@ class ConsultRequestViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_403_FORBIDDEN
             )
         
-        # Validate consult status - should be SUBMITTED
+        # Validate consult status - should be SUBMITTED or ACKNOWLEDGED
         if consult.status not in ['SUBMITTED', 'ACKNOWLEDGED']:
             return Response(
-                {'error': f'Only SUBMITTED consults can be acknowledged and assigned. Current status: {consult.status}'},
+                {'error': f'Only SUBMITTED or ACKNOWLEDGED consults can be acknowledged and assigned. Current status: {consult.status}'},
                 status=status.HTTP_400_BAD_REQUEST
             )
         
