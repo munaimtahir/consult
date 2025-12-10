@@ -4,8 +4,8 @@
 
 set -e
 
-NEW_IP="34.93.19.177"
-OLD_IPS=("3.233.180.130" "18.220.252.164")
+NEW_IP="172.104.178.44"
+OLD_IPS=("3.233.180.130" "18.220.252.164" "34.93.19.177")
 
 echo "========================================="
 echo "Updating Server IP Configuration"
@@ -16,18 +16,21 @@ echo "========================================="
 echo "Updating deploy.sh..."
 sed -i "s/3\.233\.180\.130/$NEW_IP/g" deploy.sh
 sed -i "s/18\.220\.252\.164/$NEW_IP/g" deploy.sh
+sed -i "s/34\.93\.19\.177/$NEW_IP/g" deploy.sh
 echo "✅ deploy.sh updated"
 
 # Update docker-compose.yml
 echo "Updating docker-compose.yml..."
 sed -i "s/3\.233\.180\.130/$NEW_IP/g" docker-compose.yml
 sed -i "s/18\.220\.252\.164/$NEW_IP/g" docker-compose.yml
+sed -i "s/34\.93\.19\.177/$NEW_IP/g" docker-compose.yml
 echo "✅ docker-compose.yml updated"
 
 # Update nginx/default.conf
 echo "Updating nginx/default.conf..."
 sed -i "s/3\.233\.180\.130/$NEW_IP/g" nginx/default.conf
 sed -i "s/18\.220\.252\.164/$NEW_IP/g" nginx/default.conf
+sed -i "s/34\.93\.19\.177/$NEW_IP/g" nginx/default.conf
 echo "✅ nginx/default.conf updated"
 
 echo ""

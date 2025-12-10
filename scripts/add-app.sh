@@ -109,7 +109,7 @@ BACKEND_SERVICE=$(cat <<EOF
     environment:
       - DEBUG=0
       - SECRET_KEY=change_me_in_prod
-      - ALLOWED_HOSTS=localhost,127.0.0.1,${APP_NAME}_backend,34.93.19.177
+      - ALLOWED_HOSTS=localhost,127.0.0.1,${APP_NAME}_backend,172.104.178.44
       - DATABASE=postgres
       - DB_NAME=consult_db
       - DB_USER=consult_user
@@ -119,8 +119,8 @@ BACKEND_SERVICE=$(cat <<EOF
       - REDIS_URL=redis://redis:6379/0
       - REDIS_HOST=redis
       - REDIS_PORT=6379
-      - CORS_ALLOWED_ORIGINS=http://34.93.19.177,http://localhost:3000,http://localhost
-      - CSRF_TRUSTED_ORIGINS=http://34.93.19.177,http://localhost:3000,http://localhost
+      - CORS_ALLOWED_ORIGINS=http://172.104.178.44,http://localhost:3000,http://localhost
+      - CSRF_TRUSTED_ORIGINS=http://172.104.178.44,http://localhost:3000,http://localhost
     depends_on:
       db:
         condition: service_healthy
@@ -154,7 +154,7 @@ BACKEND_SERVICE=$(cat <<EOF
     build:
       context: ./${APP_NAME}/frontend
       args:
-        - VITE_API_URL=http://34.93.19.177${APP_PATH}/api
+        - VITE_API_URL=http://172.104.178.44${APP_PATH}/api
     expose:
       - "${FRONTEND_PORT}"
     depends_on:
@@ -314,7 +314,7 @@ sed -i "/nginx-proxy:/,/depends_on:/{ /depends_on:/a\\
 # Validate configurations
 print_info "Validating configurations..."
 
-if ! docker compose config > /dev/null 2>&1; then
+if ! docker-compose config > /dev/null 2>&1; then
     print_error "docker-compose.yml has errors. Restoring backup..."
     mv docker-compose.yml.backup.* docker-compose.yml 2>/dev/null || true
     mv nginx/default.conf.backup.* nginx/default.conf 2>/dev/null || true
@@ -322,8 +322,8 @@ if ! docker compose config > /dev/null 2>&1; then
 fi
 
 # Test nginx config (if nginx is running)
-if docker compose ps nginx-proxy 2>/dev/null | grep -q "running"; then
-    if ! docker compose exec -T nginx-proxy nginx -t > /dev/null 2>&1; then
+if docker-compose ps nginx-proxy 2>/dev/null | grep -q "running"; then
+    if ! docker-compose exec -T nginx-proxy nginx -t > /dev/null 2>&1; then
         print_error "Nginx configuration has errors. Restoring backup..."
         mv docker-compose.yml.backup.* docker-compose.yml 2>/dev/null || true
         mv nginx/default.conf.backup.* nginx/default.conf 2>/dev/null || true
@@ -339,10 +339,10 @@ echo "     mkdir -p ${APP_NAME}/{backend,frontend}"
 echo "  2. Add your app code to ${APP_NAME}/backend and ${APP_NAME}/frontend"
 echo "  3. Update environment variables in docker-compose.yml if needed"
 echo "  4. Build and start the app:"
-echo "     docker compose build ${APP_NAME}_backend ${APP_NAME}_frontend"
-echo "     docker compose up -d ${APP_NAME}_backend ${APP_NAME}_frontend"
+echo "     docker-compose build ${APP_NAME}_backend ${APP_NAME}_frontend"
+echo "     docker-compose up -d ${APP_NAME}_backend ${APP_NAME}_frontend"
 echo "  5. Restart nginx-proxy:"
-echo "     docker compose restart nginx-proxy"
+echo "     docker-compose restart nginx-proxy"
 echo ""
-print_info "App will be accessible at: http://34.93.19.177${APP_PATH}"
+print_info "App will be accessible at: http://172.104.178.44${APP_PATH}"
 

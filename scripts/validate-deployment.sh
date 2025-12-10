@@ -25,7 +25,7 @@ fi
 # Function to check service status
 check_service() {
     local service=$1
-    if docker compose ps | grep -q "$service.*Up"; then
+    if docker-compose ps | grep -q "$service.*Up"; then
         echo -e "${GREEN}✓${NC} $service is running"
         return 0
     else
@@ -53,7 +53,7 @@ check_endpoint() {
 # Function to check service health
 check_health() {
     local service=$1
-    local health_status=$(docker compose ps --format json | jq -r ".[] | select(.Service==\"$service\") | .Health" 2>/dev/null || echo "unknown")
+    local health_status=$(docker-compose ps --format json | jq -r ".[] | select(.Service==\"$service\") | .Health" 2>/dev/null || echo "unknown")
     if [ "$health_status" = "healthy" ]; then
         echo -e "${GREEN}✓${NC} $service health check: healthy"
         return 0
@@ -116,7 +116,7 @@ fi
 echo ""
 echo "4. Checking database connectivity..."
 echo "----------------------------------------"
-if docker compose exec -T db pg_isready -U consult_user -d consult_db > /dev/null 2>&1; then
+if docker-compose exec -T db pg_isready -U consult_user -d consult_db > /dev/null 2>&1; then
     echo -e "${GREEN}✓${NC} Database is ready and accepting connections"
 else
     echo -e "${RED}✗${NC} Database is not ready"
@@ -126,7 +126,7 @@ fi
 echo ""
 echo "5. Checking Redis connectivity..."
 echo "----------------------------------------"
-if docker compose exec -T redis redis-cli ping > /dev/null 2>&1; then
+if docker-compose exec -T redis redis-cli ping > /dev/null 2>&1; then
     echo -e "${GREEN}✓${NC} Redis is ready and accepting connections"
 else
     echo -e "${RED}✗${NC} Redis is not ready"
@@ -136,7 +136,7 @@ fi
 echo ""
 echo "6. Checking backend logs for errors..."
 echo "----------------------------------------"
-backend_errors=$(docker compose logs backend 2>&1 | grep -i "error\|exception\|traceback" | tail -5 || true)
+backend_errors=$(docker-compose logs backend 2>&1 | grep -i "error\|exception\|traceback" | tail -5 || true)
 if [ -z "$backend_errors" ]; then
     echo -e "${GREEN}✓${NC} No recent errors in backend logs"
 else
@@ -164,7 +164,7 @@ else
     echo -e "${RED}✗ DEPLOYMENT ISSUES DETECTED${NC}"
     echo ""
     echo "Please check the errors above and review service logs:"
-    echo "  docker compose logs [service_name]"
+    echo "  docker-compose logs [service_name]"
     echo ""
     exit 1
 fi

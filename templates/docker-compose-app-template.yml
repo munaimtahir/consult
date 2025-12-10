@@ -18,7 +18,7 @@
     environment:
       - DEBUG=0
       - SECRET_KEY=change_me_in_prod
-      - ALLOWED_HOSTS=localhost,127.0.0.1,APP_NAME_backend,34.93.19.177
+      - ALLOWED_HOSTS=localhost,127.0.0.1,APP_NAME_backend,172.104.178.44
       - DATABASE=postgres
       - DB_NAME=consult_db
       - DB_USER=consult_user
@@ -28,8 +28,8 @@
       - REDIS_URL=redis://redis:6379/0
       - REDIS_HOST=redis
       - REDIS_PORT=6379
-      - CORS_ALLOWED_ORIGINS=http://34.93.19.177,http://localhost:3000,http://localhost
-      - CSRF_TRUSTED_ORIGINS=http://34.93.19.177,http://localhost:3000,http://localhost
+      - CORS_ALLOWED_ORIGINS=http://172.104.178.44,http://localhost:3000,http://localhost
+      - CSRF_TRUSTED_ORIGINS=http://172.104.178.44,http://localhost:3000,http://localhost
     depends_on:
       db:
         condition: service_healthy
@@ -63,7 +63,7 @@
     build:
       context: ./APP_NAME/frontend
       args:
-        - VITE_API_URL=http://34.93.19.177APP_PATH/api
+        - VITE_API_URL=http://172.104.178.44APP_PATH/api
     expose:
       - "FRONTEND_PORT"
     depends_on:

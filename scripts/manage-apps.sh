@@ -57,7 +57,7 @@ list_apps() {
     echo ""
     
     # Get all services from docker-compose
-    services=$(docker compose config --services 2>/dev/null || docker-compose config --services 2>/dev/null)
+    services=$(docker-compose config --services 2>/dev/null)
     
     if [ -z "$services" ]; then
         print_error "Could not read docker-compose.yml"
@@ -66,7 +66,7 @@ list_apps() {
     
     echo "Available services:"
     for service in $services; do
-        status=$(docker compose ps --format json $service 2>/dev/null | grep -o '"State":"[^"]*"' | cut -d'"' -f4 || echo "unknown")
+        status=$(docker-compose ps --format json $service 2>/dev/null | grep -o '"State":"[^"]*"' | cut -d'"' -f4 || echo "unknown")
         if [ "$status" = "running" ]; then
             echo -e "  ${GREEN}●${NC} $service (running)"
         elif [ "$status" = "exited" ]; then
@@ -83,10 +83,10 @@ show_status() {
     
     if [ -z "$app_name" ]; then
         print_info "Showing status of all apps..."
-        docker compose ps
+        docker-compose ps
     else
         print_info "Showing status of $app_name..."
-        docker compose ps $app_name
+        docker-compose ps $app_name
     fi
 }
 
@@ -96,11 +96,11 @@ start_app() {
     
     if [ -z "$app_name" ]; then
         print_info "Starting all apps..."
-        docker compose up -d
+        docker-compose up -d
         print_success "All apps started"
     else
         print_info "Starting $app_name..."
-        docker compose up -d $app_name
+        docker-compose up -d $app_name
         print_success "$app_name started"
     fi
 }
@@ -111,11 +111,11 @@ stop_app() {
     
     if [ -z "$app_name" ]; then
         print_warning "Stopping all apps..."
-        docker compose down
+        docker-compose down
         print_success "All apps stopped"
     else
         print_info "Stopping $app_name..."
-        docker compose stop $app_name
+        docker-compose stop $app_name
         print_success "$app_name stopped"
     fi
 }
@@ -126,11 +126,11 @@ restart_app() {
     
     if [ -z "$app_name" ]; then
         print_info "Restarting all apps..."
-        docker compose restart
+        docker-compose restart
         print_success "All apps restarted"
     else
         print_info "Restarting $app_name..."
-        docker compose restart $app_name
+        docker-compose restart $app_name
         print_success "$app_name restarted"
     fi
 }
@@ -141,10 +141,10 @@ show_logs() {
     
     if [ -z "$app_name" ]; then
         print_info "Showing logs for all apps..."
-        docker compose logs -f
+        docker-compose logs -f
     else
         print_info "Showing logs for $app_name..."
-        docker compose logs -f $app_name
+        docker-compose logs -f $app_name
     fi
 }
 
@@ -156,7 +156,7 @@ check_health() {
         print_info "Checking health of all apps..."
         
         # Check backend
-        if docker compose ps backend | grep -q "running"; then
+        if docker-compose ps backend | grep -q "running"; then
             echo ""
             print_info "Checking backend health..."
             response=$(curl -s -o /dev/null -w "%{http_code}" http://localhost/api/health/ || echo "000")
@@ -168,7 +168,7 @@ check_health() {
         fi
         
         # Check frontend
-        if docker compose ps frontend | grep -q "running"; then
+        if docker-compose ps frontend | grep -q "running"; then
             echo ""
             print_info "Checking frontend health..."
             response=$(curl -s -o /dev/null -w "%{http_code}" http://localhost/ || echo "000")
@@ -180,7 +180,7 @@ check_health() {
         fi
         
         # Check nginx
-        if docker compose ps nginx-proxy | grep -q "running"; then
+        if docker-compose ps nginx-proxy | grep -q "running"; then
             echo ""
             print_info "Checking nginx health..."
             response=$(curl -s -o /dev/null -w "%{http_code}" http://localhost/health || echo "000")
@@ -221,7 +221,7 @@ check_health() {
                 ;;
             *)
                 print_warning "Health check not implemented for $app_name"
-                docker compose ps $app_name
+                docker-compose ps $app_name
                 ;;
         esac
     fi
@@ -233,11 +233,11 @@ validate_config() {
     
     # Check docker-compose.yml
     if [ -f "docker-compose.yml" ]; then
-        if docker compose config > /dev/null 2>&1; then
+        if docker-compose config > /dev/null 2>&1; then
             print_success "docker-compose.yml is valid"
         else
             print_error "docker-compose.yml has errors"
-            docker compose config
+            docker-compose config
             exit 1
         fi
     else
@@ -247,7 +247,7 @@ validate_config() {
     
     # Check nginx config
     if [ -f "nginx/default.conf" ]; then
-        if docker compose exec -T nginx-proxy nginx -t > /dev/null 2>&1; then
+        if docker-compose exec -T nginx-proxy nginx -t > /dev/null 2>&1; then
             print_success "Nginx configuration is valid"
         else
             print_warning "Nginx configuration check skipped (nginx-proxy not running)"

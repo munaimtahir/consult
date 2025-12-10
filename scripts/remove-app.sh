@@ -64,8 +64,8 @@ fi
 
 # Stop and remove containers
 print_info "Stopping and removing containers..."
-docker compose stop ${APP_NAME}_backend ${APP_NAME}_frontend 2>/dev/null || true
-docker compose rm -f ${APP_NAME}_backend ${APP_NAME}_frontend 2>/dev/null || true
+docker-compose stop ${APP_NAME}_backend ${APP_NAME}_frontend 2>/dev/null || true
+docker-compose rm -f ${APP_NAME}_backend ${APP_NAME}_frontend 2>/dev/null || true
 
 # Create backup
 print_info "Creating backup..."
@@ -110,7 +110,7 @@ sed -i "/# ${APP_NAME^} App - Frontend/,/^    }$/d" nginx/default.conf
 # Validate configurations
 print_info "Validating configurations..."
 
-if ! docker compose config > /dev/null 2>&1; then
+if ! docker-compose config > /dev/null 2>&1; then
     print_error "docker-compose.yml has errors. Restoring backup..."
     mv docker-compose.yml.backup.* docker-compose.yml 2>/dev/null || true
     mv nginx/default.conf.backup.* nginx/default.conf 2>/dev/null || true
@@ -118,15 +118,15 @@ if ! docker compose config > /dev/null 2>&1; then
 fi
 
 # Test nginx config (if nginx is running)
-if docker compose ps nginx-proxy 2>/dev/null | grep -q "running"; then
-    if ! docker compose exec -T nginx-proxy nginx -t > /dev/null 2>&1; then
+if docker-compose ps nginx-proxy 2>/dev/null | grep -q "running"; then
+    if ! docker-compose exec -T nginx-proxy nginx -t > /dev/null 2>&1; then
         print_error "Nginx configuration has errors. Restoring backup..."
         mv docker-compose.yml.backup.* docker-compose.yml 2>/dev/null || true
         mv nginx/default.conf.backup.* nginx/default.conf 2>/dev/null || true
         exit 1
     fi
     print_info "Restarting nginx-proxy..."
-    docker compose restart nginx-proxy
+    docker-compose restart nginx-proxy
 fi
 
 print_success "App $APP_NAME removed successfully!"
