@@ -296,4 +296,4 @@ Potential future features (not currently implemented):
 ## Related Documentation
 
 - [ACKNOWLEDGE_ASSIGN_API.md](./ACKNOWLEDGE_ASSIGN_API.md) - Acknowledge & Assign workflow
-- [IMPLEMENTATION_SUMMARY.md](./IMPLEMENTATION_SUMMARY.md) - Technical implementation details
+- [IMPLEMENTATION_SUMMARY.md](../archive/historical-docs/IMPLEMENTATION_SUMMARY.md) - Technical implementation details

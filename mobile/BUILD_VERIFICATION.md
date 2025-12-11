@@ -26,8 +26,8 @@ This document provides a guide to verify that the Android build process is corre
 
 1. **Java Development Kit (JDK) 17**
    - Required for Android Gradle build
-   - Setup guide available: `JAVA_SETUP.md`
-   - Setup script available: `setup-java.sh`
+   - Setup guide available: `../archive/historical-docs/JAVA_SETUP.md`
+   - Setup script available: `../scripts/setup-java.sh`
 
 2. **Android SDK**
    - Required for building Android apps

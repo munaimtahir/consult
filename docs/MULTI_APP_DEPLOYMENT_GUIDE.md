@@ -74,7 +74,7 @@ Port 80 (Nginx Reverse Proxy)
 
 3. **Deploy all services**
    ```bash
-   ./deploy.sh
+   ./scripts/deploy.sh
    ```
 
 4. **Check status**
@@ -138,11 +138,11 @@ This will:
 If you prefer manual configuration:
 
 1. **Add services to docker-compose.yml**
-   - Use template: `templates/docker-compose-app-template.yml`
+   - Use template: `archive/deployment-templates/docker-compose-app-template.yml`
    - Replace `APP_NAME`, `APP_PATH`, ports, etc.
 
 2. **Add Nginx configuration**
-   - Use template: `templates/nginx-app-template.conf`
+   - Use template: `archive/deployment-templates/nginx-app-template.conf`
    - Add rate limiting zones
    - Add upstream definitions
    - Add location blocks

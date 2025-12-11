@@ -54,24 +54,23 @@ The system includes pre-seeded demo data. Use these credentials to explore:
 
 ## 📁 Project Structure
 
+This is a monorepo containing backend (Django), frontend (React), and mobile (React Native) applications.
+
 ```
 consult/
-├── backend/              # Django project
-│   ├── apps/             # Django apps (accounts, consults, patients, etc.)
-│   ├── config/           # Django settings and configuration
-│   └── templates/        # Email templates
-├── frontend/             # React project
-│   ├── src/
-│   │   ├── api/          # API client and services
-│   │   ├── components/   # Reusable React components
-│   │   ├── context/      # React context providers
-│   │   ├── hooks/        # Custom React hooks
-│   │   ├── pages/        # Page components
-│   │   └── router/       # Route configuration
-├── nginx/                # Nginx configuration for Docker
-├── docker-compose.yml    # Docker Compose configuration
+├── backend/              # Django REST API + WebSockets
+├── frontend/             # React web application (Vite)
+├── mobile/               # React Native mobile app
+├── nginx/                # Nginx configuration
+├── scripts/              # Utility scripts (deploy, setup, etc.)
+├── docs/                 # Technical documentation and API specs
+├── archive/              # Historical documentation (preserved)
+├── .github/workflows/    # CI/CD pipelines
+├── docker-compose.yml    # Docker orchestration
 └── README.md
 ```
+
+> **📖 For detailed structure:** See [docs/REPOSITORY_STRUCTURE.md](./docs/REPOSITORY_STRUCTURE.md)
 
 ## 🚀 Getting Started
 
@@ -82,7 +81,7 @@ consult/
 - PostgreSQL 14+ (for production)
 - Redis (for WebSockets)
 - **JDK 17+** (for Android mobile development and VS Code Java Language Server)
-  - See [JAVA_SETUP.md](./JAVA_SETUP.md) for installation and configuration instructions
+  - See [archive/historical-docs/JAVA_SETUP.md](./archive/historical-docs/JAVA_SETUP.md) for installation instructions
 
 ### Quick Start with Docker
 
@@ -161,14 +160,14 @@ The codebase is thoroughly documented with docstrings (Python) and JSDoc comment
 
 ### Key Documents
 
-- **[DEMO_SCRIPT.md](DEMO_SCRIPT.md)**: Step-by-step demo presentation guide
-- **[PROJECT_SUMMARY.md](PROJECT_SUMMARY.md)**: High-level project overview
-- **[CURRENT_STATUS.md](CURRENT_STATUS.md)**: Latest development progress
-- **[ADMIN_PANEL.md](ADMIN_PANEL.md)**: Admin panel features and usage
 - **[VISION.md](./VISION.md)**: Project vision and goals
 - **[WORKFLOW.md](./WORKFLOW.md)**: Consult workflow documentation
 - **[DATA_MODEL.md](./DATA_MODEL.md)**: Database schema
-- **[TECHNICAL_PLAN.md](./TECHNICAL_PLAN.md)**: Complete technical architecture
+- **[ARCHITECTURE.md](./ARCHITECTURE.md)**: System architecture
+- **[DEPLOYMENT.md](./DEPLOYMENT.md)**: Deployment instructions
+- **[docs/ADMIN_PANEL.md](./docs/ADMIN_PANEL.md)**: Admin panel features and usage
+- **[docs/ANALYTICS_DASHBOARD.md](./docs/ANALYTICS_DASHBOARD.md)**: Analytics dashboard documentation
+- **[docs/](./docs/)**: Additional API and feature documentation
 
 ## 🧪 Testing
 

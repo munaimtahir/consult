@@ -52,7 +52,7 @@ See [docs/ADD_NEW_APP_GUIDE.md](../docs/ADD_NEW_APP_GUIDE.md) for instructions.
 
 3.  **Deploy using the deployment script (recommended):**
     ```bash
-    ./deploy.sh
+    ./scripts/deploy.sh
     ```
     Or manually:
     ```bash
