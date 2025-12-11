@@ -7,6 +7,7 @@ from django.db.models import Avg, Count, F, Q, DurationField
 from django.db.models.functions import Extract
 
 from apps.accounts.models import User
+from apps.accounts.permissions import CanViewGlobalDashboard
 from apps.analytics.services import AnalyticsService
 from apps.consults.models import ConsultRequest
 
@@ -14,7 +15,7 @@ class DoctorAnalyticsViewSet(viewsets.ViewSet):
     """
     Provides analytics data for doctors.
     """
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, CanViewGlobalDashboard]
 
     def list(self, request):
         """

@@ -37,12 +37,18 @@ export default function DepartmentDashboardPage() {
         error,
     } = useQuery({
         queryKey: ['department-dashboard', selectedDepartment, consultType, filters],
-        queryFn: () =>
-            adminAPI.getDepartmentDashboard({
-                department_id: selectedDepartment || undefined,
+        queryFn: () => {
+            const params = {
                 type: consultType,
                 ...filters,
-            }),
+            };
+            // Only include department_id if a specific department is selected
+            // Empty string means "My Department" - don't send department_id
+            if (selectedDepartment && selectedDepartment.trim() !== '') {
+                params.department_id = selectedDepartment;
+            }
+            return adminAPI.getDepartmentDashboard(params);
+        },
     });
 
     const handleFilterChange = (key, value) => {

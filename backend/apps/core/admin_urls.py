@@ -13,6 +13,7 @@ from apps.analytics.dashboard_views import (
     ConsultReassignView,
     ConsultForceCloseView,
 )
+from apps.analytics.views import DoctorAnalyticsViewSet
 from apps.core.admin_views import (
     EmailNotificationSettingsViewSet,
     SMTPConfigurationViewSet,
@@ -28,6 +29,7 @@ urlpatterns = [
     path('', include(router.urls)),
     path('dashboards/department/', DepartmentDashboardView.as_view(), name='department-dashboard'),
     path('dashboards/global/', GlobalDashboardView.as_view(), name='global-dashboard'),
+    path('analytics/doctors/', DoctorAnalyticsViewSet.as_view({'get': 'list'}), name='admin-doctor-analytics'),
     path('consults/<int:consult_id>/reassign/', ConsultReassignView.as_view(), name='consult-reassign'),
     path('consults/<int:consult_id>/force-close/', ConsultForceCloseView.as_view(), name='consult-force-close'),
 ]
