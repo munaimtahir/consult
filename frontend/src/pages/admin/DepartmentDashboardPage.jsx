@@ -30,13 +30,19 @@ export default function DepartmentDashboardPage() {
     const departments = departmentsData?.results || departmentsData || [];
 
     // Fetch dashboard data
-    const { data: dashboardData, isLoading } = useQuery({
+    const {
+        data: dashboardData,
+        isLoading,
+        isError,
+        error,
+    } = useQuery({
         queryKey: ['department-dashboard', selectedDepartment, consultType, filters],
-        queryFn: () => adminAPI.getDepartmentDashboard({
-            department_id: selectedDepartment || undefined,
-            type: consultType,
-            ...filters,
-        }),
+        queryFn: () =>
+            adminAPI.getDepartmentDashboard({
+                department_id: selectedDepartment || undefined,
+                type: consultType,
+                ...filters,
+            }),
     });
 
     const handleFilterChange = (key, value) => {
@@ -150,6 +156,23 @@ export default function DepartmentDashboardPage() {
         return (
             <div className="max-w-7xl mx-auto px-4 py-8">
                 <div className="text-center text-gray-500">Loading dashboard...</div>
+            </div>
+        );
+    }
+
+    if (isError) {
+        return (
+            <div className="max-w-7xl mx-auto px-4 py-8">
+                <div className="bg-white rounded-lg shadow-sm border p-6 text-center">
+                    <h1 className="text-lg font-semibold text-red-600 mb-2">
+                        Failed to load department dashboard
+                    </h1>
+                    <p className="text-gray-600 text-sm">
+                        {error?.response?.data?.detail ||
+                            error?.message ||
+                            'Please try again later.'}
+                    </p>
+                </div>
             </div>
         );
     }

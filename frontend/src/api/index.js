@@ -185,6 +185,16 @@ export const adminAPI = {
         return response.data;
     },
 
+    getDoctorAnalytics: async () => {
+        const response = await apiClient.get('/admin/analytics/doctors/');
+        return response.data;
+    },
+
+    getDepartmentOverview: async (id) => {
+        const response = await apiClient.get(`/admin/departments/${id}/overview/`);
+        return response.data;
+    },
+
     // Consult management
     reassignConsult: async (id, data) => {
         const response = await apiClient.post(`/admin/consults/${id}/reassign/`, data);

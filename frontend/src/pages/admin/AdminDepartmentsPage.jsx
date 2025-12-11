@@ -23,13 +23,22 @@ export default function AdminDepartmentsPage() {
     });
 
     // Fetch departments
-    const { data: departmentsData, isLoading } = useQuery({
+    const {
+        data: departmentsData,
+        isLoading,
+        isError: isDepartmentsError,
+        error: departmentsError,
+    } = useQuery({
         queryKey: ['admin-departments', filters],
         queryFn: () => adminAPI.getDepartments(filters),
     });
 
     // Fetch hierarchy view
-    const { data: hierarchyData } = useQuery({
+    const {
+        data: hierarchyData,
+        isError: isHierarchyError,
+        error: hierarchyError,
+    } = useQuery({
         queryKey: ['admin-departments-hierarchy'],
         queryFn: () => adminAPI.getDepartmentHierarchy(),
         enabled: viewMode === 'hierarchy',
@@ -276,14 +285,34 @@ export default function AdminDepartmentsPage() {
                         </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
-                        {isLoading ? (
+                        {isDepartmentsError ? (
+                            <tr>
+                                <td colSpan="6" className="px-6 py-4 text-center text-red-600">
+                                    Failed to load departments:{' '}
+                                    {departmentsError?.response?.data?.detail ||
+                                        departmentsError?.message ||
+                                        'Please try again later.'}
+                                </td>
+                            </tr>
+                        ) : isLoading ? (
                             <tr>
                                 <td colSpan="6" className="px-6 py-4 text-center text-gray-500">
                                     Loading...
                                 </td>
                             </tr>
-                        ) : viewMode === 'hierarchy' && hierarchyData ? (
-                            renderHierarchy(hierarchyData)
+                        ) : viewMode === 'hierarchy' && (hierarchyData || isHierarchyError) ? (
+                            isHierarchyError ? (
+                                <tr>
+                                    <td colSpan="6" className="px-6 py-4 text-center text-red-600">
+                                        Failed to load hierarchy view:{' '}
+                                        {hierarchyError?.response?.data?.detail ||
+                                            hierarchyError?.message ||
+                                            'Please try again later.'}
+                                    </td>
+                                </tr>
+                            ) : (
+                                renderHierarchy(hierarchyData)
+                            )
                         ) : departments.length === 0 ? (
                             <tr>
                                 <td colSpan="6" className="px-6 py-4 text-center text-gray-500">
