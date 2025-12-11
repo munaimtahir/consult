@@ -291,6 +291,74 @@ class ConsultRequestViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
     
     @action(detail=True, methods=['post'])
+    def reassign(self, request, pk=None):
+        """Reassigns a consult to a different doctor.
+        
+        This action allows HOD or authorized users to change the assignment of an
+        existing consult. The consult must already be assigned before it can be reassigned.
+        
+        Args:
+            request: The Django HttpRequest object.
+            pk: The primary key of the `ConsultRequest`.
+            
+        Returns:
+            A DRF Response object with the updated consult data, or an error response.
+        """
+        consult = self.get_object()
+        
+        # Check permissions - only HOD or users with can_manage_consults permission
+        if not request.user.can_manage_consults:
+            return Response(
+                {'error': 'You do not have permission to reassign consults. Only HOD or authorized users can perform this action.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        if request.user.department != consult.target_department:
+            return Response(
+                {'error': 'You can only reassign consults in your department'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        # Validate that consult is already assigned
+        if not consult.assigned_to:
+            return Response(
+                {'error': 'This consult is not yet assigned. Use acknowledge-assign endpoint instead.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Get the new assigned user
+        new_assigned_to_id = request.data.get('assigned_to_user_id')
+        if not new_assigned_to_id:
+            return Response(
+                {'error': 'Please provide assigned_to_user_id'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        try:
+            new_assigned_user = User.objects.get(id=new_assigned_to_id)
+        except User.DoesNotExist:
+            return Response(
+                {'error': 'User not found'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        # Check that new assigned user is in the target department
+        if new_assigned_user.department != consult.target_department:
+            return Response(
+                {'error': 'New assigned user must be in the target department'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Allow HOD to reassign to themselves
+        # No additional check needed as can_manage_consults already verified
+        
+        # Perform reassignment
+        ConsultService.reassign_consult(consult, request.user, new_assigned_user)
+        
+        serializer = self.get_serializer(consult)
+        return Response(serializer.data)
+    
+    @action(detail=True, methods=['post'])
     def add_note(self, request, pk=None):
         """Adds a new note to a consult.
 

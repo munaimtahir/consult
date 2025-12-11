@@ -70,7 +70,7 @@ Returns the updated consult with all fields populated:
 **400 Bad Request** - Invalid consult status
 ```json
 {
-  "error": "Only SUBMITTED consults can be acknowledged and assigned. Current status: IN_PROGRESS"
+  "error": "Only SUBMITTED or ACKNOWLEDGED consults can be acknowledged and assigned. Current status: IN_PROGRESS"
 }
 ```
 

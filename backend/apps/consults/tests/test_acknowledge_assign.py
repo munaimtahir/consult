@@ -3,7 +3,6 @@ Tests for the acknowledge_assign endpoint.
 """
 
 from django.test import TestCase
-from django.utils import timezone
 from rest_framework.test import APIClient
 from rest_framework import status
 

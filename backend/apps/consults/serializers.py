@@ -154,6 +154,14 @@ class ConsultRequestListSerializer(serializers.ModelSerializer):
     def get_acknowledged_at_human(self, obj):
         """Returns a human-friendly acknowledged_at timestamp."""
         return humanize_timestamp(obj.acknowledged_at)
+    
+    def get_received_at_human(self, obj):
+        """Returns a human-friendly received_at timestamp."""
+        return humanize_timestamp(obj.received_at)
+    
+    def get_assigned_at_human(self, obj):
+        """Returns a human-friendly assigned_at timestamp."""
+        return humanize_timestamp(obj.assigned_at)
 
     def get_completed_at_human(self, obj):
         """Returns a human-friendly completed_at timestamp."""
@@ -271,10 +279,6 @@ class ConsultRequestDetailSerializer(serializers.ModelSerializer):
             'updated_at',
             'acknowledged_at',
             'acknowledged_at_human',
-            'received_at',
-            'received_at_human',
-            'assigned_at',
-            'assigned_at_human',
             'completed_at',
             'completed_at_human',
             'expected_response_time',
@@ -292,8 +296,6 @@ class ConsultRequestDetailSerializer(serializers.ModelSerializer):
             'created_at',
             'updated_at',
             'acknowledged_at',
-            'received_at',
-            'assigned_at',
             'completed_at',
             'expected_response_time',
             'is_overdue'

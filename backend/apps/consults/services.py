@@ -10,6 +10,29 @@ from apps.notifications.services import NotificationService
 from apps.departments.models import OnCall
 from apps.accounts.models import User
 
+
+def get_system_user():
+    """Get or create the system user for automated actions.
+    
+    This user represents automated system actions like auto-assignment
+    based on on-call schedules or hierarchy rules.
+    
+    Returns:
+        User instance representing the system
+    """
+    system_user, created = User.objects.get_or_create(
+        email='system@pmc.edu.pk',
+        defaults={
+            'username': 'system',
+            'first_name': 'System',
+            'last_name': 'Automated',
+            'role': 'ADMIN',
+            'is_active': True,
+            'is_staff': False,
+        }
+    )
+    return system_user
+
 class ConsultService:
     """Encapsulates the business logic for the consult workflow.
 
@@ -51,17 +74,18 @@ class ConsultService:
         # Check for on-call doctor
         today = timezone.now().date()
         on_call_entry = OnCall.objects.filter(department=target_department, date=today).first()
+        system_user = get_system_user()
 
         if on_call_entry and on_call_entry.doctor:
             now = timezone.now()
             consult.assigned_to = on_call_entry.doctor
-            consult.assigned_by = on_call_entry.doctor  # Auto-assigned to self
+            consult.assigned_by = system_user  # System auto-assignment
             consult.assigned_at = now
             consult.assignment_type = 'auto'
-            consult.status = 'IN_PROGRESS'
+            consult.status = 'ACKNOWLEDGED'  # Auto-acknowledged when assigned
             consult.acknowledged_at = now
-            consult.acknowledged_by = on_call_entry.doctor
-            consult.received_by = on_call_entry.doctor
+            consult.acknowledged_by = system_user
+            consult.received_by = system_user
             consult.received_at = now
             consult.last_action_summary = f"Auto-assigned to on-call doctor: {on_call_entry.doctor.get_full_name()}"
             consult.save()
@@ -76,13 +100,13 @@ class ConsultService:
             if junior_doctor:
                 now = timezone.now()
                 consult.assigned_to = junior_doctor
-                consult.assigned_by = junior_doctor  # Auto-assigned to self
+                consult.assigned_by = system_user  # System auto-assignment
                 consult.assigned_at = now
                 consult.assignment_type = 'auto'
-                consult.status = 'IN_PROGRESS'
+                consult.status = 'ACKNOWLEDGED'  # Auto-acknowledged when assigned
                 consult.acknowledged_at = now
-                consult.acknowledged_by = junior_doctor
-                consult.received_by = junior_doctor
+                consult.acknowledged_by = system_user
+                consult.received_by = system_user
                 consult.received_at = now
                 consult.last_action_summary = f"Auto-assigned by hierarchy to: {junior_doctor.get_full_name()}"
                 consult.save()
@@ -191,6 +215,42 @@ class ConsultService:
         
         # Send notifications
         NotificationService.notify_consult_assigned(consult, assigned_to_user)
+        
+        return consult
+    
+    @staticmethod
+    @transaction.atomic
+    def reassign_consult(consult, reassigner, new_assigned_to_user):
+        """Reassigns a consult to a different doctor.
+        
+        This allows HOD or authorized users to change the assignment of an existing consult.
+        
+        Args:
+            consult: The `ConsultRequest` to be reassigned.
+            reassigner: The user performing the reassignment (HOD or authorized user).
+            new_assigned_to_user: The user to whom the consult is being reassigned.
+            
+        Returns:
+            The updated `ConsultRequest` instance.
+        """
+        now = timezone.now()
+        
+        # Store old assignment for logging
+        old_assigned_to = consult.assigned_to
+        
+        # Update assignment fields
+        consult.assigned_to = new_assigned_to_user
+        consult.assigned_by = reassigner
+        consult.assigned_at = now
+        consult.assignment_type = 'manual'
+        
+        # Keep status as is (don't change from IN_PROGRESS or other valid states)
+        
+        consult.last_action_summary = f"Reassigned from {old_assigned_to.get_full_name() if old_assigned_to else 'unassigned'} to {new_assigned_to_user.get_full_name()} by {reassigner.get_full_name()}"
+        consult.save()
+        
+        # Send notifications
+        NotificationService.notify_consult_assigned(consult, new_assigned_to_user)
         
         return consult
     
