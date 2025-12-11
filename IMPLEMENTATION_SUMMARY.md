@@ -338,10 +338,32 @@ CodeQL Analysis: PASSED
 
 ---
 
+## Additional Features (Implemented)
+
+### Reassignment Functionality ✅
+- **Endpoint**: `POST /api/v1/consults/requests/{id}/reassign/`
+- **Purpose**: Allow HOD to reassign existing consults to different doctors
+- **Features**:
+  - Transaction-protected atomic operation
+  - HOD can reassign to themselves
+  - Complete audit trail maintained
+  - 5 comprehensive test cases
+- **Documentation**: See [REASSIGNMENT_API.md](./REASSIGNMENT_API.md)
+
+### System User for Auto-Assignments ✅
+- **User**: `system@pmc.edu.pk`
+- **Purpose**: Represent automated system actions
+- **Used For**:
+  - Auto-assignment based on on-call schedule
+  - Auto-assignment based on hierarchy
+  - Clear distinction from manual assignments
+- **Audit Trail**: Shows "System Automated" as assigner
+
 ## Future Enhancements (Not Implemented)
 
 ### Frontend Work Required:
 - [ ] UI for "Acknowledge & Assign" button
+- [ ] UI for "Reassign" button
 - [ ] Doctor selection modal
 - [ ] HOD delegation settings page
 - [ ] Enhanced audit trail display
@@ -349,10 +371,12 @@ CodeQL Analysis: PASSED
 
 ### Backend Enhancements (Optional):
 - [ ] Bulk acknowledge & assign
+- [ ] Bulk reassignment
 - [ ] Auto-assignment based on workload
 - [ ] Advanced delegation rules
 - [ ] Analytics on assignment patterns
 - [ ] Escalation rules based on time
+- [ ] Reassignment history view
 
 ---
 
