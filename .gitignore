@@ -114,3 +114,9 @@ mobile/.metro/
 *.pem
 secrets/
 credentials/
+
+# Test artifacts and reports
+test-results/
+playwright-report/
+coverage/
+.nyc_output/
