@@ -39,6 +39,13 @@ export default function AdminHomePage() {
             icon: '🌐',
             permission: 'can_view_global_dashboard',
         },
+        {
+            title: 'Doctor Analytics',
+            description: 'Performance metrics and analytics for doctors',
+            link: '/adminpanel/analytics/doctors',
+            icon: '👨‍⚕️',
+            permission: 'can_view_global_dashboard',
+        },
     ];
 
     const accessibleSections = adminSections.filter(

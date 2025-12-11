@@ -149,6 +149,97 @@ export default function UserEditModal({ user, isCreating, onClose, canManagePerm
         { value: 'HOD', label: 'Head of Department' },
     ];
 
+    // Role templates/presets based on ADMIN_PANEL.md
+    const roleTemplates = {
+        SUPERADMIN: {
+            name: 'SuperAdmin',
+            description: 'Full access to all features',
+            permissions: {
+                can_manage_users: true,
+                can_manage_departments: true,
+                can_view_department_dashboard: true,
+                can_view_global_dashboard: true,
+                can_manage_consults_globally: true,
+                can_manage_permissions: true,
+            },
+        },
+        MEDICAL_DIRECTOR: {
+            name: 'Medical Director / IT Admin',
+            description: 'Manage users, departments, and view all dashboards',
+            permissions: {
+                can_manage_users: true,
+                can_manage_departments: true,
+                can_view_department_dashboard: true,
+                can_view_global_dashboard: true,
+                can_manage_consults_globally: true,
+                can_manage_permissions: false,
+            },
+        },
+        HOD: {
+            name: 'Head of Department',
+            description: 'View own department dashboard only',
+            permissions: {
+                can_manage_users: false,
+                can_manage_departments: false,
+                can_view_department_dashboard: true,
+                can_view_global_dashboard: false,
+                can_manage_consults_globally: false,
+                can_manage_permissions: false,
+            },
+        },
+        QA: {
+            name: 'Quality Assurance',
+            description: 'View all dashboards for reporting, no management',
+            permissions: {
+                can_manage_users: false,
+                can_manage_departments: false,
+                can_view_department_dashboard: true,
+                can_view_global_dashboard: true,
+                can_manage_consults_globally: false,
+                can_manage_permissions: false,
+            },
+        },
+        DOCTOR: {
+            name: 'Doctor (Basic)',
+            description: 'No admin access',
+            permissions: {
+                can_manage_users: false,
+                can_manage_departments: false,
+                can_view_department_dashboard: false,
+                can_view_global_dashboard: false,
+                can_manage_consults_globally: false,
+                can_manage_permissions: false,
+            },
+        },
+        CUSTOM: {
+            name: 'Custom',
+            description: 'Manually configure permissions',
+            permissions: null, // null means use current formData values
+        },
+    };
+
+    const [selectedTemplate, setSelectedTemplate] = useState(() => {
+        // Try to detect current template based on permissions
+        if (!user) return 'CUSTOM';
+        const perms = user.permissions || {};
+        if (user.is_superuser || user.is_admin_user) return 'SUPERADMIN';
+        if (perms.can_manage_users && perms.can_manage_departments && perms.can_view_global_dashboard && !perms.can_manage_permissions) return 'MEDICAL_DIRECTOR';
+        if (perms.can_view_department_dashboard && !perms.can_view_global_dashboard && !perms.can_manage_users) return 'HOD';
+        if (perms.can_view_department_dashboard && perms.can_view_global_dashboard && !perms.can_manage_users) return 'QA';
+        if (!perms.can_view_department_dashboard && !perms.can_view_global_dashboard) return 'DOCTOR';
+        return 'CUSTOM';
+    });
+
+    const handleTemplateChange = (templateKey) => {
+        setSelectedTemplate(templateKey);
+        if (templateKey !== 'CUSTOM' && roleTemplates[templateKey].permissions) {
+            setFormData(prev => ({
+                ...prev,
+                ...roleTemplates[templateKey].permissions,
+            }));
+        }
+    };
+
     const isLoading = createMutation.isPending || updateMutation.isPending || permissionsMutation.isPending;
 
     return (
@@ -379,7 +470,17 @@ export default function UserEditModal({ user, isCreating, onClose, canManagePerm
                                 <select
                                     name="role"
                                     value={formData.role}
-                                    onChange={handleInputChange}
+                                    onChange={(e) => {
+                                        handleInputChange(e);
+                                        // Suggest permission template based on role
+                                        if (e.target.value === 'HOD' && canManagePermissions) {
+                                            handleTemplateChange('HOD');
+                                        } else if (e.target.value === 'ADMIN' && canManagePermissions) {
+                                            handleTemplateChange('MEDICAL_DIRECTOR');
+                                        } else if (e.target.value === 'DOCTOR' && canManagePermissions) {
+                                            handleTemplateChange('DOCTOR');
+                                        }
+                                    }}
                                     className="w-full border rounded-md px-3 py-2"
                                 >
                                     <option value="DOCTOR">Doctor</option>
@@ -387,6 +488,11 @@ export default function UserEditModal({ user, isCreating, onClose, canManagePerm
                                     <option value="HOD">Head of Department</option>
                                     <option value="ADMIN">Administrator</option>
                                 </select>
+                                {canManagePermissions && (
+                                    <p className="mt-1 text-xs text-gray-500">
+                                        Tip: Changing role may suggest permission templates. Check the Admin Permissions tab to customize.
+                                    </p>
+                                )}
                             </div>
                             <div className="flex items-center">
                                 <input
@@ -414,6 +520,30 @@ export default function UserEditModal({ user, isCreating, onClose, canManagePerm
                             <p className="text-sm text-gray-600 mb-4">
                                 Configure what admin features this user can access:
                             </p>
+                            
+                            {/* Role Template Selector */}
+                            <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Role Template (Quick Preset)
+                                </label>
+                                <select
+                                    value={selectedTemplate}
+                                    onChange={(e) => handleTemplateChange(e.target.value)}
+                                    className="w-full border rounded-md px-3 py-2 bg-white"
+                                >
+                                    {Object.entries(roleTemplates).map(([key, template]) => (
+                                        <option key={key} value={key}>
+                                            {template.name} - {template.description}
+                                        </option>
+                                    ))}
+                                </select>
+                                {selectedTemplate !== 'CUSTOM' && (
+                                    <p className="mt-2 text-xs text-gray-500">
+                                        Selected template will apply preset permissions. You can still customize individual permissions below.
+                                    </p>
+                                )}
+                            </div>
+
                             <div className="space-y-3">
                                 <div className="flex items-center">
                                     <input
