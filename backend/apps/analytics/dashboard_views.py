@@ -23,34 +23,35 @@ class DepartmentDashboardView(views.APIView):
     
     def get(self, request):
         """Get department dashboard data."""
-        user = request.user
-        
-        # Get department from query params or use user's department
-        department_id = request.query_params.get('department_id')
-        
-        if department_id:
-            try:
-                department = Department.objects.get(id=department_id)
-            except Department.DoesNotExist:
-                return Response(
-                    {'error': 'Department not found'},
-                    status=status.HTTP_404_NOT_FOUND
-                )
+        try:
+            user = request.user
             
-            # Check permission for the specific department
-            if not user.can_view_department_dashboard_for(department):
-                return Response(
-                    {'error': 'You do not have permission to view this department\'s dashboard'},
-                    status=status.HTTP_403_FORBIDDEN
-                )
-        else:
-            # Use user's department
-            if not user.department:
-                return Response(
-                    {'error': 'No department specified and you are not assigned to a department'},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-            department = user.department
+            # Get department from query params or use user's department
+            department_id = request.query_params.get('department_id')
+            
+            if department_id:
+                try:
+                    department = Department.objects.get(id=department_id)
+                except Department.DoesNotExist:
+                    return Response(
+                        {'error': 'Department not found'},
+                        status=status.HTTP_404_NOT_FOUND
+                    )
+                
+                # Check permission for the specific department
+                if not user.can_view_department_dashboard_for(department):
+                    return Response(
+                        {'error': 'You do not have permission to view this department\'s dashboard'},
+                        status=status.HTTP_403_FORBIDDEN
+                    )
+            else:
+                # Use user's department
+                if not user.department:
+                    return Response(
+                        {'error': 'No department specified and you are not assigned to a department'},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+                department = user.department
         
         # Get query params for filtering
         consult_type = request.query_params.get('type', 'all')  # received, sent, all
@@ -91,7 +92,7 @@ class DepartmentDashboardView(views.APIView):
         today = timezone.now().date()
         
         summary = {
-            'total_active': received_qs.exclude(status__in=['COMPLETED', 'CANCELLED', 'CLOSED']).count(),
+            'total_active': received_qs.exclude(status__in=['COMPLETED', 'CLOSED']).count(),
             'pending': received_qs.filter(status='SUBMITTED').count(),
             'acknowledged': received_qs.filter(status='ACKNOWLEDGED').count(),
             'in_progress': received_qs.filter(status='IN_PROGRESS').count(),
@@ -101,66 +102,71 @@ class DepartmentDashboardView(views.APIView):
             ).count(),
             'overdue': received_qs.filter(
                 is_overdue=True
-            ).exclude(status__in=['COMPLETED', 'CANCELLED', 'CLOSED']).count(),
-            'sent_active': sent_qs.exclude(status__in=['COMPLETED', 'CANCELLED', 'CLOSED']).count(),
+            ).exclude(status__in=['COMPLETED', 'CLOSED']).count(),
+            'sent_active': sent_qs.exclude(status__in=['COMPLETED', 'CLOSED']).count(),
         }
         
-        # Build consult list data
-        def serialize_consult(consult):
-            return {
-                'id': consult.id,
-                'patient': {
-                    'id': consult.patient.id,
-                    'name': consult.patient.name,
-                    'mrn': consult.patient.mrn,
-                    'location': f"{consult.patient.ward or ''} {consult.patient.bed_number or ''}".strip(),
+            # Build consult list data
+            def serialize_consult(consult):
+                return {
+                    'id': consult.id,
+                    'patient': {
+                        'id': consult.patient.id,
+                        'name': consult.patient.name,
+                        'mrn': consult.patient.mrn,
+                        'location': f"{consult.patient.ward or ''} {consult.patient.bed_number or ''}".strip(),
+                    },
+                    'requesting_department': {
+                        'id': consult.requesting_department.id,
+                        'name': consult.requesting_department.name,
+                    },
+                    'target_department': {
+                        'id': consult.target_department.id,
+                        'name': consult.target_department.name,
+                    },
+                    'assigned_to': {
+                        'id': consult.assigned_to.id,
+                        'name': consult.assigned_to.get_full_name(),
+                    } if consult.assigned_to else None,
+                    'created_at': consult.created_at.isoformat(),
+                    'urgency': consult.urgency,
+                    'status': consult.status,
+                    'completed_at': consult.completed_at.isoformat() if consult.completed_at else None,
+                    'is_overdue': consult.is_overdue,
+                    'reason_for_consult': consult.reason_for_consult[:100] + '...' if len(consult.reason_for_consult) > 100 else consult.reason_for_consult,
+                }
+            
+            # Get consults based on type filter
+            received_list = []
+            sent_list = []
+            
+            if consult_type in ['received', 'all']:
+                received_consults = received_qs.select_related(
+                    'patient', 'requesting_department', 'target_department', 'assigned_to'
+                ).order_by('-created_at')[:50]
+                received_list = [serialize_consult(c) for c in received_consults]
+            
+            if consult_type in ['sent', 'all']:
+                sent_consults = sent_qs.select_related(
+                    'patient', 'requesting_department', 'target_department', 'assigned_to'
+                ).order_by('-created_at')[:50]
+                sent_list = [serialize_consult(c) for c in sent_consults]
+            
+            return Response({
+                'department': {
+                    'id': department.id,
+                    'name': department.name,
+                    'code': department.code,
                 },
-                'requesting_department': {
-                    'id': consult.requesting_department.id,
-                    'name': consult.requesting_department.name,
-                },
-                'target_department': {
-                    'id': consult.target_department.id,
-                    'name': consult.target_department.name,
-                },
-                'assigned_to': {
-                    'id': consult.assigned_to.id,
-                    'name': consult.assigned_to.get_full_name(),
-                } if consult.assigned_to else None,
-                'created_at': consult.created_at.isoformat(),
-                'urgency': consult.urgency,
-                'status': consult.status,
-                'completed_at': consult.completed_at.isoformat() if consult.completed_at else None,
-                'is_overdue': consult.is_overdue,
-                'reason_for_consult': consult.reason_for_consult[:100] + '...' if len(consult.reason_for_consult) > 100 else consult.reason_for_consult,
-            }
-        
-        # Get consults based on type filter
-        received_list = []
-        sent_list = []
-        
-        if consult_type in ['received', 'all']:
-            received_consults = received_qs.select_related(
-                'patient', 'requesting_department', 'target_department', 'assigned_to'
-            ).order_by('-created_at')[:50]
-            received_list = [serialize_consult(c) for c in received_consults]
-        
-        if consult_type in ['sent', 'all']:
-            sent_consults = sent_qs.select_related(
-                'patient', 'requesting_department', 'target_department', 'assigned_to'
-            ).order_by('-created_at')[:50]
-            sent_list = [serialize_consult(c) for c in sent_consults]
-        
-        return Response({
-            'department': {
-                'id': department.id,
-                'name': department.name,
-                'code': department.code,
-            },
-            'summary': summary,
-            'received_consults': received_list,
-            'sent_consults': sent_list,
-        })
+                'summary': summary,
+                'received_consults': received_list,
+                'sent_consults': sent_list,
+            })
+        except Exception as e:
+            return Response(
+                {'error': f'Failed to retrieve department dashboard: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 
 class GlobalDashboardView(views.APIView):
@@ -174,16 +180,16 @@ class GlobalDashboardView(views.APIView):
     
     def get(self, request):
         """Get global dashboard data."""
-        
-        # Get query params for filtering
-        requesting_department = request.query_params.get('requesting_department')
-        target_department = request.query_params.get('target_department')
-        status_filter = request.query_params.get('status')
-        urgency_filter = request.query_params.get('urgency')
-        date_from = request.query_params.get('date_from')
-        date_to = request.query_params.get('date_to')
-        overdue_filter = request.query_params.get('overdue')
-        assigned_to = request.query_params.get('assigned_to')
+        try:
+            # Get query params for filtering
+            requesting_department = request.query_params.get('requesting_department')
+            target_department = request.query_params.get('target_department')
+            status_filter = request.query_params.get('status')
+            urgency_filter = request.query_params.get('urgency')
+            date_from = request.query_params.get('date_from')
+            date_to = request.query_params.get('date_to')
+            overdue_filter = request.query_params.get('overdue')
+            assigned_to = request.query_params.get('assigned_to')
         
         # Build base queryset
         qs = ConsultRequest.objects.all()
@@ -210,11 +216,11 @@ class GlobalDashboardView(views.APIView):
         today = timezone.now().date()
         
         global_kpis = {
-            'total_open': qs.exclude(status__in=['COMPLETED', 'CANCELLED', 'CLOSED']).count(),
+            'total_open': qs.exclude(status__in=['COMPLETED', 'CLOSED']).count(),
             'total_today': qs.filter(created_at__date=today).count(),
             'overdue_count': qs.filter(
                 is_overdue=True
-            ).exclude(status__in=['COMPLETED', 'CANCELLED', 'CLOSED']).count(),
+            ).exclude(status__in=['COMPLETED', 'CLOSED']).count(),
             'pending_count': qs.filter(status='SUBMITTED').count(),
             'in_progress_count': qs.filter(status='IN_PROGRESS').count(),
             'completed_today': qs.filter(
@@ -304,23 +310,28 @@ class GlobalDashboardView(views.APIView):
                 'department_id': dept.id,
                 'department_name': dept.name,
                 'open_received_count': dept_received.exclude(
-                    status__in=['COMPLETED', 'CANCELLED', 'CLOSED']
+                    status__in=['COMPLETED', 'CLOSED']
                 ).count(),
                 'open_sent_count': dept_sent.exclude(
-                    status__in=['COMPLETED', 'CANCELLED', 'CLOSED']
+                    status__in=['COMPLETED', 'CLOSED']
                 ).count(),
                 'overdue_count': dept_received.filter(
                     is_overdue=True
-                ).exclude(status__in=['COMPLETED', 'CANCELLED', 'CLOSED']).count(),
+                ).exclude(status__in=['COMPLETED', 'CLOSED']).count(),
                 'average_ack_time_minutes': avg_ack_time,
                 'average_completion_time_minutes': avg_completion_time,
             })
         
-        return Response({
-            'global_kpis': global_kpis,
-            'consults': consults_list,
-            'department_stats': department_stats,
-        })
+            return Response({
+                'global_kpis': global_kpis,
+                'consults': consults_list,
+                'department_stats': department_stats,
+            })
+        except Exception as e:
+            return Response(
+                {'error': f'Failed to retrieve global dashboard: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 
 class ConsultReassignView(views.APIView):

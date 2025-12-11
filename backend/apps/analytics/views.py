@@ -3,8 +3,9 @@ from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from django.db.models import Avg, Count, F, Q, DurationField
-from django.db.models.functions import Extract
+from django.db.models import Avg, Count, F, Q, DurationField, Case, When, FloatField
+from django.db.models.functions import Extract, Coalesce
+from django.utils import timezone
 
 from apps.accounts.models import User
 from apps.accounts.permissions import CanViewGlobalDashboard
@@ -21,32 +22,84 @@ class DoctorAnalyticsViewSet(viewsets.ViewSet):
         """
         Returns a list of analytics for each doctor.
         """
-        analytics_data = User.objects.filter(role='DOCTOR').annotate(
-            total_consults=Count('assigned_consults'),
-            avg_acknowledgment_time=Avg(
-                Extract(F('assigned_consults__acknowledged_at') - F('assigned_consults__created_at'), 'epoch'),
-                output_field=DurationField()
-            ),
-            avg_completion_time=Avg(
-                Extract(F('assigned_consults__completed_at') - F('assigned_consults__created_at'), 'epoch'),
-                output_field=DurationField()
-            ),
-            pending_workload=Count('assigned_consults', filter=Q(assigned_consults__status__in=['SUBMITTED', 'ACKNOWLEDGED', 'IN_PROGRESS'])),
-            escalations_handled=Count('assigned_consults', filter=Q(assigned_consults__escalation_level__gt > 0)),
-            delayed_consults=Count('assigned_consults', filter=Q(assigned_consults__is_overdue=True))
-        ).values(
-            'id',
-            'first_name',
-            'last_name',
-            'total_consults',
-            'avg_acknowledgment_time',
-            'avg_completion_time',
-            'pending_workload',
-            'escalations_handled',
-            'delayed_consults'
-        )
+        try:
+            analytics_data = User.objects.filter(role='DOCTOR').annotate(
+                total_consults=Count('assigned_consults'),
+                # Calculate average acknowledgment time in seconds (only for consults with acknowledged_at)
+                avg_acknowledgment_time=Avg(
+                    Case(
+                        When(
+                            assigned_consults__acknowledged_at__isnull=False,
+                            then=Extract(
+                                F('assigned_consults__acknowledged_at') - F('assigned_consults__created_at'),
+                                'epoch'
+                            )
+                        ),
+                        default=None,
+                        output_field=FloatField()
+                    ),
+                    filter=Q(assigned_consults__acknowledged_at__isnull=False)
+                ),
+                # Calculate average completion time in seconds (only for consults with completed_at)
+                avg_completion_time=Avg(
+                    Case(
+                        When(
+                            assigned_consults__completed_at__isnull=False,
+                            then=Extract(
+                                F('assigned_consults__completed_at') - F('assigned_consults__created_at'),
+                                'epoch'
+                            )
+                        ),
+                        default=None,
+                        output_field=FloatField()
+                    ),
+                    filter=Q(assigned_consults__completed_at__isnull=False)
+                ),
+                pending_workload=Count(
+                    'assigned_consults',
+                    filter=Q(assigned_consults__status__in=['SUBMITTED', 'ACKNOWLEDGED', 'IN_PROGRESS'])
+                ),
+                escalations_handled=Count(
+                    'assigned_consults',
+                    filter=Q(assigned_consults__escalation_level__gt=0)
+                ),
+                delayed_consults=Count(
+                    'assigned_consults',
+                    filter=Q(assigned_consults__is_overdue=True)
+                )
+            ).values(
+                'id',
+                'first_name',
+                'last_name',
+                'total_consults',
+                'avg_acknowledgment_time',
+                'avg_completion_time',
+                'pending_workload',
+                'escalations_handled',
+                'delayed_consults'
+            )
 
-        return Response(list(analytics_data))
+            # Convert the queryset to a list and format the data
+            result = []
+            for doctor in analytics_data:
+                result.append({
+                    'id': doctor['id'],
+                    'first_name': doctor['first_name'],
+                    'last_name': doctor['last_name'],
+                    'total_consults': doctor['total_consults'] or 0,
+                    'avg_acknowledgment_time': round(doctor['avg_acknowledgment_time'], 2) if doctor['avg_acknowledgment_time'] else None,
+                    'avg_completion_time': round(doctor['avg_completion_time'], 2) if doctor['avg_completion_time'] else None,
+                    'pending_workload': doctor['pending_workload'] or 0,
+                    'escalations_handled': doctor['escalations_handled'] or 0,
+                    'delayed_consults': doctor['delayed_consults'] or 0,
+                })
+
+            return Response(result)
+        except Exception as e:
+            return Response(
+                {'error': f'Failed to retrieve doctor analytics: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 
 class MyPerformanceView(APIView):
