@@ -7,7 +7,7 @@
 
 ### 1. Server IP Configuration Updates
 
-All files have been updated to use the correct **public IP address** (`34.93.19.177`) instead of the private IP (`18.220.252.164`).
+All files have been updated to use the correct **public IP address** (`172.104.53.127`) instead of the private IP (`18.220.252.164`).
 
 #### Files Updated:
 
@@ -55,7 +55,7 @@ This prevents accidental commit of sensitive credentials in the future.
 ## 📋 Current Server Configuration
 
 ### Public IP (Internet Access)
-- **IP**: `34.93.19.177`
+- **IP**: `172.104.53.127`
 - **Used for**: All external access, configuration files, documentation
 
 ### Private IP (Internal Only)
@@ -63,10 +63,10 @@ This prevents accidental commit of sensitive credentials in the future.
 - **Used for**: Internal server communication only (not in config files)
 
 ### Application URLs
-- **Frontend**: http://34.93.19.177
-- **Backend API**: http://34.93.19.177/api/v1/
-- **Admin Panel**: http://34.93.19.177/admin/
-- **WebSocket**: ws://34.93.19.177/ws
+- **Frontend**: http://172.104.53.127
+- **Backend API**: http://172.104.53.127/api/v1/
+- **Admin Panel**: http://172.104.53.127/admin/
+- **WebSocket**: ws://172.104.53.127/ws
 
 ## 🔍 Verification
 
@@ -78,7 +78,7 @@ Run this command to verify all references are correct:
 grep -r "18.220.252.164" . --include="*.yml" --include="*.conf" --include="*.md" --include="*.sh" | grep -v "SERVER_CONFIG.md" | grep -v "git"
 
 # Verify public IP is used in all config files
-grep -r "34.93.19.177" docker-compose.yml nginx/default.conf deploy.sh
+grep -r "172.104.53.127" docker-compose.yml nginx/default.conf deploy.sh
 ```
 
 ### Files That Should Reference Public IP
@@ -116,13 +116,13 @@ grep -r "34.93.19.177" docker-compose.yml nginx/default.conf deploy.sh
 
 Before final release, verify:
 
-- [x] All configuration files use public IP (`34.93.19.177`)
+- [x] All configuration files use public IP (`172.104.53.127`)
 - [x] All documentation files reference correct URLs
 - [x] Obsolete files removed
 - [x] Security improvements in place (`.gitignore` updated)
 - [x] Single source of truth created (`SERVER_CONFIG.md`)
 - [ ] **TODO**: Test deployment with updated configuration
-- [ ] **TODO**: Verify application is accessible at http://34.93.19.177
+- [ ] **TODO**: Verify application is accessible at http://172.104.53.127
 - [ ] **TODO**: Verify all endpoints work correctly
 - [ ] **TODO**: Check that no sensitive data is in repository
 

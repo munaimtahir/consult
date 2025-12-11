@@ -41,9 +41,9 @@ app2_backend:
     - DB_PASSWORD=consult_password
     - REDIS_HOST=redis
     - REDIS_URL=redis://redis:6379/1  # Use different DB number
-    - ALLOWED_HOSTS=localhost,127.0.0.1,app2_backend,34.93.19.177
-    - CORS_ALLOWED_ORIGINS=http://34.93.19.177
-    - CSRF_TRUSTED_ORIGINS=http://34.93.19.177
+    - ALLOWED_HOSTS=localhost,127.0.0.1,app2_backend,172.104.53.127
+    - CORS_ALLOWED_ORIGINS=http://172.104.53.127
+    - CSRF_TRUSTED_ORIGINS=http://172.104.53.127
   depends_on:
     db:
       condition: service_healthy
@@ -77,7 +77,7 @@ app2_frontend:
   build:
     context: ./app2/frontend
     args:
-      - VITE_API_URL=http://34.93.19.177/app2/api/v1
+      - VITE_API_URL=http://172.104.53.127/app2/api/v1
   expose:
     - "80"
   depends_on:
@@ -118,7 +118,7 @@ upstream app2_frontend {
 # Add to existing server block:
 server {
     listen 80;
-    server_name 34.93.19.177 _;
+    server_name 172.104.53.127 _;
     
     # ... existing locations ...
     
@@ -202,7 +202,7 @@ If your app needs specific environment variables:
 
 3. **Check health:**
    ```bash
-   curl http://34.93.19.177/app2/api/health/
+   curl http://172.104.53.127/app2/api/health/
    ```
 
 4. **Restart Nginx:**
@@ -212,7 +212,7 @@ If your app needs specific environment variables:
 
 5. **Verify access:**
    ```bash
-   curl http://34.93.19.177/app2/
+   curl http://172.104.53.127/app2/
    ```
 
 ### Step 7: Update Documentation

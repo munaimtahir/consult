@@ -104,7 +104,7 @@ The repository demonstrates strong foundational architecture with modern technol
    - **Risk**: Allows deployment without proper secret key
 
 3. **Hardcoded IP Addresses** (multiple files)
-   - Server IPs `34.93.19.177`, `18.220.252.164`, `3.233.180.130` hardcoded in config
+   - Server IPs `172.104.53.127`, `18.220.252.164`, `3.233.180.130` hardcoded in config
    - **Risk**: Environment-specific configuration leaked into codebase
 
 4. **Duplicate Settings Files**
@@ -262,7 +262,7 @@ The repository demonstrates strong foundational architecture with modern technol
 **Leaked Secrets/Credentials:**
 - Default SECRET_KEY: `change_me_in_prod`
 - Default DB password: `consult_password`
-- IP addresses hardcoded: `34.93.19.177`, `18.220.252.164`
+- IP addresses hardcoded: `172.104.53.127`, `18.220.252.164`
 
 ### 6.2 Backend Config (Django)
 
@@ -273,7 +273,7 @@ The repository demonstrates strong foundational architecture with modern technol
 - ⚠️ Inconsistent settings structure (both `settings.py` and `settings/` directory)
 
 **ALLOWED_HOSTS:**
-- ⚠️ Multiple IPs listed: `34.93.19.177`, `18.220.252.164`, `3.233.180.130`
+- ⚠️ Multiple IPs listed: `172.104.53.127`, `18.220.252.164`, `3.233.180.130`
 - ⚠️ Should be environment-specific via `.env` file
 
 **CORS Configuration:**

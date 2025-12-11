@@ -1,12 +1,12 @@
 #!/bin/bash
 # Deployment script for Hospital Consult System
-# Server IP: 172.104.178.44
+# Server IP: 172.104.53.127
 
 set -e
 
 echo "========================================="
 echo "Hospital Consult System - Deployment"
-echo "Server IP: 172.104.178.44"
+echo "Server IP: 172.104.53.127"
 echo "========================================="
 
 # Colors for output
@@ -136,14 +136,14 @@ echo ""
 print_info "Testing health endpoints..."
 
 # Test backend health
-if curl -f http://localhost/api/v1/health/ > /dev/null 2>&1 || curl -f http://172.104.178.44/api/v1/health/ > /dev/null 2>&1; then
+if curl -f http://localhost/api/v1/health/ > /dev/null 2>&1 || curl -f http://172.104.53.127/api/v1/health/ > /dev/null 2>&1; then
     print_success "Backend health endpoint is accessible"
 else
     print_error "Backend health endpoint is not accessible"
 fi
 
 # Test nginx health
-if curl -f http://localhost/health > /dev/null 2>&1 || curl -f http://172.104.178.44/health > /dev/null 2>&1; then
+if curl -f http://localhost/health > /dev/null 2>&1 || curl -f http://172.104.53.127/health > /dev/null 2>&1; then
     print_success "Nginx health endpoint is accessible"
 else
     print_error "Nginx health endpoint is not accessible"
@@ -155,9 +155,9 @@ print_success "Deployment Complete!"
 echo "========================================="
 echo ""
 echo "Access Points:"
-echo "  Frontend:    http://172.104.178.44"
-echo "  Backend API: http://172.104.178.44/api/v1/"
-echo "  Admin Panel: http://172.104.178.44/admin/"
+echo "  Frontend:    http://172.104.53.127"
+echo "  Backend API: http://172.104.53.127/api/v1/"
+echo "  Admin Panel: http://172.104.53.127/admin/"
 echo ""
 echo "Demo Credentials:"
 echo "  Superuser: admin@pmc.edu.pk / adminpassword123"

@@ -1,7 +1,7 @@
 # Server Update Instructions
 
 ## Issue
-The server is using old IP addresses (`3.233.180.130`) instead of the new public IP (`34.93.19.177`).
+The server is using old IP addresses (`3.233.180.130`) instead of the new public IP (`172.104.53.127`).
 
 ## Quick Fix - Update deploy.sh on Server
 
@@ -14,13 +14,13 @@ cd /home/munaim/apps/consult
 cat > deploy.sh << 'EOF'
 #!/bin/bash
 # Deployment script for Hospital Consult System
-# Server IP: 34.93.19.177
+# Server IP: 172.104.53.127
 
 set -e
 
 echo "========================================="
 echo "Hospital Consult System - Deployment"
-echo "Server IP: 34.93.19.177"
+echo "Server IP: 172.104.53.127"
 echo "========================================="
 
 # Check if Docker is running
@@ -54,9 +54,9 @@ echo ""
 echo "========================================="
 echo "Deployment Complete!"
 echo "========================================="
-echo "Frontend: http://34.93.19.177"
-echo "Backend API: http://34.93.19.177/api/v1/"
-echo "Admin Panel: http://34.93.19.177/admin/"
+echo "Frontend: http://172.104.53.127"
+echo "Backend API: http://172.104.53.127/api/v1/"
+echo "Admin Panel: http://172.104.53.127/admin/"
 echo ""
 echo "To view logs: sudo docker compose logs -f"
 echo "To stop: sudo docker compose down"
@@ -74,11 +74,11 @@ The docker-compose.yml on the server also needs to be updated. Run this on the s
 cd /home/munaim/apps/consult
 
 # Update docker-compose.yml to use correct IP
-sed -i 's/3\.233\.180\.130/34.93.19.177/g' docker-compose.yml
-sed -i 's/18\.220\.252\.164/34.93.19.177/g' docker-compose.yml
+sed -i 's/3\.233\.180\.130/172.104.53.127/g' docker-compose.yml
+sed -i 's/18\.220\.252\.164/172.104.53.127/g' docker-compose.yml
 
 # Verify the changes
-grep "34.93.19.177" docker-compose.yml
+grep "172.104.53.127" docker-compose.yml
 ```
 
 ## Update nginx/default.conf
@@ -87,11 +87,11 @@ grep "34.93.19.177" docker-compose.yml
 cd /home/munaim/apps/consult
 
 # Update nginx config
-sed -i 's/3\.233\.180\.130/34.93.19.177/g' nginx/default.conf
-sed -i 's/18\.220\.252\.164/34.93.19.177/g' nginx/default.conf
+sed -i 's/3\.233\.180\.130/172.104.53.127/g' nginx/default.conf
+sed -i 's/18\.220\.252\.164/172.104.53.127/g' nginx/default.conf
 
 # Verify the changes
-grep "34.93.19.177" nginx/default.conf
+grep "172.104.53.127" nginx/default.conf
 ```
 
 ## After Updates - Redeploy
@@ -112,9 +112,9 @@ After deployment, verify the configuration is correct:
 sudo docker compose config | grep -E "(VITE_API_URL|VITE_WS_URL|ALLOWED_HOSTS|CORS_ALLOWED_ORIGINS)"
 
 # Should show:
-# - VITE_API_URL=http://34.93.19.177/api/v1
-# - VITE_WS_URL=ws://34.93.19.177/ws
-# - ALLOWED_HOSTS should include 34.93.19.177
-# - CORS_ALLOWED_ORIGINS should include http://34.93.19.177
+# - VITE_API_URL=http://172.104.53.127/api/v1
+# - VITE_WS_URL=ws://172.104.53.127/ws
+# - ALLOWED_HOSTS should include 172.104.53.127
+# - CORS_ALLOWED_ORIGINS should include http://172.104.53.127
 ```
 

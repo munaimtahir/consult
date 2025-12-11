@@ -56,7 +56,7 @@ Port 80 (Nginx Reverse Proxy)
 ### Prerequisites
 
 - Docker and Docker Compose installed
-- Server with public IP: `34.93.19.177`
+- Server with public IP: `172.104.53.127`
 - At least 4GB RAM recommended
 - Root or sudo access
 
@@ -85,9 +85,9 @@ Port 80 (Nginx Reverse Proxy)
 
 ### Access URLs
 
-- **Consult App**: http://34.93.19.177
-- **Consult API**: http://34.93.19.177/api/v1/
-- **Health Check**: http://34.93.19.177/health
+- **Consult App**: http://172.104.53.127
+- **Consult API**: http://172.104.53.127/api/v1/
+- **Health Check**: http://172.104.53.127/health
 
 ## Adding a New App
 
@@ -308,9 +308,9 @@ REDIS_PORT=6379
 REDIS_URL=redis://redis:6379/0
 
 # App-specific
-ALLOWED_HOSTS=localhost,127.0.0.1,app2_backend,34.93.19.177
-CORS_ALLOWED_ORIGINS=http://34.93.19.177
-CSRF_TRUSTED_ORIGINS=http://34.93.19.177
+ALLOWED_HOSTS=localhost,127.0.0.1,app2_backend,172.104.53.127
+CORS_ALLOWED_ORIGINS=http://172.104.53.127
+CSRF_TRUSTED_ORIGINS=http://172.104.53.127
 ```
 
 ### Resource Limits
@@ -378,7 +378,7 @@ docker compose exec nginx-proxy tail -f /var/log/nginx/access.log
 
 4. **Check health**
    ```bash
-   curl http://34.93.19.177/app2/api/health/
+   curl http://172.104.53.127/app2/api/health/
    bash scripts/manage-apps.sh health app2_backend
    ```
 

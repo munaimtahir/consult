@@ -6,7 +6,7 @@ When updating server configuration, update this file first, then update all othe
 ## Server IP Addresses
 
 ### Public IP (Internet Access)
-- **IP Address**: `34.93.19.177`
+- **IP Address**: `172.104.53.127`
 - **Usage**: This is the IP address used to access the application from the internet
 - **Used in**: 
   - `docker-compose.yml` (ALLOWED_HOSTS, CORS, CSRF, VITE_API_URL, VITE_WS_URL)
@@ -21,12 +21,12 @@ When updating server configuration, update this file first, then update all othe
 
 ## Application URLs
 
-All URLs use the **Public IP** (`34.93.19.177`):
+All URLs use the **Public IP** (`172.104.53.127`):
 
-- **Frontend**: http://34.93.19.177
-- **Backend API**: http://34.93.19.177/api/v1/
-- **Admin Panel**: http://34.93.19.177/admin/
-- **WebSocket**: ws://34.93.19.177/ws
+- **Frontend**: http://172.104.53.127
+- **Backend API**: http://172.104.53.127/api/v1/
+- **Admin Panel**: http://172.104.53.127/admin/
+- **WebSocket**: ws://172.104.53.127/ws
 
 ## Files That Reference Server IP
 
@@ -53,22 +53,22 @@ If the server IP changes, follow these steps:
 2. **Update configuration files**:
    ```bash
    # Update docker-compose.yml
-   sed -i 's/34.93.19.177/NEW_PUBLIC_IP/g' docker-compose.yml
+   sed -i 's/172.104.53.127/NEW_PUBLIC_IP/g' docker-compose.yml
    
    # Update nginx/default.conf
-   sed -i 's/34.93.19.177/NEW_PUBLIC_IP/g' nginx/default.conf
+   sed -i 's/172.104.53.127/NEW_PUBLIC_IP/g' nginx/default.conf
    ```
 3. **Update documentation files**:
    ```bash
-   find . -name "*.md" -type f -exec sed -i 's/34.93.19.177/NEW_PUBLIC_IP/g' {} \;
+   find . -name "*.md" -type f -exec sed -i 's/172.104.53.127/NEW_PUBLIC_IP/g' {} \;
    ```
 4. **Update scripts**:
    ```bash
-   find . -name "*.sh" -type f -exec sed -i 's/34.93.19.177/NEW_PUBLIC_IP/g' {} \;
+   find . -name "*.sh" -type f -exec sed -i 's/172.104.53.127/NEW_PUBLIC_IP/g' {} \;
    ```
 5. **Verify changes**:
    ```bash
-   grep -r "34.93.19.177" . --include="*.yml" --include="*.conf" --include="*.md" --include="*.sh"
+   grep -r "172.104.53.127" . --include="*.yml" --include="*.conf" --include="*.md" --include="*.sh"
    ```
 6. **Rebuild and redeploy**:
    ```bash

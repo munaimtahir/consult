@@ -29,15 +29,15 @@ REDIS_URL=redis://redis:6379/0
 # Django/Backend Settings
 DEBUG=0
 SECRET_KEY=change_me_in_prod
-ALLOWED_HOSTS=localhost,127.0.0.1,APP_NAME_backend,172.104.178.44
+ALLOWED_HOSTS=localhost,127.0.0.1,APP_NAME_backend,172.104.53.127
 
 # CORS Configuration
-CORS_ALLOWED_ORIGINS=http://172.104.178.44,http://localhost:3000,http://localhost
-CSRF_TRUSTED_ORIGINS=http://172.104.178.44,http://localhost:3000,http://localhost
+CORS_ALLOWED_ORIGINS=http://172.104.53.127,http://localhost:3000,http://localhost
+CSRF_TRUSTED_ORIGINS=http://172.104.53.127,http://localhost:3000,http://localhost
 
 # API Configuration
-API_URL=http://172.104.178.44/APP_NAME/api
-WS_URL=ws://172.104.178.44/APP_NAME/ws
+API_URL=http://172.104.53.127/APP_NAME/api
+WS_URL=ws://172.104.53.127/APP_NAME/ws
 
 # Resource Limits (for docker-compose.yml)
 BACKEND_CPU_LIMIT=1.0

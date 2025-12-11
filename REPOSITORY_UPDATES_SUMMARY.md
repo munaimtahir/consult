@@ -5,51 +5,51 @@
 
 ## Summary
 
-All necessary updates have been applied to the repository. The IP address has been standardized to **`34.93.19.177`** across all configuration files. You can now sync the repository to your server and deploy.
+All necessary updates have been applied to the repository. The IP address has been standardized to **`172.104.53.127`** across all configuration files. You can now sync the repository to your server and deploy.
 
 ## Files Updated
 
 ### Critical Configuration Files ✅
 
 1. **`docker-compose.yml`**
-   - ✅ `ALLOWED_HOSTS` updated to use `34.93.19.177`
-   - ✅ `CORS_ALLOWED_ORIGINS` updated to use `34.93.19.177`
-   - ✅ `CSRF_TRUSTED_ORIGINS` updated to use `34.93.19.177`
+   - ✅ `ALLOWED_HOSTS` updated to use `172.104.53.127`
+   - ✅ `CORS_ALLOWED_ORIGINS` updated to use `172.104.53.127`
+   - ✅ `CSRF_TRUSTED_ORIGINS` updated to use `172.104.53.127`
    - ✅ Frontend build args updated:
-     - `VITE_API_URL=http://34.93.19.177/api/v1`
-     - `VITE_WS_URL=ws://34.93.19.177/ws`
+     - `VITE_API_URL=http://172.104.53.127/api/v1`
+     - `VITE_WS_URL=ws://172.104.53.127/ws`
 
 2. **`nginx/default.conf`**
    - ✅ Merge conflict resolved
-   - ✅ Server name updated to `34.93.19.177`
+   - ✅ Server name updated to `172.104.53.127`
    - ✅ Upstream definitions correct for host network mode
 
 3. **`deploy.sh`**
-   - ✅ All IP references updated to `34.93.19.177`
+   - ✅ All IP references updated to `172.104.53.127`
    - ✅ Deployment messages updated
 
 ### Documentation Files ✅
 
 4. **`DEPLOYMENT_COMPLETE.md`**
-   - ✅ Server IP updated to `34.93.19.177`
+   - ✅ Server IP updated to `172.104.53.127`
    - ✅ All URLs updated
 
 5. **`GCP_FIREWALL_SETUP.md`**
-   - ✅ All IP references updated to `34.93.19.177`
+   - ✅ All IP references updated to `172.104.53.127`
    - ✅ Example commands updated
 
 ## Current Configuration
 
 ### Server IP Address
-- **Public IP**: `34.93.19.177` ✅
+- **Public IP**: `172.104.53.127` ✅
 - **Private IP**: `18.220.252.164` (documented only, not used in config)
 
 ### Application URLs
-- **Frontend**: http://34.93.19.177
-- **Backend API**: http://34.93.19.177/api/v1/
-- **Admin Panel**: http://34.93.19.177/admin/
-- **WebSocket**: ws://34.93.19.177/ws
-- **Health Check**: http://34.93.19.177/health
+- **Frontend**: http://172.104.53.127
+- **Backend API**: http://172.104.53.127/api/v1/
+- **Admin Panel**: http://172.104.53.127/admin/
+- **WebSocket**: ws://172.104.53.127/ws
+- **Health Check**: http://172.104.53.127/health
 
 ## Next Steps
 
@@ -59,7 +59,7 @@ All necessary updates have been applied to the repository. The IP address has be
 ```bash
 # On your local machine
 git add .
-git commit -m "Update IP addresses to 34.93.19.177"
+git commit -m "Update IP addresses to 172.104.53.127"
 git push origin main
 
 # On server
@@ -102,13 +102,13 @@ After deployment, verify:
 sudo docker compose ps
 
 # Test health endpoint
-curl http://34.93.19.177/health
+curl http://172.104.53.127/health
 
 # Test frontend
-curl -I http://34.93.19.177
+curl -I http://172.104.53.127
 
 # Test API
-curl http://34.93.19.177/api/v1/
+curl http://172.104.53.127/api/v1/
 ```
 
 ## Verification Checklist
@@ -121,7 +121,7 @@ Before deploying, verify these files on the server have the correct IP:
 
 You can verify with:
 ```bash
-grep "34.93.19.177" docker-compose.yml nginx/default.conf deploy.sh
+grep "172.104.53.127" docker-compose.yml nginx/default.conf deploy.sh
 ```
 
 ## Important Notes
@@ -147,7 +147,7 @@ If you encounter issues after deployment:
 ## Summary
 
 ✅ All configuration files updated  
-✅ All IP addresses standardized to `34.93.19.177`  
+✅ All IP addresses standardized to `172.104.53.127`  
 ✅ Merge conflicts resolved  
 ✅ Ready for deployment  
 

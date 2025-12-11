@@ -99,17 +99,17 @@ Once the firewall is configured, open your MacBook browser and visit:
 
 **Frontend:**
 ```
-http://34.93.19.177/
+http://172.104.53.127/
 ```
 
 **Backend API:**
 ```
-http://34.93.19.177/api/v1/
+http://172.104.53.127/api/v1/
 ```
 
 **Admin Panel:**
 ```
-http://34.93.19.177/admin/
+http://172.104.53.127/admin/
 ```
 
 ### Step 5: Verify External Access
@@ -118,10 +118,10 @@ Test from your MacBook terminal:
 
 ```bash
 # Test if port 80 is accessible
-curl -I http://34.93.19.177/
+curl -I http://172.104.53.127/
 
 # Or use telnet
-telnet 34.93.19.177 80
+telnet 172.104.53.127 80
 ```
 
 If you get a response, the firewall is configured correctly!
@@ -151,7 +151,7 @@ If you get a response, the firewall is configured correctly!
 4. **Check if Nginx is Running on Server**
    ```bash
    # SSH into your server
-   ssh YOUR_USER@34.93.19.177
+   ssh YOUR_USER@172.104.53.127
    
    # Check if nginx is listening
    sudo netstat -tlnp | grep :80
@@ -228,5 +228,5 @@ If you're still having issues:
 
 ---
 
-**Your Server IP:** `34.93.19.177`
+**Your Server IP:** `172.104.53.127`
 **Port to Open:** `80` (and `443` for HTTPS)

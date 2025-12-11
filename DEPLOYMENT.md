@@ -75,8 +75,8 @@ See [docs/ADD_NEW_APP_GUIDE.md](../docs/ADD_NEW_APP_GUIDE.md) for instructions.
 
 ## Accessing the Application
 
--   **Frontend:** Open your web browser and navigate to `http://34.93.19.177`.
--   **Backend API:** The API is accessible at `http://34.93.19.177/api/v1/`.
+-   **Frontend:** Open your web browser and navigate to `http://172.104.53.127`.
+-   **Backend API:** The API is accessible at `http://172.104.53.127/api/v1/`.
 
 ## Default Login Credentials
 
@@ -146,7 +146,7 @@ This guide provides instructions for deploying the application on a Linux VPS wi
     ```
 3.  **Create a production build:**
     ```bash
-    VITE_API_URL=http://34.93.19.177/api/v1 VITE_WS_URL=ws://34.93.19.177/ws npm run build
+    VITE_API_URL=http://172.104.53.127/api/v1 VITE_WS_URL=ws://172.104.53.127/ws npm run build
     ```
 4.  The static files will be generated in the `frontend/dist` directory.
 

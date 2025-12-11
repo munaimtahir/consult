@@ -109,7 +109,7 @@ BACKEND_SERVICE=$(cat <<EOF
     environment:
       - DEBUG=0
       - SECRET_KEY=change_me_in_prod
-      - ALLOWED_HOSTS=localhost,127.0.0.1,${APP_NAME}_backend,172.104.178.44
+      - ALLOWED_HOSTS=localhost,127.0.0.1,${APP_NAME}_backend,172.104.53.127
       - DATABASE=postgres
       - DB_NAME=consult_db
       - DB_USER=consult_user
@@ -119,8 +119,8 @@ BACKEND_SERVICE=$(cat <<EOF
       - REDIS_URL=redis://redis:6379/0
       - REDIS_HOST=redis
       - REDIS_PORT=6379
-      - CORS_ALLOWED_ORIGINS=http://172.104.178.44,http://localhost:3000,http://localhost
-      - CSRF_TRUSTED_ORIGINS=http://172.104.178.44,http://localhost:3000,http://localhost
+      - CORS_ALLOWED_ORIGINS=http://172.104.53.127,http://localhost:3000,http://localhost
+      - CSRF_TRUSTED_ORIGINS=http://172.104.53.127,http://localhost:3000,http://localhost
     depends_on:
       db:
         condition: service_healthy
@@ -154,7 +154,7 @@ BACKEND_SERVICE=$(cat <<EOF
     build:
       context: ./${APP_NAME}/frontend
       args:
-        - VITE_API_URL=http://172.104.178.44${APP_PATH}/api
+        - VITE_API_URL=http://172.104.53.127${APP_PATH}/api
     expose:
       - "${FRONTEND_PORT}"
     depends_on:
@@ -344,5 +344,5 @@ echo "     docker-compose up -d ${APP_NAME}_backend ${APP_NAME}_frontend"
 echo "  5. Restart nginx-proxy:"
 echo "     docker-compose restart nginx-proxy"
 echo ""
-print_info "App will be accessible at: http://172.104.178.44${APP_PATH}"
+print_info "App will be accessible at: http://172.104.53.127${APP_PATH}"
 
