@@ -296,6 +296,8 @@ class ConsultRequestDetailSerializer(serializers.ModelSerializer):
             'created_at',
             'updated_at',
             'acknowledged_at',
+            'received_at',
+            'assigned_at',
             'completed_at',
             'expected_response_time',
             'is_overdue'
