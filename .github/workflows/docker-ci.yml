@@ -49,8 +49,15 @@ jobs:
 
       - name: Test Backend Image
         run: |
-          # Test that the image can run help command
-          docker run --rm consult-backend:test python manage.py --help > /dev/null
+          # Test that the image can run help command with required env vars
+          docker run --rm \
+            -e DB_NAME=test_db \
+            -e DB_USER=test_user \
+            -e DB_PASSWORD=test_pass \
+            -e DB_HOST=localhost \
+            -e DB_PORT=5432 \
+            -e SECRET_KEY=test-secret-key-for-ci \
+            consult-backend:test python manage.py --help > /dev/null
           echo "✓ Backend image is functional"
 
       - name: Build Frontend Docker Image
@@ -77,14 +84,22 @@ jobs:
 
       - name: Build with docker-compose (smoke test)
         run: |
+          # Create minimal .env file for docker-compose build
+          cat > .env << EOF
+          DB_NAME=test_db
+          DB_USER=test_user
+          DB_PASSWORD=test_pass
+          DB_HOST=localhost
+          DB_PORT=5432
+          SECRET_KEY=test-secret-key-for-ci
+          VITE_API_URL=http://localhost:8000/api/v1
+          VITE_WS_URL=ws://localhost:8000/ws
+          EOF
+          
           # This validates that docker-compose can build all services
           # We don't start services as they need postgres/redis
           docker compose build
           echo "✓ All services build successfully via docker-compose"
-        env:
-          # Set minimal env vars for build
-          VITE_API_URL: http://localhost:8000/api/v1
-          VITE_WS_URL: ws://localhost:8000/ws
 
       - name: Show image sizes
         run: |

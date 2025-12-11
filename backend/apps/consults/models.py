@@ -77,6 +77,43 @@ class ConsultRequest(models.Model):
         related_name='assigned_consults',
         help_text='Doctor assigned to handle this consult'
     )
+    assigned_by = models.ForeignKey(
+        'accounts.User',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='consults_assigned_by_me',
+        help_text='User who assigned this consult'
+    )
+    assigned_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text='When the consult was assigned'
+    )
+    assignment_type = models.CharField(
+        max_length=20,
+        default='manual',
+        choices=[
+            ('manual', 'Manual Assignment'),
+            ('auto', 'Auto Assignment'),
+        ],
+        help_text='How the consult was assigned'
+    )
+    
+    # Receipt/Acknowledgement tracking
+    received_by = models.ForeignKey(
+        'accounts.User',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='consults_received_by_me',
+        help_text='User who received/acknowledged this consult'
+    )
+    received_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text='When the consult was received/acknowledged'
+    )
     
     # Status and urgency
     status = models.CharField(
@@ -121,13 +158,14 @@ class ConsultRequest(models.Model):
     acknowledged_at = models.DateTimeField(null=True, blank=True)
     completed_at = models.DateTimeField(null=True, blank=True)
 
-    # Audit fields
+    # Audit fields (deprecated in favor of received_by)
     acknowledged_by = models.ForeignKey(
         'accounts.User',
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        related_name='acknowledged_consults'
+        related_name='acknowledged_consults',
+        help_text='Deprecated: Use received_by instead'
     )
     last_action_summary = models.TextField(blank=True)
     
