@@ -209,8 +209,21 @@ echo ""
 
 # Step 6: Clean previous builds (optional)
 echo "Step 6: Preparing build environment..."
-read -p "Clean previous builds? (y/n) " -n 1 -r
-echo
+# In non-interactive environments (CI, automation, Cursor tools), `read -p` can
+# receive EOF and cause the script to exit due to `set -e`. Default to "no"
+# unless explicitly requested.
+#
+# You can force a clean build by setting CLEAN_BUILD=y (or yes/true/1).
+REPLY="n"
+if [[ "${CLEAN_BUILD:-}" =~ ^([Yy]|[Yy][Ee][Ss]|[Tt][Rr][Uu][Ee]|1)$ ]]; then
+    REPLY="y"
+elif [ -t 0 ]; then
+    read -p "Clean previous builds? (y/n) " -n 1 -r
+    echo
+else
+    echo "  Non-interactive shell detected; skipping clean (set CLEAN_BUILD=y to force)."
+fi
+
 if [[ $REPLY =~ ^[Yy]$ ]]; then
     print_info "Cleaning previous builds..."
     cd android
