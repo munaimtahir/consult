@@ -3,21 +3,21 @@
   // This project requires JDK 17 or higher for Android development
   
   // Configure JDK runtimes - update the path after installing JDK
-  // Common Windows JDK installation paths:
-  // - C:\Program Files\Java\jdk-17
-  // - C:\Program Files\Eclipse Adoptium\jdk-17.0.x-hotspot
-  // - C:\Program Files\Microsoft\jdk-17.0.x
+  // Common Linux JDK installation paths:
+  // - /usr/lib/jvm/java-17-openjdk-amd64
+  // - /usr/lib/jvm/java-17-openjdk
+  // - /usr/lib/jvm/default-java
   "java.configuration.runtimes": [
     {
       "name": "JavaSE-17",
-      "path": "C:\\Program Files\\Microsoft\\jdk-17.0.17.10-hotspot",
+      "path": "/usr/lib/jvm/java-17-openjdk-amd64",
       "default": true
     }
   ],
   
   // Alternative: If you prefer to set a single JDK path directly
   // Uncomment and update the path below after installing JDK:
-  // "java.jdt.ls.java.home": "C:\\Program Files\\Java\\jdk-17",
+  // "java.jdt.ls.java.home": "/usr/lib/jvm/java-17-openjdk-amd64",
   
   // Java Language Server settings
   "java.compile.nullAnalysis.mode": "automatic",
@@ -27,7 +27,7 @@
   
   // Note: After installing JDK, update the paths above to match your installation
   // You can find your JDK path by checking:
-  // - C:\Program Files\Java\
-  // - C:\Program Files\Eclipse Adoptium\
-  // - C:\Program Files\Microsoft\
+  // - /usr/lib/jvm/
+  // Or by running:
+  // - readlink -f "$(which java)" | sed "s:bin/java::"
 }
