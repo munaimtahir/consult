@@ -38,13 +38,25 @@ echo ""
 # Configuration
 SDK_DIR="$HOME/Android/Sdk"
 COMMAND_LINE_TOOLS_VERSION="11076708_latest"
-ANDROID_PLATFORM="android-33"
-BUILD_TOOLS_VERSION="33.0.0"
+# Match project requirements from build.gradle: compileSdkVersion 34, buildToolsVersion 34.0.0
+ANDROID_PLATFORM="android-34"
+BUILD_TOOLS_VERSION="34.0.0"
 
-# Check if SDK already exists
+# Check if SDK already exists and has required components
+SDK_EXISTS=false
 if [ -d "$SDK_DIR" ] && [ -f "$SDK_DIR/platform-tools/adb" ]; then
-    print_warning "Android SDK appears to already be installed at: $SDK_DIR"
-    read -p "Continue installation anyway? (y/n) " -n 1 -r
+    # Check if required platform and build-tools are installed
+    if [ -d "$SDK_DIR/platforms/$ANDROID_PLATFORM" ] && [ -d "$SDK_DIR/build-tools/$BUILD_TOOLS_VERSION" ]; then
+        print_success "Android SDK already installed with required components at: $SDK_DIR"
+        SDK_EXISTS=true
+    else
+        print_warning "Android SDK exists but missing required components (platform $ANDROID_PLATFORM or build-tools $BUILD_TOOLS_VERSION)"
+    fi
+fi
+
+# Allow non-interactive mode via environment variable
+if [ "$SDK_EXISTS" = false ] && [ -z "$NON_INTERACTIVE" ]; then
+    read -p "Continue installation? (y/n) " -n 1 -r
     echo
     if [[ ! $REPLY =~ ^[Yy]$ ]]; then
         echo "Installation cancelled."
@@ -184,20 +196,27 @@ print_info "Installing platform-tools..."
 
 print_info "Installing SDK Platform $ANDROID_PLATFORM..."
 "$SDKMANAGER" "platforms;$ANDROID_PLATFORM" || {
-    print_warning "Failed to install platform $ANDROID_PLATFORM, trying android-34..."
-    ANDROID_PLATFORM="android-34"
-    "$SDKMANAGER" "platforms;$ANDROID_PLATFORM" || {
-        print_error "Failed to install SDK platform"
+    print_warning "Failed to install platform $ANDROID_PLATFORM, trying android-33 as fallback..."
+    FALLBACK_PLATFORM="android-33"
+    "$SDKMANAGER" "platforms;$FALLBACK_PLATFORM" || {
+        print_error "Failed to install SDK platform. Please check your internet connection and try again."
         exit 1
     }
+    print_warning "Installed fallback platform $FALLBACK_PLATFORM instead of $ANDROID_PLATFORM"
+    ANDROID_PLATFORM="$FALLBACK_PLATFORM"
 }
 
 print_info "Installing build-tools $BUILD_TOOLS_VERSION..."
 "$SDKMANAGER" "build-tools;$BUILD_TOOLS_VERSION" || {
-    print_warning "Failed to install build-tools $BUILD_TOOLS_VERSION, trying latest..."
+    print_warning "Failed to install build-tools $BUILD_TOOLS_VERSION, trying latest stable..."
     "$SDKMANAGER" "build-tools;latest" || {
-        print_error "Failed to install build-tools"
-        exit 1
+        print_warning "Failed to install latest build-tools, trying 33.0.0 as fallback..."
+        "$SDKMANAGER" "build-tools;33.0.0" || {
+            print_error "Failed to install build-tools. Please check your internet connection and try again."
+            exit 1
+        }
+        print_warning "Installed fallback build-tools 33.0.0 instead of $BUILD_TOOLS_VERSION"
+        BUILD_TOOLS_VERSION="33.0.0"
     }
 }
 
