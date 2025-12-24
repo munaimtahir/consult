@@ -7,6 +7,12 @@ const apiClient = axios.create({
   },
 });
 
+// Keystone Compatibility: Get the app base path for redirects
+const getAppBasePath = () => {
+  const appSlug = import.meta.env.VITE_APP_SLUG || '';
+  return appSlug ? `/${appSlug}` : '';
+};
+
 // Request interceptor to add JWT token
 apiClient.interceptors.request.use(
   (config) => {
@@ -31,7 +37,7 @@ apiClient.interceptors.response.use(
       try {
         const refreshToken = localStorage.getItem('refresh_token');
         const response = await axios.post(
-          `${import.meta.env.VITE_API_URL}/api/v1/auth/token/refresh/`,
+          `${import.meta.env.VITE_API_URL}/auth/token/refresh/`,
           { refresh: refreshToken }
         );
 
@@ -43,7 +49,8 @@ apiClient.interceptors.response.use(
       } catch (refreshError) {
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
-        window.location.href = '/login';
+        // Use relative path with app base for Keystone compatibility
+        window.location.href = `${getAppBasePath()}/login`;
         return Promise.reject(refreshError);
       }
     }
