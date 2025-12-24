@@ -29,6 +29,13 @@ const queryClient = new QueryClient({
   },
 });
 
+// Keystone Compatibility: Support for path-based routing
+// Extract basename from the script src (Vite injects the base path)
+const getBasename = () => {
+  const appSlug = import.meta.env.VITE_APP_SLUG || '';
+  return appSlug ? `/${appSlug}` : '';
+};
+
 /**
  * The main application component.
  *
@@ -38,10 +45,12 @@ const queryClient = new QueryClient({
  * @returns {React.ReactElement} The rendered application component.
  */
 function App() {
+  const basename = getBasename();
+  
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <BrowserRouter>
+        <BrowserRouter basename={basename}>
           <Routes>
             <Route path="/login" element={<LoginPage />} />
 

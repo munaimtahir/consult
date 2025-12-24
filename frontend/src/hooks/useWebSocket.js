@@ -9,6 +9,9 @@ import { useAuth } from './useAuth';
  * and manages the connection state. It also includes logic for
  * auto-reconnection and browser notifications.
  *
+ * Keystone Compatibility: Supports path-based routing by constructing
+ * WebSocket URL relative to the configured WS endpoint.
+ *
  * @returns {{
  *   notifications: object[],
  *   isConnected: boolean,
@@ -33,6 +36,8 @@ export const useWebSocket = () => {
 
         const connect = () => {
             const token = localStorage.getItem('access_token');
+            // Keystone Compatibility: Use configured WS URL (includes subpath if needed)
+            // The VITE_WS_URL should be configured as ws://VPS_IP/{APP_SLUG}/ws or ws://VPS_IP/ws
             const wsUrl = `${import.meta.env.VITE_WS_URL}/notifications/?token=${token}`;
 
             const ws = new WebSocket(wsUrl);

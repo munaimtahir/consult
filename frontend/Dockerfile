@@ -9,10 +9,13 @@ RUN npm install --legacy-peer-deps
 COPY . .
 
 # Set environment variables for build from build arguments
+# Keystone Compatibility: Support for path-based routing
 ARG VITE_API_URL
 ARG VITE_WS_URL
+ARG VITE_APP_SLUG
 ENV VITE_API_URL=${VITE_API_URL}
 ENV VITE_WS_URL=${VITE_WS_URL}
+ENV VITE_APP_SLUG=${VITE_APP_SLUG}
 
 RUN npm run build
 

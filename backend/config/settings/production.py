@@ -21,6 +21,18 @@ DATABASES = {
     }
 }
 
+# Keystone Compatibility: Reverse proxy settings
+# Trust X-Forwarded-Host header from reverse proxy (Traefik/Nginx)
+USE_X_FORWARDED_HOST = config('USE_X_FORWARDED_HOST', default=True, cast=bool)
+
+# Trust X-Forwarded-Proto header for HTTPS detection behind reverse proxy
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+# Cookie path configuration for subpath deployments
+# When APP_SLUG is set, cookies are scoped to that path
+SESSION_COOKIE_PATH = FORCE_SCRIPT_NAME or '/'
+CSRF_COOKIE_PATH = FORCE_SCRIPT_NAME or '/'
+
 # Security settings - Set based on environment
 # In Docker behind reverse proxy, disable SSL redirect
 SECURE_SSL_REDIRECT = config('SECURE_SSL_REDIRECT', default=False, cast=bool)

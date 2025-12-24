@@ -21,6 +21,11 @@ DEBUG = config('DEBUG', default=True, cast=bool)
 
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1').split(',')
 
+# Keystone Compatibility: Support for path-based routing (e.g., /{APP_SLUG}/)
+# This allows the app to work behind a reverse proxy that strips the path prefix
+APP_SLUG = config('APP_SLUG', default='').strip('/')
+FORCE_SCRIPT_NAME = f'/{APP_SLUG}' if APP_SLUG else None
+
 # Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -109,12 +114,13 @@ USE_I18N = True
 USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
-STATIC_URL = 'static/'
+# Keystone Compatibility: Use FORCE_SCRIPT_NAME prefix for static/media URLs if set
+STATIC_URL = f'{FORCE_SCRIPT_NAME}/static/' if FORCE_SCRIPT_NAME else '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Media files
-MEDIA_URL = 'media/'
+MEDIA_URL = f'{FORCE_SCRIPT_NAME}/media/' if FORCE_SCRIPT_NAME else '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 # Default primary key field type
@@ -190,6 +196,12 @@ CORS_ALLOWED_ORIGINS = config(
 ).split(',')
 
 CORS_ALLOW_CREDENTIALS = True
+
+# CSRF Configuration - Add CSRF_TRUSTED_ORIGINS for production
+CSRF_TRUSTED_ORIGINS = config(
+    'CSRF_TRUSTED_ORIGINS',
+    default='http://localhost:3000,http://localhost:8000'
+).split(',')
 
 # Email Configuration (Google Workspace SMTP)
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
