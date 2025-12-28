@@ -108,16 +108,14 @@ services:
     restart: unless-stopped
 
   nginx-proxy:
-    image: nginx:alpine
+    build: ./nginx
     container_name: consult_nginx
     # Expose port 80 - Coolify's Traefik will route to this
     ports:
       - "80:80"
     volumes:
-      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
       - static_volume:/app/staticfiles:ro
       - media_volume:/app/media:ro
-      - ./nginx/error-pages:/etc/nginx/error-pages:ro
     depends_on:
       - backend
       - frontend
