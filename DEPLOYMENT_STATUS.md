@@ -1,145 +1,151 @@
-# Deployment Status Report
+# Deployment Status - Hospital Consult System
 
-## Server Configuration
+## ✅ Deployment Complete
 
-**Public IP:** `172.104.53.127`  
-**Private IP:** `18.220.252.164` (internal use only)
+**Deployment Date:** $(date)
+**Deployment Method:** Docker Compose (Ready for Coolify)
 
-## Configuration Updates Completed
+## Services Status
 
-### 1. Nginx Configuration (`nginx/default.conf`)
-- ✅ Configured for multiple apps with path-based routing
-- ✅ No port conflicts - all apps use port 80 through nginx proxy
-- ✅ Proper proxy headers for backend communication
-- ✅ WebSocket support configured
-- ✅ Static and media file serving configured
+### ✅ Running Services
 
-### 2. Docker Compose Configuration (`docker-compose.yml`)
-- ✅ Updated `ALLOWED_HOSTS` with public IP: `172.104.53.127`
-- ✅ Updated `CORS_ALLOWED_ORIGINS` with public IP
-- ✅ Updated `CSRF_TRUSTED_ORIGINS` with public IP
-- ✅ Updated frontend build args:
-  - `VITE_API_URL=http://172.104.53.127/api/v1`
-  - `VITE_WS_URL=ws://172.104.53.127/ws`
-- ✅ Removed direct port mappings to avoid conflicts
-- ✅ Services use `expose` instead of `ports` for internal communication
+| Service | Status | Port | Health |
+|---------|--------|------|--------|
+| **Backend** | ✅ Running | 8000 (internal) | ✅ Healthy |
+| **Frontend** | ✅ Running | 3000 | ✅ Accessible |
+| **Database** | ✅ Running | 5432 | ✅ Healthy |
+| **Redis** | ✅ Running | 6379 | ✅ Healthy |
+| **Nginx Proxy** | ⚠️ Disabled | - | - |
 
-### 3. Backend Configuration
-- ✅ Production settings module configured in Dockerfile
-- ✅ Environment variables updated with server IP
-- ✅ CORS and CSRF settings updated
+**Note:** Nginx proxy is disabled because Coolify's Traefik will handle reverse proxy routing.
 
-### 4. Frontend Configuration
-- ✅ Build-time environment variables updated with server IP
-- ✅ API client configured to use environment variables
+## Access Points
 
-### 5. Documentation Updates
-- ✅ `DEPLOYMENT.md` updated with new server IP
+### Direct Access (Current)
+- **Frontend:** http://localhost:3000
+- **Backend API:** http://localhost:8000/api/v1/
+- **Django Admin:** http://localhost:8000/admin/
 
-## Multiple Apps Configuration
+### Via Coolify (After Configuration)
+Once configured in Coolify, access will be through:
+- **Frontend:** http://your-domain.com or http://your-vps-ip
+- **Backend API:** http://your-domain.com/api/v1/
+- **Django Admin:** http://your-domain.com/admin/
 
-The server is now configured to run multiple applications simultaneously:
+## Configuration
 
-1. **Path-based routing**: All apps are accessed through nginx on port 80
-2. **No port conflicts**: Backend and frontend services don't expose ports directly
-3. **Extensible**: Additional apps can be added by:
-   - Adding new services to `docker-compose.yml`
-   - Adding new location blocks to `nginx/default.conf`
-   - Using different paths (e.g., `/app2/`, `/app3/`)
+### Environment Variables
+- ✅ **SECRET_KEY:** Configured (`062ea43b72adeb8c8b73e691994e25bc18e488406bd50cf4b329134b92ea6c63`)
+- ✅ **Database:** PostgreSQL (consult_db)
+- ✅ **Redis:** Configured for WebSockets
+- ✅ **CORS:** Configured for localhost and VPS IP
 
-## Deployment Instructions
-
-### Option 1: Using the deployment script
-```bash
-cd /workspace
-./deploy.sh
-```
-
-### Option 2: Manual deployment
-```bash
-cd /workspace
-
-# Stop existing containers
-sudo docker compose down
-
-# Build images
-sudo docker compose build
-
-# Start services
-sudo docker compose up -d
-
-# Check status
-sudo docker compose ps
-
-# View logs
-sudo docker compose logs -f
-```
-
-## Access URLs
-
-- **Frontend**: http://172.104.53.127
-- **Backend API**: http://172.104.53.127/api/v1/
-- **Admin Panel**: http://172.104.53.127/admin/
-- **WebSocket**: ws://172.104.53.127/ws
+### Database
+- ✅ Migrations applied
+- ✅ Demo data seeded
+- ✅ Default users created
 
 ## Default Login Credentials
 
-| Role             | Email                    | Password        |
-| ---------------- | ------------------------ | --------------- |
-| **Superuser**    | `admin@pmc.edu.pk`       | `adminpassword123` |
-| **System Admin** | `sysadmin@pmc.edu.pk`    | `password123`   |
-| **HOD (Cardiology)**|`cardio.hod@pmc.edu.pk` | `password123`   |
-| **Doctor (Cardiology)** | `cardio.doc@pmc.edu.pk`  | `password123`   |
+| Role | Email | Password |
+|------|-------|----------|
+| **Superuser** | admin@pmc.edu.pk | adminpassword123 |
+| **System Admin** | sysadmin@pmc.edu.pk | password123 |
+| **Cardiology HOD** | cardio.hod@pmc.edu.pk | password123 |
+| **Cardiology Doctor** | cardio.doc@pmc.edu.pk | password123 |
+| **Neurology HOD** | neuro.hod@pmc.edu.pk | password123 |
+| **Neurology Doctor** | neuro.doc@pmc.edu.pk | password123 |
 
-## Service Architecture
+⚠️ **Security Note:** Change default passwords in production!
 
+## Next Steps for Coolify Integration
+
+1. **Access Coolify Dashboard:**
+   - Navigate to http://your-vps-ip:8000 (Coolify UI)
+
+2. **Create New Resource:**
+   - Type: Docker Compose
+   - Source: Connect Git repository or use local files
+   - Path: `/home/munaim/repos/consult`
+
+3. **Configure Environment Variables:**
+   - Copy from `COOLIFY_ENV_VARIABLES.md`
+   - Update domain/IP in CORS and VITE URLs
+
+4. **Configure Routing in Coolify:**
+   - Route `/api/` → Backend service (port 8000)
+   - Route `/ws/` → Backend service (WebSocket)
+   - Route `/` → Frontend service (port 3000)
+   - Route `/admin/` → Backend service
+
+5. **Deploy:**
+   - Click "Deploy" in Coolify
+   - Monitor logs for initialization
+
+## Health Checks
+
+### Backend Health Endpoint
+```bash
+curl http://localhost:8000/api/v1/health/
 ```
-Internet
-   ↓
-Port 80 (nginx-proxy)
-   ├── /api/ → backend:8000
-   ├── /admin/ → backend:8000
-   ├── /ws/ → backend:8000 (WebSocket)
-   ├── /static/ → static files
-   ├── /media/ → media files
-   └── / → frontend:80
+Expected: `{"status":"healthy","checks":{"database":"ok","cache":"ok"}}`
+
+### Frontend
+```bash
+curl http://localhost:3000
+```
+Expected: HTML content with React app
+
+## Useful Commands
+
+```bash
+# View service status
+cd /home/munaim/repos/consult
+docker compose ps
+
+# View logs
+docker compose logs -f backend
+docker compose logs -f frontend
+
+# Restart services
+docker compose restart backend
+docker compose restart frontend
+
+# Stop services
+docker compose down
+
+# Start services
+docker compose up -d
+
+# Rebuild and restart
+docker compose up -d --build
 ```
 
 ## Troubleshooting
 
-### Check service status
-```bash
-sudo docker compose ps
-```
+### Services Not Starting
+- Check logs: `docker compose logs [service-name]`
+- Verify environment variables in `.env` file
+- Check port conflicts: `sudo lsof -i :PORT`
 
-### View logs
-```bash
-# All services
-sudo docker compose logs -f
+### Database Issues
+- Check database logs: `docker compose logs db`
+- Verify connection: `docker compose exec db psql -U consult_user -d consult_db`
 
-# Specific service
-sudo docker compose logs -f backend
-sudo docker compose logs -f frontend
-sudo docker compose logs -f nginx-proxy
-```
+### Frontend Not Loading
+- Verify backend is healthy
+- Check `VITE_API_URL` and `VITE_WS_URL` in frontend build
+- Check browser console for errors
 
-### Restart services
-```bash
-sudo docker compose restart
-```
+## Files Created
 
-### Rebuild and redeploy
-```bash
-sudo docker compose down
-sudo docker compose build --no-cache
-sudo docker compose up -d
-```
+- ✅ `COOLIFY_DEPLOYMENT.md` - Complete deployment guide
+- ✅ `COOLIFY_QUICK_START.md` - Quick reference
+- ✅ `COOLIFY_ENV_VARIABLES.md` - Environment variables template
+- ✅ `docker-compose.coolify.yml` - Optimized for Coolify
+- ✅ `.env` - Environment configuration
 
-## Notes
+---
 
-- The public IP `172.104.53.127` is configured in all runtime configuration files
-- Documentation has been updated to reflect the correct public IP address
-- CORS is configured to allow requests from the server IP
-- All services communicate through Docker's internal network
-- Nginx acts as the reverse proxy for all external traffic
-- The configuration supports adding additional apps without port conflicts
+**Status:** ✅ Services deployed and running
+**Ready for:** Coolify integration and production use

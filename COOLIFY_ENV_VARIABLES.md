@@ -8,7 +8,7 @@ Copy these variables to Coolify's environment variables section and replace plac
 # Django Configuration
 SECRET_KEY=062ea43b72adeb8c8b73e691994e25bc18e488406bd50cf4b329134b92ea6c63
 DEBUG=0
-ALLOWED_HOSTS=your-domain.com,your-vps-ip,localhost,127.0.0.1
+ALLOWED_HOSTS=consult.alshifalab.pk,localhost,127.0.0.1,backend
 DJANGO_SETTINGS_MODULE=config.settings.production
 
 # Database Configuration
@@ -25,12 +25,12 @@ REDIS_HOST=redis
 REDIS_PORT=6379
 
 # CORS Configuration
-CORS_ALLOWED_ORIGINS=https://your-domain.com,http://your-vps-ip,http://localhost:3000
-CSRF_TRUSTED_ORIGINS=https://your-domain.com,http://your-vps-ip,http://localhost:3000
+CORS_ALLOWED_ORIGINS=https://consult.alshifalab.pk,http://consult.alshifalab.pk,http://localhost:3000
+CSRF_TRUSTED_ORIGINS=https://consult.alshifalab.pk,http://consult.alshifalab.pk,http://localhost:3000
 
 # Frontend Build Configuration
-VITE_API_URL=https://your-domain.com/api/v1
-VITE_WS_URL=wss://your-domain.com/ws
+VITE_API_URL=https://consult.alshifalab.pk/api/v1
+VITE_WS_URL=wss://consult.alshifalab.pk/ws
 ```
 
 ## Optional Environment Variables

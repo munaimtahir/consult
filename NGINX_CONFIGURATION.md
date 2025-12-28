@@ -132,3 +132,4 @@ If you prefer to use only Coolify's Traefik (without Nginx), you would need to:
 
 **Status:** ✅ Nginx reverse proxy is configured and ready for deployment
 
+

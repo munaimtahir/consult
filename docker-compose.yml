@@ -93,27 +93,29 @@ services:
       - consult_network
     restart: unless-stopped
 
-  nginx-proxy:
-    image: nginx:alpine
-    container_name: consult_nginx
-    ports:
-      - "80:80"
-    volumes:
-      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
-      - static_volume:/app/staticfiles:ro
-      - media_volume:/app/media:ro
-      - ./nginx/error-pages:/etc/nginx/error-pages:ro
-    depends_on:
-      - backend
-      - frontend
-    healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-    networks:
-      - consult_network
-    restart: unless-stopped
+  # nginx-proxy service removed - Coolify's Traefik will handle reverse proxy
+  # If you need nginx for internal routing, uncomment and configure a free port
+  # nginx-proxy:
+  #   image: nginx:alpine
+  #   container_name: consult_nginx
+  #   ports:
+  #     - "8080:80"
+  #   volumes:
+  #     - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+  #     - static_volume:/app/staticfiles:ro
+  #     - media_volume:/app/media:ro
+  #     - ./nginx/error-pages:/etc/nginx/error-pages:ro
+  #   depends_on:
+  #     - backend
+  #     - frontend
+  #   healthcheck:
+  #     test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 3
+  #   networks:
+  #     - consult_network
+  #   restart: unless-stopped
 
 volumes:
   postgres_data:
