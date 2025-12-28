@@ -10,6 +10,7 @@ Since the Coolify API structure may vary, here's the quickest way to deploy manu
 
 ### 2. Navigate to Project
 - Go to project: **FMU** (UUID: `ewsc80ck8scc8sw8s4ksc08g`)
+- Select environment: **production** (UUID: `fcs8ssg8w4gwck00gkgwsgck`)
 
 ### 3. Create New Application
 - Click **"+ New"** or **"New Resource"**
