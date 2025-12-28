@@ -15,15 +15,15 @@ This plan sets up a complete deployment system for the consult repository using 
 
 ## Files to Create
 
-### 1. Coolify API Configuration Template
-**File**: `coolify-api-config.env.example`
-- Template with placeholders for:
-  - `COOLIFY_API_URL` - Public IP based API endpoint
-  - `COOLIFY_API_TOKEN` - API token from Coolify dashboard
-  - `COOLIFY_SERVER_ID` - Server/Destination ID
-  - `COOLIFY_PROJECT_ID` - Project ID (optional)
-  - `COOLIFY_PUBLIC_IP` - Public IP address (34.124.150.231)
-  - `COOLIFY_DOMAIN` - Domain name (consult.alshifalab.pk)
+### 1. Coolify API Configuration
+**File**: `coolify-api-config.env`
+- Configuration with actual values:
+  - `COOLIFY_API_URL` - Public IP based API endpoint: `http://34.124.150.231:8000/api/v1`
+  - `COOLIFY_API_TOKEN` - API token: `2|2cA2IeQjF9ndrIBVoLd2ZUagGKVl9R2Dvns8VglUefaccdfa`
+  - `COOLIFY_SERVER_ID` - Server name: `localhost`
+  - `COOLIFY_PROJECT_ID` - Project ID: `fmu`
+  - `COOLIFY_PUBLIC_IP` - Public IP address: `34.124.150.231`
+  - `COOLIFY_DOMAIN` - Domain name: `consult.alshifalab.pk`
 
 ### 2. Environment Variables for Deployment
 **File**: `coolify-deploy.env`
@@ -175,14 +175,20 @@ After deployment, validate using:
 - Django Admin: `https://consult.alshifalab.pk/admin/` or `http://34.124.150.231/admin/`
 - WebSocket: `wss://consult.alshifalab.pk/ws/` or `ws://34.124.150.231/ws/`
 
-## Placeholders to Fill
+## Configuration Values
 
-User needs to provide:
-1. **Coolify API Token** - From Coolify dashboard at `http://34.124.150.231:8000`
-2. **Coolify Server ID** - ID of the server/destination in Coolify
-3. **Coolify Project ID** - Project ID (optional, can be created)
-4. **Email Password** (optional) - For email notifications
-5. **Google OAuth Credentials** (optional) - If using OAuth
+**Coolify API Configuration:**
+- **Coolify API Token**: `2|2cA2IeQjF9ndrIBVoLd2ZUagGKVl9R2Dvns8VglUefaccdfa`
+- **Coolify Server ID**: `localhost` (server name - this is the server identifier in Coolify)
+- **Coolify Project ID**: `fmu`
+
+**Configuration Files Created:**
+- `coolify-api-config.env` - Contains actual API configuration with token and IDs
+- `coolify-deploy.env` - Contains all environment variables for deployment
+
+**Other Placeholders:**
+- **Email Password** (optional) - For email notifications
+- **Google OAuth Credentials** (optional) - If using OAuth
 
 Note: Database password is set to `consult_password` as per documentation. Change it in production for security.
 
@@ -205,3 +211,4 @@ Note: Database password is set to `consult_password` as per documentation. Chang
 - All API calls use public IP for Coolify API endpoint
 - Environment variables include both domain and public IP for flexibility
 
+ 
