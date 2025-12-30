@@ -3,7 +3,7 @@ Audit Service
 Handles logging of all significant actions in the system.
 """
 
-from apps.core.models import AuditLog, UnauthorizedAccessLog
+from apps.core.models import AuditLog
 
 
 class AuditService:
@@ -198,26 +198,21 @@ class AuditService:
             ip_address = AuditService._get_client_ip(request)
             user_agent = request.META.get('HTTP_USER_AGENT', '')[:500]
 
-        # Log to both audit log and specific unauthorized access log
-        AuditService.log_action(
+        # Log unauthorized access attempt to audit log
+        audit_log = AuditService.log_action(
             action='UNAUTHORIZED_ACCESS',
             actor=user,
             details={
                 'resource_type': resource_type,
                 'resource_id': resource_id,
-                'action_attempted': action_attempted
+                'action_attempted': action_attempted,
+                'ip_address': ip_address,
+                'user_agent': user_agent
             },
             request=request
         )
 
-        return UnauthorizedAccessLog.objects.create(
-            user=user,
-            resource_type=resource_type,
-            resource_id=resource_id,
-            action_attempted=action_attempted,
-            ip_address=ip_address,
-            user_agent=user_agent
-        )
+        return audit_log
 
     @staticmethod
     def _get_client_ip(request):

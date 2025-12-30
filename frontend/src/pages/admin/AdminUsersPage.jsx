@@ -24,13 +24,22 @@ export default function AdminUsersPage() {
     });
 
     // Fetch users
-    const { data: usersData, isLoading: usersLoading } = useQuery({
+    const {
+        data: usersData,
+        isLoading: usersLoading,
+        isError: isUsersError,
+        error: usersError,
+    } = useQuery({
         queryKey: ['admin-users', filters],
         queryFn: () => adminAPI.getUsers(filters),
     });
 
     // Fetch departments for filter
-    const { data: departmentsData } = useQuery({
+    const {
+        data: departmentsData,
+        isError: isDepartmentsError,
+        error: departmentsError,
+    } = useQuery({
         queryKey: ['departments'],
         queryFn: () => departmentsAPI.getDepartments(),
     });
@@ -96,6 +105,14 @@ export default function AdminUsersPage() {
 
             {/* Filters */}
             <div className="bg-white rounded-lg shadow-sm border p-4 mb-6">
+                {isDepartmentsError && (
+                    <div className="mb-4 p-3 bg-red-50 text-red-700 rounded-md text-sm">
+                        Failed to load departments for filtering:{' '}
+                        {departmentsError?.response?.data?.detail ||
+                            departmentsError?.message ||
+                            'Please try again later.'}
+                    </div>
+                )}
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -180,7 +197,16 @@ export default function AdminUsersPage() {
                         </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
-                        {usersLoading ? (
+                        {isUsersError ? (
+                            <tr>
+                                <td colSpan="5" className="px-6 py-4 text-center text-red-600">
+                                    Failed to load users:{' '}
+                                    {usersError?.response?.data?.detail ||
+                                        usersError?.message ||
+                                        'Please try again later.'}
+                                </td>
+                            </tr>
+                        ) : usersLoading ? (
                             <tr>
                                 <td colSpan="5" className="px-6 py-4 text-center text-gray-500">
                                     Loading...

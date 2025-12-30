@@ -58,7 +58,7 @@ export default function Layout({ children }) {
                 </Link>
                 {hasAdminAccess && (
                   <Link
-                    to="/admin"
+                    to="/adminpanel"
                     className="text-purple-700 hover:text-purple-900 px-3 py-2 rounded-md text-sm font-medium"
                   >
                     Admin Panel

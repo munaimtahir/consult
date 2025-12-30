@@ -1,0 +1,143 @@
+# Coolify Configuration File
+# This file provides additional configuration for Coolify PaaS deployment
+
+version: '3.8'
+
+# Coolify-specific configuration
+# Note: Coolify will use docker-compose.yml for service definitions
+# This file provides metadata and deployment hints
+
+services:
+  # Backend Service Configuration
+  backend:
+    # Build configuration
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    
+    # Health check configuration (for Coolify monitoring)
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/health/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    
+    # Resource limits (adjust based on your VPS capacity)
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    
+    # Restart policy
+    restart: unless-stopped
+
+  # Frontend Service Configuration
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        - VITE_API_URL=${VITE_API_URL:-http://localhost/api/v1}
+        - VITE_WS_URL=${VITE_WS_URL:-ws://localhost/ws}
+    
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    
+    restart: unless-stopped
+
+  # Database Service Configuration
+  db:
+    image: postgres:13-alpine
+    
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U consult_user -d consult_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    
+    restart: unless-stopped
+
+  # Redis Service Configuration
+  redis:
+    image: redis:7-alpine
+    
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 256M
+        reservations:
+          cpus: '0.1'
+          memory: 128M
+    
+    restart: unless-stopped
+
+  # Nginx Proxy Configuration
+  nginx-proxy:
+    image: nginx:alpine
+    
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 256M
+        reservations:
+          cpus: '0.1'
+          memory: 128M
+    
+    restart: unless-stopped
+
+# Volume Configuration
+# Coolify will handle volume persistence
+volumes:
+  postgres_data:
+    driver: local
+  static_volume:
+    driver: local
+  media_volume:
+    driver: local
+
+# Network Configuration
+networks:
+  consult_network:
+    driver: bridge
+
+

@@ -1,0 +1,110 @@
+name: Docker CI
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'backend/**'
+      - 'frontend/**'
+      - 'docker-compose.yml'
+      - 'backend/Dockerfile'
+      - 'frontend/Dockerfile'
+      - '.github/workflows/docker-ci.yml'
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'backend/**'
+      - 'frontend/**'
+      - 'docker-compose.yml'
+      - 'backend/Dockerfile'
+      - 'frontend/Dockerfile'
+      - '.github/workflows/docker-ci.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  docker-build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Validate docker-compose configuration
+        run: |
+          docker compose config > /dev/null
+          echo "✓ docker-compose.yml is valid"
+
+      - name: Build Backend Docker Image
+        run: |
+          docker build \
+            --file backend/Dockerfile \
+            --tag consult-backend:test \
+            --build-arg BUILDKIT_INLINE_CACHE=1 \
+            backend/
+          echo "✓ Backend image built successfully"
+
+      - name: Test Backend Image
+        run: |
+          # Test that the image can run help command with required env vars
+          docker run --rm \
+            -e DB_NAME=test_db \
+            -e DB_USER=test_user \
+            -e DB_PASSWORD=test_pass \
+            -e DB_HOST=localhost \
+            -e DB_PORT=5432 \
+            -e SECRET_KEY=test-secret-key-for-ci \
+            consult-backend:test python manage.py --help > /dev/null
+          echo "✓ Backend image is functional"
+
+      - name: Build Frontend Docker Image
+        run: |
+          docker build \
+            --file frontend/Dockerfile \
+            --tag consult-frontend:test \
+            --build-arg VITE_API_URL=http://localhost:8000/api/v1 \
+            --build-arg VITE_WS_URL=ws://localhost:8000/ws \
+            --build-arg BUILDKIT_INLINE_CACHE=1 \
+            frontend/
+          echo "✓ Frontend image built successfully"
+
+      - name: Test Frontend Image
+        run: |
+          # Start the frontend container and check if nginx responds
+          docker run -d --name test-frontend -p 3000:80 consult-frontend:test
+          sleep 5
+          # Check if nginx is serving content (expecting HTTP 200)
+          curl -f http://localhost:3000/ || exit 1
+          docker stop test-frontend
+          docker rm test-frontend
+          echo "✓ Frontend image is functional"
+
+      - name: Build with docker-compose (smoke test)
+        run: |
+          # Create minimal .env file for docker-compose build
+          cat > .env << EOF
+          DB_NAME=test_db
+          DB_USER=test_user
+          DB_PASSWORD=test_pass
+          DB_HOST=localhost
+          DB_PORT=5432
+          SECRET_KEY=test-secret-key-for-ci
+          VITE_API_URL=http://localhost:8000/api/v1
+          VITE_WS_URL=ws://localhost:8000/ws
+          EOF
+          
+          # This validates that docker-compose can build all services
+          # We don't start services as they need postgres/redis
+          docker compose build
+          echo "✓ All services build successfully via docker-compose"
+
+      - name: Show image sizes
+        run: |
+          echo "Docker images built:"
+          docker images | grep -E "(consult-|REPOSITORY)" || true
+          echo ""
+          echo "Total size:"
+          docker images --format "table {{.Repository}}\t{{.Size}}" | grep consult- || true

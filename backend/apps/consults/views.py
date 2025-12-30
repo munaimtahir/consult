@@ -9,6 +9,7 @@ from rest_framework.permissions import IsAuthenticated
 from django.utils import timezone
 from django.db.models import Q, Count, Prefetch
 
+from apps.accounts.models import User
 from .models import ConsultRequest, ConsultNote
 from .serializers import (
     ConsultRequestListSerializer,
@@ -16,8 +17,7 @@ from .serializers import (
     ConsultRequestCreateSerializer,
     ConsultNoteSerializer
 )
-
-
+from .services import ConsultService
 from .permissions import IsConsultParticipant, CanAssignConsult
 
 class ConsultRequestViewSet(viewsets.ModelViewSet):
@@ -125,25 +125,9 @@ class ConsultRequestViewSet(viewsets.ModelViewSet):
         Args:
             serializer: The serializer instance.
         """
-        from .services import ConsultService
-        
-        # We need to extract data from serializer to pass to service
-        # But serializer.save() does a lot of work. 
-        # For now, let's let serializer save, but we might want to move creation logic to service fully later.
-        # Actually, to strictly follow service pattern:
-        # serializer.save(requester=self.request.user)
-        # ConsultService.notify_new_consult(serializer.instance)
-        
-        # Better approach:
-        # 1. Validate data
-        # 2. Call service
-        
-        # However, since we are using ModelViewSet, perform_create is called after validation.
-        # Let's override create instead? Or just hook into perform_create.
-        
-        # Let's stick to the current pattern but use service for notifications/side effects
-        instance = serializer.save(requester=self.request.user)
         from apps.notifications.services import NotificationService
+        
+        instance = serializer.save(requester=self.request.user)
         NotificationService.notify_new_consult(instance)
     
     @action(detail=True, methods=['post'])
@@ -162,7 +146,6 @@ class ConsultRequestViewSet(viewsets.ModelViewSet):
             error response.
         """
         consult = self.get_object()
-        from .services import ConsultService
         
         # Check permissions
         if request.user.department != consult.target_department:
@@ -199,7 +182,6 @@ class ConsultRequestViewSet(viewsets.ModelViewSet):
             error response.
         """
         consult = self.get_object()
-        from .services import ConsultService
         
         # Check permissions - only HOD or admins can assign
         if not request.user.can_assign_consults:
@@ -222,7 +204,6 @@ class ConsultRequestViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        from apps.accounts.models import User
         try:
             assigned_user = User.objects.get(id=assigned_to_id)
         except User.DoesNotExist:
@@ -238,7 +219,141 @@ class ConsultRequestViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        ConsultService.assign_consult(consult, assigned_user)
+        ConsultService.assign_consult(consult, assigned_user, assigner=request.user)
+        
+        serializer = self.get_serializer(consult)
+        return Response(serializer.data)
+    
+    @action(detail=True, methods=['post'], url_path='acknowledge-assign')
+    def acknowledge_assign(self, request, pk=None):
+        """Acknowledges and assigns a consult in one combined action.
+
+        This is the new workflow where acknowledgement and assignment must happen together.
+        Only HOD or delegated receivers can perform this action.
+
+        Args:
+            request: The Django HttpRequest object.
+            pk: The primary key of the `ConsultRequest`.
+
+        Returns:
+            A DRF Response object with the updated consult data, or an
+            error response.
+        """
+        consult = self.get_object()
+        
+        # Check permissions - only HOD or delegated receivers can acknowledge & assign
+        if not request.user.can_manage_consults:
+            return Response(
+                {'error': 'You do not have permission to acknowledge and assign consults. Only HOD or delegated receivers can perform this action.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        if request.user.department != consult.target_department:
+            return Response(
+                {'error': 'You can only acknowledge and assign consults in your department'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        # Validate consult status - should be SUBMITTED or ACKNOWLEDGED
+        if consult.status not in ['SUBMITTED', 'ACKNOWLEDGED']:
+            return Response(
+                {'error': f'Only SUBMITTED or ACKNOWLEDGED consults can be acknowledged and assigned. Current status: {consult.status}'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Get the assigned user
+        assigned_to_id = request.data.get('assigned_to_user_id')
+        if not assigned_to_id:
+            return Response(
+                {'error': 'Please provide assigned_to_user_id'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        try:
+            assigned_user = User.objects.get(id=assigned_to_id)
+        except User.DoesNotExist:
+            return Response(
+                {'error': 'User not found'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        # Check that assigned user is in the target department
+        if assigned_user.department != consult.target_department:
+            return Response(
+                {'error': 'Assigned user must be in the target department'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Perform acknowledge and assign in one atomic action
+        ConsultService.acknowledge_and_assign_consult(consult, request.user, assigned_user)
+        
+        serializer = self.get_serializer(consult)
+        return Response(serializer.data)
+    
+    @action(detail=True, methods=['post'])
+    def reassign(self, request, pk=None):
+        """Reassigns a consult to a different doctor.
+        
+        This action allows HOD or authorized users to change the assignment of an
+        existing consult. The consult must already be assigned before it can be reassigned.
+        
+        Args:
+            request: The Django HttpRequest object.
+            pk: The primary key of the `ConsultRequest`.
+            
+        Returns:
+            A DRF Response object with the updated consult data, or an error response.
+        """
+        consult = self.get_object()
+        
+        # Check permissions - only HOD or users with can_manage_consults permission
+        if not request.user.can_manage_consults:
+            return Response(
+                {'error': 'You do not have permission to reassign consults. Only HOD or authorized users can perform this action.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        if request.user.department != consult.target_department:
+            return Response(
+                {'error': 'You can only reassign consults in your department'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        # Validate that consult is already assigned
+        if not consult.assigned_to:
+            return Response(
+                {'error': 'This consult is not yet assigned. Use acknowledge-assign endpoint instead.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Get the new assigned user
+        new_assigned_to_id = request.data.get('assigned_to_user_id')
+        if not new_assigned_to_id:
+            return Response(
+                {'error': 'Please provide assigned_to_user_id'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        try:
+            new_assigned_user = User.objects.get(id=new_assigned_to_id)
+        except User.DoesNotExist:
+            return Response(
+                {'error': 'User not found'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        # Check that new assigned user is in the target department
+        if new_assigned_user.department != consult.target_department:
+            return Response(
+                {'error': 'New assigned user must be in the target department'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Allow HOD to reassign to themselves
+        # No additional check needed as can_manage_consults already verified
+        
+        # Perform reassignment
+        ConsultService.reassign_consult(consult, request.user, new_assigned_user)
         
         serializer = self.get_serializer(consult)
         return Response(serializer.data)
@@ -260,7 +375,6 @@ class ConsultRequestViewSet(viewsets.ModelViewSet):
             an error response.
         """
         consult = self.get_object()
-        from .services import ConsultService
         
         # Check permissions - must be assigned or in target department
         if (request.user != consult.assigned_to and 
@@ -304,7 +418,6 @@ class ConsultRequestViewSet(viewsets.ModelViewSet):
             error response.
         """
         consult = self.get_object()
-        from .services import ConsultService
         
         # Check permissions
         if (request.user != consult.assigned_to and 
@@ -335,7 +448,6 @@ class ConsultRequestViewSet(viewsets.ModelViewSet):
             error response.
         """
         consult = self.get_object()
-        from .services import ConsultService
         
         # Check permissions - only requester or admins can cancel
         if request.user != consult.requester and not request.user.is_admin_user:

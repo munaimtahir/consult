@@ -88,6 +88,8 @@ class ConsultRequestListSerializer(serializers.ModelSerializer):
     requesting_department_name = serializers.CharField(source='requesting_department.name', read_only=True)
     target_department_name = serializers.CharField(source='target_department.name', read_only=True)
     assigned_to_name = serializers.CharField(source='assigned_to.get_full_name', read_only=True)
+    assigned_by_name = serializers.CharField(source='assigned_by.get_full_name', read_only=True)
+    received_by_name = serializers.CharField(source='received_by.get_full_name', read_only=True)
     notes_count = serializers.IntegerField(source='notes.count', read_only=True)
     
     # Human-friendly fields
@@ -116,6 +118,15 @@ class ConsultRequestListSerializer(serializers.ModelSerializer):
             'target_department_name',
             'assigned_to',
             'assigned_to_name',
+            'assigned_by',
+            'assigned_by_name',
+            'assigned_at',
+            'assigned_at_human',
+            'assignment_type',
+            'received_by',
+            'received_by_name',
+            'received_at',
+            'received_at_human',
             'status',
             'status_display',
             'status_color',
@@ -143,6 +154,14 @@ class ConsultRequestListSerializer(serializers.ModelSerializer):
     def get_acknowledged_at_human(self, obj):
         """Returns a human-friendly acknowledged_at timestamp."""
         return humanize_timestamp(obj.acknowledged_at)
+    
+    def get_received_at_human(self, obj):
+        """Returns a human-friendly received_at timestamp."""
+        return humanize_timestamp(obj.received_at)
+    
+    def get_assigned_at_human(self, obj):
+        """Returns a human-friendly assigned_at timestamp."""
+        return humanize_timestamp(obj.assigned_at)
 
     def get_completed_at_human(self, obj):
         """Returns a human-friendly completed_at timestamp."""
@@ -200,6 +219,8 @@ class ConsultRequestDetailSerializer(serializers.ModelSerializer):
     requesting_department = DepartmentSerializer(read_only=True)
     target_department = DepartmentSerializer(read_only=True)
     assigned_to = UserSerializer(read_only=True)
+    assigned_by = UserSerializer(read_only=True)
+    received_by = UserSerializer(read_only=True)
     notes = ConsultNoteSerializer(many=True, read_only=True)
     
     # Calculated fields
@@ -214,6 +235,8 @@ class ConsultRequestDetailSerializer(serializers.ModelSerializer):
     # Human-friendly fields
     created_at_human = serializers.SerializerMethodField()
     acknowledged_at_human = serializers.SerializerMethodField()
+    received_at_human = serializers.SerializerMethodField()
+    assigned_at_human = serializers.SerializerMethodField()
     completed_at_human = serializers.SerializerMethodField()
     urgency_color = serializers.SerializerMethodField()
     status_color = serializers.SerializerMethodField()
@@ -230,6 +253,13 @@ class ConsultRequestDetailSerializer(serializers.ModelSerializer):
             'requesting_department',
             'target_department',
             'assigned_to',
+            'assigned_by',
+            'assigned_at',
+            'assigned_at_human',
+            'assignment_type',
+            'received_by',
+            'received_at',
+            'received_at_human',
             'status',
             'status_display',
             'status_color',
@@ -266,6 +296,8 @@ class ConsultRequestDetailSerializer(serializers.ModelSerializer):
             'created_at',
             'updated_at',
             'acknowledged_at',
+            'received_at',
+            'assigned_at',
             'completed_at',
             'expected_response_time',
             'is_overdue'
@@ -347,6 +379,14 @@ class ConsultRequestDetailSerializer(serializers.ModelSerializer):
     def get_acknowledged_at_human(self, obj):
         """Returns a human-friendly acknowledged_at timestamp."""
         return humanize_timestamp(obj.acknowledged_at)
+    
+    def get_received_at_human(self, obj):
+        """Returns a human-friendly received_at timestamp."""
+        return humanize_timestamp(obj.received_at)
+    
+    def get_assigned_at_human(self, obj):
+        """Returns a human-friendly assigned_at timestamp."""
+        return humanize_timestamp(obj.assigned_at)
 
     def get_completed_at_human(self, obj):
         """Returns a human-friendly completed_at timestamp."""

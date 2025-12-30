@@ -185,6 +185,16 @@ export const adminAPI = {
         return response.data;
     },
 
+    getDoctorAnalytics: async () => {
+        const response = await apiClient.get('/admin/analytics/doctors/');
+        return response.data;
+    },
+
+    getDepartmentOverview: async (id) => {
+        const response = await apiClient.get(`/admin/departments/${id}/overview/`);
+        return response.data;
+    },
+
     // Consult management
     reassignConsult: async (id, data) => {
         const response = await apiClient.post(`/admin/consults/${id}/reassign/`, data);
@@ -193,6 +203,63 @@ export const adminAPI = {
 
     forceCloseConsult: async (id, data) => {
         const response = await apiClient.post(`/admin/consults/${id}/force-close/`, data);
+        return response.data;
+    },
+
+    // Email notification settings
+    getEmailNotificationSettings: async (params = {}) => {
+        const response = await apiClient.get('/admin/email-notification-settings/', { params });
+        return response.data;
+    },
+
+    getEmailNotificationSetting: async (id) => {
+        const response = await apiClient.get(`/admin/email-notification-settings/${id}/`);
+        return response.data;
+    },
+
+    createEmailNotificationSetting: async (data) => {
+        const response = await apiClient.post('/admin/email-notification-settings/', data);
+        return response.data;
+    },
+
+    updateEmailNotificationSetting: async (id, data) => {
+        const response = await apiClient.patch(`/admin/email-notification-settings/${id}/`, data);
+        return response.data;
+    },
+
+    // SMTP configurations
+    getSMTPConfigurations: async () => {
+        const response = await apiClient.get('/admin/smtp-configurations/');
+        return response.data;
+    },
+
+    getSMTPConfiguration: async (id) => {
+        const response = await apiClient.get(`/admin/smtp-configurations/${id}/`);
+        return response.data;
+    },
+
+    createSMTPConfiguration: async (data) => {
+        const response = await apiClient.post('/admin/smtp-configurations/', data);
+        return response.data;
+    },
+
+    updateSMTPConfiguration: async (id, data) => {
+        const response = await apiClient.patch(`/admin/smtp-configurations/${id}/`, data);
+        return response.data;
+    },
+
+    activateSMTPConfiguration: async (id) => {
+        const response = await apiClient.post(`/admin/smtp-configurations/${id}/activate/`);
+        return response.data;
+    },
+
+    deactivateSMTPConfiguration: async (id) => {
+        const response = await apiClient.post(`/admin/smtp-configurations/${id}/deactivate/`);
+        return response.data;
+    },
+
+    testSMTPConnection: async (id) => {
+        const response = await apiClient.post(`/admin/smtp-configurations/${id}/test_connection/`);
         return response.data;
     },
 };

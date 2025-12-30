@@ -1,8 +1,7 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { useTable, useSortBy } from 'react-table';
 
 export default function DoctorAnalyticsTable({ data }) {
-    const [tableData, setTableData] = useState(data);
 
     const columns = useMemo(
         () => [
@@ -46,7 +45,7 @@ export default function DoctorAnalyticsTable({ data }) {
         headerGroups,
         rows,
         prepareRow,
-    } = useTable({ columns, data: tableData }, useSortBy);
+    } = useTable({ columns, data }, useSortBy);
 
     return (
         <div className="bg-white rounded-lg shadow">

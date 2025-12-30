@@ -1,17 +1,33 @@
 {
-  // Java Language Server Configuration
-  // Set this to your JDK 17+ installation path if JAVA_HOME is not set
-  // Example: "/usr/lib/jvm/java-17-openjdk-amd64"
-  "java.jdt.ls.java.home": "${env:JAVA_HOME}",
+  // Java Configuration for VS Code/Cursor
+  // This project requires JDK 17 or higher for Android development
   
-  // Java Configuration
-  "java.configuration.runtimes": [],
+  // Configure JDK runtimes - update the path after installing JDK
+  // Common Linux JDK installation paths:
+  // - /usr/lib/jvm/java-17-openjdk-amd64
+  // - /usr/lib/jvm/java-17-openjdk
+  // - /usr/lib/jvm/default-java
+  "java.configuration.runtimes": [
+    {
+      "name": "JavaSE-17",
+      "path": "/usr/lib/jvm/java-17-openjdk-amd64",
+      "default": true
+    }
+  ],
+  
+  // Alternative: If you prefer to set a single JDK path directly
+  // Uncomment and update the path below after installing JDK:
+  // "java.jdt.ls.java.home": "/usr/lib/jvm/java-17-openjdk-amd64",
+  
+  // Java Language Server settings
   "java.compile.nullAnalysis.mode": "automatic",
   
-  // Java Extension Settings
+  // Gradle settings
   "java.configuration.updateBuildConfiguration": "automatic",
-  "java.import.gradle.enabled": true,
-  "java.import.gradle.wrapper.enabled": true
+  
+  // Note: After installing JDK, update the paths above to match your installation
+  // You can find your JDK path by checking:
+  // - /usr/lib/jvm/
+  // Or by running:
+  // - readlink -f "$(which java)" | sed "s:bin/java::"
 }
-
-

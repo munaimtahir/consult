@@ -241,6 +241,21 @@ class User(AbstractUser):
         """
         return self.role in ['HOD', 'DEPARTMENT_USER', 'ADMIN']
     
+    @property
+    def can_manage_consults(self):
+        """Checks if the user can receive and assign consults (HOD or delegated).
+
+        Returns:
+            True if the user is HOD, has department consult management permission,
+            or is delegated receiver for their department.
+        """
+        if self.role == 'HOD' or self.can_manage_consults_in_department:
+            return True
+        # Check if user is a delegated receiver for their department
+        if self.department and hasattr(self.department, 'delegated_receiver'):
+            return self.department.delegated_receiver == self
+        return False
+    
     def has_admin_panel_access(self):
         """Checks if the user can access the Admin Panel.
 
