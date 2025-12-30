@@ -51,7 +51,7 @@ jobs:
         run: |
           # Verify Python and dependencies are installed correctly
           docker run --rm consult-backend:test python --version
-          docker run --rm consult-backend:test pip list | grep -i django
+          docker run --rm consult-backend:test pip show django
           echo "✓ Backend image is functional"
 
       - name: Build Frontend Docker Image
