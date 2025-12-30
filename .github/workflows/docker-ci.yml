@@ -49,9 +49,15 @@ jobs:
 
       - name: Test Backend Image
         run: |
-          # Verify Python and dependencies are installed correctly
-          docker run --rm consult-backend:test python --version
-          docker run --rm consult-backend:test pip show django
+          # Test that the image can run help command with required env vars
+          docker run --rm \
+            -e DB_NAME=test_db \
+            -e DB_USER=test_user \
+            -e DB_PASSWORD=test_pass \
+            -e DB_HOST=localhost \
+            -e DB_PORT=5432 \
+            -e SECRET_KEY=test-secret-key-for-ci \
+            consult-backend:test python manage.py --help > /dev/null
           echo "✓ Backend image is functional"
 
       - name: Build Frontend Docker Image

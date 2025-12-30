@@ -16,7 +16,6 @@ The Hospital Consult System is a paperless, digital application that streamlines
 - **Dashboard**: Statistics and quick actions for consult management
 - **Admin Panel**: User management, department configuration, SLA setup
 - **Email Notifications**: Configurable SMTP for alerts
-- **Student Intake Form**: Public form for student application submissions (Phase 1 - No Placement, No Accounts)
 
 ## 🔐 Demo Credentials
 
@@ -283,56 +282,6 @@ docker-compose restart
 - Analytics dashboard
 - CSV user import
 - Email notifications (templates ready)
-
-## 📋 Student Intake – Phase 1 (No Placement, No Accounts)
-
-The Student Intake system allows newly joining students to submit their application data through a public form. This is **Phase 1** implementation with the following characteristics:
-
-### Features
-- ✅ **Public Form**: Accessible at `/apply/student-intake/` without login
-- ✅ **Comprehensive Data Collection**: Personal info, guardian info, merit details, academic background, and documents
-- ✅ **Mandatory Fields**: Email, mobile, guardian WhatsApp, and passport-size photo are required
-- ✅ **File Upload Validation**: Enforced file size limits and format validation
-- ✅ **Anti-Spam Protection**: Honeypot field and session-based cooldown (60 seconds)
-- ✅ **Verification Queue**: All submissions stored as PENDING for staff review
-- ✅ **Admin Approval**: Staff can approve submissions and create Student records
-- ✅ **Duplicate Detection**: Checks for duplicates based on CNIC, Mobile, Email, and MDCAT Roll Number
-- ✅ **Audit Log Safety**: Sensitive fields (CNIC, mobile, email) are redacted from audit logs
-
-### What's NOT Included (Phase 1)
-- ❌ **No User Accounts**: Students do NOT get user accounts, usernames, or passwords
-- ❌ **No Academic Placement**: Students are NOT assigned to Program/Batch/Group
-- ❌ **No Direct Student Creation**: Submissions must be approved by staff first
-
-### Access Points
-- **Public Form**: `http://localhost:8000/apply/student-intake/`
-- **Success Page**: `http://localhost:8000/apply/student-intake/success/<submission_id>/`
-- **Admin Queue**: `http://localhost:8000/admin/intake/studentintakesubmission/`
-
-### Admin Actions
-Staff with roles ADMIN, COORDINATOR, or OFFICE_ASSISTANT can:
-1. View all submissions in the verification queue
-2. Filter by status, search by submission ID, name, CNIC, mobile, email, or MDCAT roll number
-3. Review duplicate check results
-4. Use "Approve & Create Student" action to:
-   - Check for duplicates (CNIC, Mobile, Email, MDCAT Roll Number)
-   - Create Student record if no duplicates (or if force_approve is enabled)
-   - Link submission to created Student
-   - Set approval status and timestamps
-
-### Data Fields Collected
-- **Personal**: Full name, father's name, gender, DOB, CNIC/B-Form, mobile, email, address
-- **Guardian**: Name, relation, WhatsApp number
-- **Merit**: MDCAT roll number, merit number, merit percentage
-- **Academic**: Last qualification, institute, board/university, passing year, marks/grades, subjects
-- **Documents**: Passport photo (required), CNIC front/back, domicile, certificates, other documents (optional)
-
-### Security & Privacy
-- All file uploads stored under `media/intake/<submission_id>/`
-- Sensitive fields redacted in admin display
-- Session-based cooldown prevents spam
-- Honeypot field blocks automated submissions
-- Upload validation enforces file size and format limits
 
 ## 📄 License
 

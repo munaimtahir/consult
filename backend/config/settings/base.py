@@ -50,7 +50,6 @@ INSTALLED_APPS = [
     'apps.notifications',
     'apps.analytics',
     'apps.core',
-    'apps.intake',
 ]
 
 MIDDLEWARE = [
