@@ -263,3 +263,66 @@ export const adminAPI = {
         return response.data;
     },
 };
+
+export const timetableAPI = {
+    // Week plans
+    getWeeks: async (params = {}) => {
+        const response = await apiClient.get('/timetable/weeks/', { params });
+        return response.data;
+    },
+
+    getWeek: async (id) => {
+        const response = await apiClient.get(`/timetable/weeks/${id}/`);
+        return response.data;
+    },
+
+    createWeek: async (weekStartDate) => {
+        const response = await apiClient.post('/timetable/weeks/create_week/', {
+            week_start_date: weekStartDate,
+        });
+        return response.data;
+    },
+
+    createNext4Weeks: async (fromWeekStart = null) => {
+        const response = await apiClient.post('/timetable/weeks/create_next_4_weeks/', {
+            from_week_start: fromWeekStart,
+        });
+        return response.data;
+    },
+
+    saveGrid: async (weekId, rows, cells) => {
+        const response = await apiClient.post(`/timetable/weeks/${weekId}/save_grid/`, {
+            rows,
+            cells,
+        });
+        return response.data;
+    },
+
+    verifyWeek: async (weekId) => {
+        const response = await apiClient.post(`/timetable/weeks/${weekId}/verify/`);
+        return response.data;
+    },
+
+    publishWeek: async (weekId) => {
+        const response = await apiClient.post(`/timetable/weeks/${weekId}/publish/`);
+        return response.data;
+    },
+
+    revertToDraft: async (weekId, reason) => {
+        const response = await apiClient.post(`/timetable/weeks/${weekId}/revert_to_draft/`, {
+            reason,
+        });
+        return response.data;
+    },
+
+    getChangeLogs: async (weekId) => {
+        const response = await apiClient.get(`/timetable/weeks/${weekId}/change_logs/`);
+        return response.data;
+    },
+
+    // Session occurrences
+    getSessions: async (params = {}) => {
+        const response = await apiClient.get('/timetable/sessions/', { params });
+        return response.data;
+    },
+};

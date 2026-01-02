@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "apps.accounts",
     "apps.departments",
+    "apps.timetable",
 ]
 
 MIDDLEWARE = [
@@ -124,3 +125,6 @@ STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 AUTH_USER_MODEL = "accounts.User"
+
+# Timetable Configuration
+TIMETABLE_SLOT_COUNT = 8  # Number of time slots per day (default: 8)

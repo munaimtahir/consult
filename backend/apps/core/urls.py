@@ -28,6 +28,7 @@ urlpatterns = [
     path('patients/', include('apps.patients.urls')),
     path('consults/', include('apps.consults.urls')),
     path('analytics/', include('apps.analytics.urls')),
+    path('timetable/', include('apps.timetable.urls')),
     path('admin/', include('apps.core.admin_urls')),
     path('devices/', include('apps.notifications.urls')),
     path('audit-logs/', AuditLogView.as_view(), name='audit-logs'),

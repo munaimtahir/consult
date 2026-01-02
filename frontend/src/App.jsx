@@ -19,6 +19,7 @@ import DepartmentDashboardPage from './pages/admin/DepartmentDashboardPage';
 import GlobalDashboardPage from './pages/admin/GlobalDashboardPage';
 import DoctorAnalyticsPage from './pages/admin/DoctorAnalyticsPage';
 import AdminLayout from './components/admin/AdminLayout';
+import TimetableWeekEditor from './pages/TimetableWeekEditor';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -177,6 +178,17 @@ function App() {
                       <GlobalDashboardPage />
                     </AdminLayout>
                   </AdminRoute>
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/timetable"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <TimetableWeekEditor />
+                  </Layout>
                 </ProtectedRoute>
               }
             />
