@@ -20,6 +20,12 @@ import GlobalDashboardPage from './pages/admin/GlobalDashboardPage';
 import DoctorAnalyticsPage from './pages/admin/DoctorAnalyticsPage';
 import AdminLayout from './components/admin/AdminLayout';
 
+// Finance pages
+import FinanceDashboardPage from './pages/finance/FinanceDashboardPage';
+import VouchersPage from './pages/finance/VouchersPage';
+import PaymentsPage from './pages/finance/PaymentsPage';
+import StudentFinancePage from './pages/finance/StudentFinancePage';
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -177,6 +183,48 @@ function App() {
                       <GlobalDashboardPage />
                     </AdminLayout>
                   </AdminRoute>
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Finance Routes */}
+            <Route
+              path="/finance"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <FinanceDashboardPage />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/finance/vouchers"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <VouchersPage />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/finance/payments"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <PaymentsPage />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/finance/students/:studentId/summary"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <StudentFinancePage />
+                  </Layout>
                 </ProtectedRoute>
               }
             />
