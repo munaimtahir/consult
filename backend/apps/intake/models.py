@@ -87,14 +87,15 @@ class StudentIntakeSubmission(models.Model):
         help_text='Staff member who approved this submission'
     )
     approved_at = models.DateTimeField(null=True, blank=True)
-    created_student = models.ForeignKey(
-        'students.Student',
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name='intake_submission',
-        help_text='Student record created from this submission (if approved)'
-    )
+    # TODO: Re-enable when students app is created
+    # created_student = models.ForeignKey(
+    #     'students.Student',
+    #     on_delete=models.SET_NULL,
+    #     null=True,
+    #     blank=True,
+    #     related_name='intake_submission',
+    #     help_text='Student record created from this submission (if approved)'
+    # )
     force_approve = models.BooleanField(
         default=False,
         help_text='Admin-only override to bypass duplicate checks'
