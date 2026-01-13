@@ -1,0 +1,251 @@
+================================================================================
+CONSULT - DOCKER & CONFIG FIX REPORT
+================================================================================
+Date: 2025-01-XX
+VPS IP: 34.16.82.13
+Status: ✅ COMPLETE
+
+================================================================================
+1. REPOSITORY NAME
+================================================================================
+consult (Hospital Consult System)
+
+================================================================================
+2. AUDIT SUMMARY
+================================================================================
+
+Backend Framework: Django with ASGI (Uvicorn)
+Frontend: React with Vite
+Existing Dockerfiles:
+  - backend/Dockerfile (Python 3.11-slim, Uvicorn)
+  - frontend/Dockerfile (Node, Nginx)
+Existing docker-compose.yml: ✅ Present but needed fixes
+Environment Variables: Partially configured, needed updates
+Port Usage:
+  - Backend: Was no port mapping ❌ → Fixed to "127.0.0.1:8011:8000" ✅
+  - Frontend: Was "3000:80" (wrong port, no 127.0.0.1) ❌ → Fixed to "127.0.0.1:8012:80" ✅
+  - Database: Was "5432:5432" (exposed publicly) ❌ → Removed (internal only) ✅
+  - Redis: Was "6379:6379" (exposed publicly) ❌ → Removed (internal only) ✅
+Hardcoded Domains/IPs: Found old IP (172.104.53.127) in docker-compose.yml
+
+Issues Identified:
+1. Backend had no port mapping
+2. Frontend port was 3000 but should be 8012 (note: routing table shows 8011, but both can't use same port)
+3. Frontend port mapping missing 127.0.0.1 binding
+4. Database and Redis ports exposed publicly (security risk)
+5. ALLOWED_HOSTS includes old IP (172.104.53.127)
+6. CORS/CSRF includes old IP
+7. Frontend API URL uses old IP
+
+Note: Routing table shows both frontend and backend on 127.0.0.1:8011, but this is impossible.
+Configured backend on 8011 and frontend on 8012. Caddy should route:
+- api.consult.alshifalab.pk → 127.0.0.1:8011 (backend)
+- consult.alshifalab.pk → 127.0.0.1:8012 (frontend)
+
+================================================================================
+3. CHANGES MADE
+================================================================================
+
+✅ Fixed docker-compose.yml:
+   - Added backend port mapping: "127.0.0.1:8011:8000"
+   - Changed frontend port mapping from "3000:80" to "127.0.0.1:8012:80"
+   - Removed database port exposure (internal only)
+   - Removed Redis port exposure (internal only)
+   - Updated ALLOWED_HOSTS default to remove old IP and include api.consult.alshifalab.pk, consult.alshifalab.pk
+   - Updated CORS_ALLOWED_ORIGINS default to https://consult.alshifalab.pk
+   - Updated CSRF_TRUSTED_ORIGINS default to include api.consult.alshifalab.pk
+   - Updated frontend VITE_API_URL from old IP to https://api.consult.alshifalab.pk/api/v1
+   - Updated frontend VITE_WS_URL from old IP to wss://api.consult.alshifalab.pk/ws
+
+✅ Fixed backend/config/settings/base.py:
+   - Updated ALLOWED_HOSTS default to include api.consult.alshifalab.pk and consult.alshifalab.pk
+
+✅ Verified Dockerfiles:
+   - backend/Dockerfile: Uses Uvicorn on 0.0.0.0:8000 inside container (correct)
+   - frontend/Dockerfile: Uses Nginx on port 80 inside container (correct)
+   - Both are properly mapped to 127.0.0.1 on host via docker-compose.yml
+
+✅ Verified DEBUG setting:
+   - Default is False (DEBUG=0 in docker-compose.yml)
+
+================================================================================
+4. UPDATED DOCKERFILE(S)
+================================================================================
+
+backend/Dockerfile:
+--------------------
+FROM python:3.11-slim
+
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+ENV DJANGO_SETTINGS_MODULE config.settings.production
+
+# Set work directory
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    postgresql-client \
+    netcat-openbsd \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install python dependencies
+COPY requirements.txt /app/
+RUN pip install --upgrade pip && pip install -r requirements.txt
+RUN pip install "uvicorn[standard]" gunicorn psycopg2-binary
+
+# Copy project
+COPY . /app/
+
+# Create static, media, and log directories
+RUN mkdir -p /app/staticfiles /app/media /var/log/consult
+
+# Entrypoint script
+COPY ./entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
+ENTRYPOINT ["sh", "/app/entrypoint.sh"]
+
+Note: Command in docker-compose.yml overrides to use uvicorn on 0.0.0.0:8000
+
+frontend/Dockerfile:
+--------------------
+(Not shown - uses standard Node/Nginx multi-stage build)
+
+================================================================================
+5. UPDATED docker-compose.yml
+================================================================================
+
+Key Changes:
+- Backend port mapping: "127.0.0.1:8011:8000" (was missing)
+- Frontend port mapping: "127.0.0.1:8012:80" (was "3000:80")
+- Database port: Removed external exposure (internal only)
+- Redis port: Removed external exposure (internal only)
+- ALLOWED_HOSTS default: api.consult.alshifalab.pk,consult.alshifalab.pk,localhost,127.0.0.1,backend
+- CORS_ALLOWED_ORIGINS default: https://consult.alshifalab.pk
+- CSRF_TRUSTED_ORIGINS default: https://consult.alshifalab.pk,https://api.consult.alshifalab.pk
+- Frontend VITE_API_URL: https://api.consult.alshifalab.pk/api/v1
+- Frontend VITE_WS_URL: wss://api.consult.alshifalab.pk/ws
+
+Full docker-compose.yml structure:
+- db: PostgreSQL 13-alpine (internal only)
+- redis: Redis 7-alpine (internal only)
+- backend: Django/ASGI backend on 127.0.0.1:8011
+- frontend: React frontend on 127.0.0.1:8012
+
+================================================================================
+6. UPDATED ENV VARIABLES
+================================================================================
+
+Required Environment Variables (.env file):
+
+# Django Core Settings
+SECRET_KEY=your-secret-key-here-change-in-production
+DEBUG=0
+ALLOWED_HOSTS=api.consult.alshifalab.pk,consult.alshifalab.pk,localhost,127.0.0.1,backend
+
+# Database Configuration
+DATABASE=postgres
+DB_NAME=consult_db
+DB_USER=consult_user
+DB_PASSWORD=your-database-password-here
+DB_HOST=db
+DB_PORT=5432
+
+# PostgreSQL container password (must match DB_PASSWORD)
+POSTGRES_DB=consult_db
+POSTGRES_USER=consult_user
+POSTGRES_PASSWORD=your-database-password-here
+
+# Redis Configuration
+REDIS_URL=redis://redis:6379/0
+REDIS_HOST=redis
+REDIS_PORT=6379
+
+# CORS & CSRF Configuration
+CORS_ALLOWED_ORIGINS=https://consult.alshifalab.pk
+CSRF_TRUSTED_ORIGINS=https://consult.alshifalab.pk,https://api.consult.alshifalab.pk
+
+# Frontend Build Configuration
+VITE_API_URL=https://api.consult.alshifalab.pk/api/v1
+VITE_WS_URL=wss://api.consult.alshifalab.pk/ws
+
+# Email Configuration (Optional)
+EMAIL_HOST_USER=consult@pmc.edu.pk
+EMAIL_HOST_PASSWORD=your-email-password
+EMAIL_DOMAIN=pmc.edu.pk
+
+# Google OAuth (Optional)
+GOOGLE_OAUTH_CLIENT_ID=your-google-client-id
+GOOGLE_OAUTH_CLIENT_SECRET=your-google-client-secret
+DOMAIN=pmc.edu.pk
+
+================================================================================
+7. VERIFICATION CHECKLIST
+================================================================================
+
+✅ docker-compose.yml exists and is valid
+✅ Backend service binds to 127.0.0.1:8011 (correct port for Caddy routing)
+✅ Frontend service binds to 127.0.0.1:8012 (correct port for Caddy routing)
+✅ No services bind to public VPS IP (34.16.82.13)
+✅ No services listen on ports 80 or 443
+✅ Database port not exposed externally (security ✅)
+✅ Redis port not exposed externally (security ✅)
+✅ Backend Dockerfile uses Uvicorn on 0.0.0.0:8000 inside container (correct)
+✅ Docker maps backend to 127.0.0.1:8011 on host (correct)
+✅ Frontend uses Nginx on port 80 inside container (correct)
+✅ Docker maps frontend to 127.0.0.1:8012 on host (correct)
+✅ ALLOWED_HOSTS includes api.consult.alshifalab.pk, consult.alshifalab.pk, localhost, 127.0.0.1
+✅ CORS settings include correct production domain
+✅ CSRF settings include api.consult.alshifalab.pk and consult.alshifalab.pk
+✅ DEBUG defaults to False (0)
+✅ Frontend API URL configured for production (https://api.consult.alshifalab.pk/api/v1)
+✅ Frontend WebSocket URL configured for production (wss://api.consult.alshifalab.pk/ws)
+✅ No hardcoded references to old VPS IP in active config
+✅ Static/media handling configured correctly
+✅ Volume paths are sane for VPS deployment
+✅ Services have restart: unless-stopped policy
+
+Port Collision Check:
+- Backend: 127.0.0.1:8011 ✅
+- Frontend: 127.0.0.1:8012 ✅
+- No conflicts with other apps
+
+Ready for Caddy Proxy:
+✅ Backend ready at 127.0.0.1:8011 for api.consult.alshifalab.pk
+✅ Frontend ready at 127.0.0.1:8012 for consult.alshifalab.pk
+
+Note: Routing table shows both on 8011, but configured on different ports to avoid conflict.
+Caddy should route:
+- api.consult.alshifalab.pk → 127.0.0.1:8011 (backend)
+- consult.alshifalab.pk → 127.0.0.1:8012 (frontend)
+
+================================================================================
+8. GO / NO-GO VERDICT
+================================================================================
+
+✅ GO - READY FOR DEPLOYMENT
+
+The consult repository is now properly configured for deployment on VPS 34.16.82.13 behind Caddy reverse proxy.
+
+All critical issues have been resolved:
+- ✅ Correct port bindings (127.0.0.1 only)
+- ✅ Correct domain configuration (api.consult.alshifalab.pk, consult.alshifalab.pk)
+- ✅ Production-ready defaults (DEBUG=0)
+- ✅ Proper CORS/CSRF settings
+- ✅ Frontend API/WebSocket URLs configured for production
+- ✅ Database and Redis ports secured (internal only)
+
+Next Steps:
+1. Create .env file from template above
+2. Set strong SECRET_KEY and DB_PASSWORD
+3. Run: docker compose up -d
+4. Verify services are listening on correct ports
+5. Configure Caddy to route:
+   - consult.alshifalab.pk → 127.0.0.1:8012
+   - api.consult.alshifalab.pk → 127.0.0.1:8011
+
+================================================================================
+END OF REPORT
+================================================================================
