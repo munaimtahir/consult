@@ -1,24 +1,7 @@
 name: Docker CI
 
 on:
-  push:
-    branches: [main, develop]
-    paths:
-      - 'backend/**'
-      - 'frontend/**'
-      - 'docker-compose.yml'
-      - 'backend/Dockerfile'
-      - 'frontend/Dockerfile'
-      - '.github/workflows/docker-ci.yml'
-  pull_request:
-    branches: [main, develop]
-    paths:
-      - 'backend/**'
-      - 'frontend/**'
-      - 'docker-compose.yml'
-      - 'backend/Dockerfile'
-      - 'frontend/Dockerfile'
-      - '.github/workflows/docker-ci.yml'
+  workflow_dispatch:
 
 permissions:
   contents: read
