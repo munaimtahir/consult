@@ -51,7 +51,6 @@ class StudentIntakeSubmissionAdmin(admin.ModelAdmin):
         'updated_at',
         'approved_by',
         'approved_at',
-        'created_student',
         'duplicate_check_display',
     ]
     
@@ -92,7 +91,7 @@ class StudentIntakeSubmissionAdmin(admin.ModelAdmin):
         ('Review & Approval', {
             'fields': (
                 'staff_notes', 'force_approve', 'duplicate_check_display',
-                'approved_by', 'approved_at', 'created_student'
+                'approved_by', 'approved_at'
             )
         }),
     )
@@ -235,8 +234,7 @@ class StudentIntakeSubmissionAdmin(admin.ModelAdmin):
                             # Program/Batch/Group are NOT assigned in this phase
                         )
                         
-                        # Link student to submission
-                        submission.created_student = student
+                        # Student linkage field was removed from StudentIntakeSubmission.
                         submission.status = 'APPROVED'
                         submission.approved_by = user
                         submission.approved_at = timezone.now()
@@ -294,4 +292,4 @@ class StudentIntakeSubmissionAdmin(admin.ModelAdmin):
     def get_queryset(self, request):
         """Optimize queryset with select_related."""
         qs = super().get_queryset(request)
-        return qs.select_related('approved_by', 'created_student')
+        return qs.select_related('approved_by')

@@ -12,6 +12,5 @@ COPY error-pages /etc/nginx/error-pages
 # Ensure proper permissions
 RUN chmod -R 755 /etc/nginx/error-pages
 
-# Verify nginx configuration syntax
-RUN nginx -t
-
+# Runtime service names (backend/frontend) are not resolvable during build,
+# so config syntax validation must run in a started compose network.
